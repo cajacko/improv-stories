@@ -19,7 +19,9 @@ block content
                 label(class='formLabel', for='registerFormPasswordConfirm') Confirm Password
                 input(id='registerFormPasswordConfirm', class='formInput', name='password', type='password')
 
-            div(class='g-recaptcha',data-sitekey='6Ld1NRwTAAAAAFN3U4oZQBKUaNaVYEXnliwupo8a')
+            div(class='captchaGroup formGroup')
+                div(class='g-recaptcha',data-sitekey='6Ld1NRwTAAAAAFN3U4oZQBKUaNaVYEXnliwupo8a')
+            
             button(class='formSubmit', type='submit') Register
 
         form(id='loginForm', class='loginRegisterForm', method='POST', action='/login')
