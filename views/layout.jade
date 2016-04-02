@@ -1,8 +1,37 @@
 doctype html
 html
     head
+        meta(name='viewport', content='width=device-width, initial-scale=1')
         title= title
-        link(rel='stylesheet', href='/stylesheets/style.css')
+
+        link(href='https://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic', rel='stylesheet', type='text/css')
+        link(rel='stylesheet', href='/stylesheets/lib.min.css')
+        link(rel='stylesheet', href='/stylesheets/style.min.css')
         script(src='https://www.google.com/recaptcha/api.js')
     body
-        block content
+        header(id='siteHeader')
+            nav
+                ul
+                    li
+                        h1(id='pageTitle') Improv Stories
+        main
+            block content
+
+        footer(id='siteFooter')
+            nav(id='siteNav')
+                ul
+                    li
+                        a(class='fa fa-home')
+                            span Dashboard
+                    li
+                        a(class='fa fa-plus')
+                            span New
+                    li
+                        a(class='fa fa-users')
+                            span Friends
+                    li
+                        a(class='fa fa-user')
+                            span Profile
+                    li
+                        a(class='fa fa-bell')
+                            span Notifications

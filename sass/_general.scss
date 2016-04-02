@@ -7,10 +7,12 @@ $baseFontSize: 16px;
 $xlFontSize: 2rem;
 $lFontSize: 1.5rem;
 $sFontSize: 0.9rem;
-$xsFontSize: 0.85rem;
+$xsFontSize: 0.8rem;
+
+$fontFamily: 'Lato', helvetica, sans-serif;
 
 html {
-	font-family: helvetica, sans-serif;
+	font-family: $fontFamily;
 	background: #F5F5F5;
 	font-size: $baseFontSize;
 	line-height: 1.5;
@@ -37,55 +39,104 @@ h3, h4, h5, h6 {
 	margin: $paddingD2 0;
 }
 
-button {
-	background: #1E7CD0;
-	border: 1px solid #9191A2;
-	color: white;
+a {
+	cursor: pointer;
 }
 
-#loginRegister {
-	max-width: 500px;
-	box-sizing: border-box;
-	margin: 0 auto;
-	background: white;
-	padding: $padding;
-	border-radius: 5px;
-	border: 2px solid #E4E4E4;
-}
+$brandBlue: #2D6ED0;
 
-#pageTitle {
-	margin-top: 0;
-}
+$siteHeaderNavHeight: 45px;
+$siteHeaderBorderWidth: 1px;
+$siteHeaderHeight: $siteHeaderNavHeight + $siteHeaderBorderWidth;
 
-.formGroup {
-	margin-bottom: $padding;
-}
+$siteFooterBorderWidth: 2px;
+$siteNavHeight: 75px;
+$siteFooterHeight: $siteNavHeight + $siteFooterBorderWidth;
 
-.formLabel {
-	display: block;
-	margin-bottom: $paddingD4;
-}
+$navZIndex: 2;
+$mainZIndex: $navZIndex - 1;
 
-form {
-	input, button {
-		display: block;
-		width: 100%;
-		box-sizing: border-box;
-		padding: $paddingD4;
+@mixin tableNav($height) {
+	line-height: 1;
+	text-align: center;
+	display: table;
+	width: 100%;
+	height: $height;
+
+	ul {
+		display: table-row;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	li {
+		display: table-cell;
+		vertical-align: middle;
 	}
 }
 
-#registerForm {
-	$margin: $paddingX2;
-	margin-bottom: $margin;
-	padding-bottom: $margin;
-	border-bottom: 2px solid #C7C7C7;
-}
-
-.captchaGroup {
+#siteHeader {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: white;
+	border-bottom: $siteHeaderBorderWidth solid #B9B9B9;
 	text-align: center;
+	line-height: 1;
+	z-index: $navZIndex;
+
+	nav {
+		@include tableNav($siteHeaderNavHeight);
+	}
 }
 
-.g-recaptcha {
-	display: inline-block;
+#pageTitle {
+	font-weight: 300;
+	font-size: $lFontSize;
+	margin: 0;
+	padding: 0;
+}
+
+main {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin-bottom: $siteFooterHeight;
+	margin-top: $siteHeaderHeight;
+	z-index: $mainZIndex;
+}
+
+#siteFooter {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: $brandBlue;
+	border-top: $siteFooterBorderWidth solid darken($brandBlue, 10%);
+	z-index: $navZIndex;
+}
+
+#siteNav {
+	@include tableNav($siteNavHeight);
+
+	li {
+		width: 20%;
+	}
+
+	a {
+		display: block;
+		font-size: $lFontSize;
+		color: white;
+	}
+
+	span {
+		display: block;
+		font-size: $xsFontSize;
+		margin-top: $paddingD4;
+		font-family: $fontFamily;
+	}
 }
