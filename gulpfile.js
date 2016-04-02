@@ -1,12 +1,15 @@
 'use strict';
  
-var gulp        = require('gulp'),
-    sass        = require('gulp-sass'),
-    rename      = require('gulp-rename'),
-    minifyCss   = require('gulp-minify-css'),
-    uglify      = require('gulp-uglify'),
-    concat      = require('gulp-concat'),
-    fs          = require('fs');
+var gulp            = require('gulp'),
+    sass            = require('gulp-sass'),
+    rename          = require('gulp-rename'),
+    minifyCss       = require('gulp-minify-css'),
+    uglify          = require('gulp-uglify'),
+    concat          = require('gulp-concat'),
+    fs              = require('fs'),
+    browserSync     = require('browser-sync'),
+    nodemon         = require('gulp-nodemon'),
+    autoprefixer    = require('gulp-autoprefixer');
 
 /********************************************************
 * DEFINE PROJECTS AND THEIR PATHS                       *
@@ -21,6 +24,10 @@ var gulp        = require('gulp'),
         return gulp.src('./sass/import.scss')
             .pipe(sass().on('error', sass.logError))
             .pipe(rename('style.css'))
+            .pipe(autoprefixer({
+                browsers: ['last 2 versions'],
+                cascade: false
+            }))
             .pipe(gulp.dest(projectCssPath))
             .pipe(rename('style.min.css'))
             .pipe(minifyCss())
@@ -105,6 +112,34 @@ var gulp        = require('gulp'),
     gulp.task('init',['libcss', 'libscripts', 'fonts']);
 
 /********************************************************
+* SETUP BROWSER SYNC                                    *
+********************************************************/
+    gulp.task('browser-sync', ['nodemon'], function() {
+        browserSync.init(null, {
+            proxy: "http://localhost:3000",
+            files: ["public/**/*.*"],
+            port: "5000"
+        });
+    });
+
+/********************************************************
+* SETUP NODEMON                                         *
+********************************************************/
+    gulp.task('nodemon', function (cb) {       
+        var started = false;
+        
+        return nodemon({
+            script: './bin/www',
+            env: { 'NODE_ENV': 'development' }
+        }).on('start', function () {
+            if (!started) {
+                cb();
+                started = true; 
+            }  
+        });
+    });
+
+/********************************************************
 * WATCH TASKS                                           *
 ********************************************************/
     gulp.task('watch', function () {
@@ -115,4 +150,4 @@ var gulp        = require('gulp'),
 /********************************************************
 * DEFAULT TASKS                                         *
 ********************************************************/
-    gulp.task('default',['watch']);
+    gulp.task('default',['watch', 'browser-sync']);

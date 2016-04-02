@@ -17,8 +17,6 @@ var connection = mysql.createConnection({
 });
 
 
-
-
         // Configure the Facebook strategy for use by Passport.
         //
         // OAuth 2.0-based strategies require a `verify` function which receives the
@@ -29,7 +27,7 @@ var connection = mysql.createConnection({
         passport.use(new Strategy({
             clientID: config.facebook.clientID,
             clientSecret: config.facebook.clientSecret,
-            callbackURL: 'http://localhost:3000/login/facebook/return'
+            callbackURL: 'http://localhost:5000/login/facebook/return'
           },
           function(accessToken, refreshToken, profile, cb) {
             // In this example, the user's Facebook profile is supplied as the user
