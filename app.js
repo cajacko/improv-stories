@@ -175,7 +175,7 @@ app.all('/add-story', function(req, res, next) {
 });
 
 app.get('/story/*', function(req, res, next) {
-   res.send('What in the world');
+   res.render('story');
 });
 
 app.get('/login/facebook',

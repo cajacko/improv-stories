@@ -3,9 +3,9 @@ extends layout
 block content
     if stories
         ul(id='storyList')
-            
+
             each val in stories
                 li(class='storyItem') 
-                    a(class='storyLink', href='/stories/#{val.id}') #{val.codename}
+                    a(class='storyLink', href='/story/#{val.id}') #{val.codename}
     else
         p Welcome to Improv Stories, <a href="/add-story">start a new story</a> or <a href="/invite">invite friends to join</a>.
