@@ -11,6 +11,8 @@ $xsFontSize: 0.8rem;
 
 $fontFamily: 'Lato', helvetica, sans-serif;
 
+$brandBlue: #2D6ED0;
+
 html {
 	font-family: $fontFamily;
 	background: #F5F5F5;
@@ -48,8 +50,6 @@ a {
 		color: darken($brandBlue, 10%);
 	}
 }
-
-$brandBlue: #2D6ED0;
 
 $siteHeaderNavHeight: 45px;
 $siteHeaderBorderWidth: 1px;
@@ -204,4 +204,27 @@ form {
 		color: white;
 		border-color: darken($brandBlue, 10%);
 	}
+}
+
+#facebookLogin {
+	display: block;
+	text-align: center;
+	font-size: 40px;
+	background: white;
+	padding: $paddingX2;
+	max-width: 250px;
+	margin: $paddingX2 auto 0 auto;
+
+	&:hover {
+		background: $brandBlue;
+		color: white;
+	}
+}
+
+#facebookLoginText {
+	display: block;
+	font-size: $lFontSize;
+	font-family: $fontFamily;
+	display: block;
+	margin-top: $padding;
 }

@@ -19,7 +19,10 @@ h3, h4, h5, h6 {
 
 a {
   cursor: pointer;
-  text-decoration: none; }
+  text-decoration: none;
+  color: #2D6ED0; }
+  a:hover {
+    color: #2458a6; }
 
 #siteHeader {
   position: fixed;
@@ -141,3 +144,22 @@ form button {
     background: #2D6ED0;
     color: white;
     border-color: #2458a6; }
+
+#facebookLogin {
+  display: block;
+  text-align: center;
+  font-size: 40px;
+  background: white;
+  padding: 40px;
+  max-width: 250px;
+  margin: 40px auto 0 auto; }
+  #facebookLogin:hover {
+    background: #2D6ED0;
+    color: white; }
+
+#facebookLoginText {
+  display: block;
+  font-size: 1.5rem;
+  font-family: "Lato", helvetica, sans-serif;
+  display: block;
+  margin-top: 20px; }

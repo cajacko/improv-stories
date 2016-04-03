@@ -148,8 +148,8 @@ app.post('/insert-story', function(req, res, next) {
   res.send('post');
 });
 
-function addStoryPage(req, res, next) {
-  if(req.user) {
+app.all('/add-story', function(req, res, next) {
+   if(req.user) {
     if(req.body.action == 'addStory') {
       connection.query('INSERT INTO stories (codename, entry_time, visibility) VALUES (?, ?, ?)', [req.body.codename, req.body.entryTime, req.body.visibility], function(err, result) {
         
@@ -172,14 +172,10 @@ function addStoryPage(req, res, next) {
   } else {
     res.render('login');
   } 
-}
-
-app.post('/add-story', function(req, res, next) {
-   addStoryPage(req, res, next);
 });
 
-app.get('/add-story', function(req, res, next) {
-   addStoryPage(req, res, next);
+app.get('/story/*', function(req, res, next) {
+   res.send('What in the world');
 });
 
 app.get('/login/facebook',
