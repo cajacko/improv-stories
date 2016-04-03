@@ -42,6 +42,11 @@ h3, h4, h5, h6 {
 a {
 	cursor: pointer;
 	text-decoration: none;
+	color: $brandBlue;
+
+	&:hover {
+		color: darken($brandBlue, 10%);
+	}
 }
 
 $brandBlue: #2D6ED0;
@@ -106,9 +111,14 @@ main {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	margin-bottom: $siteFooterHeight;
 	margin-top: $siteHeaderHeight;
+	margin-bottom: $siteFooterHeight;
 	z-index: $mainZIndex;
+	overflow: auto;
+}
+
+#mainWrap {
+	padding: $padding;
 }
 
 #siteFooter {
@@ -139,5 +149,59 @@ main {
 		font-size: $xsFontSize;
 		margin-top: $paddingD4;
 		font-family: $fontFamily;
+	}
+}
+
+form {
+	label {
+		display: block;
+		margin-bottom: $paddingD4;
+	}
+
+	input, select, button {
+		width: 100%;
+		display: block;
+		padding: $paddingD2;
+		box-sizing: border-box;
+	}
+
+	button {
+		background: $brandBlue;
+		color: white;
+		border: none;
+		font-weight: 300;
+		margin-top: $paddingX2;
+
+		&:hover {
+			background: darken($brandBlue, 10%);
+		}
+	}
+}
+
+.formGroup {
+	margin-bottom: $padding;
+}
+
+#storyList {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.storyItem {
+	margin-bottom: $paddingD2;
+}
+
+.storyLink {
+	display: block;
+	padding: $padding;
+	line-height: 1;
+	background: white;
+	border: 1px solid #EAEAEA;
+
+	&:hover {
+		background: $brandBlue;
+		color: white;
+		border-color: darken($brandBlue, 10%);
 	}
 }

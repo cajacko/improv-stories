@@ -15,23 +15,24 @@ html
                     li
                         h1(id='pageTitle') Improv Stories
         main
-            block content
+            div(id='mainWrap')
+                block content
 
         footer(id='siteFooter')
             nav(id='siteNav')
                 ul
                     li
-                        a(class='fa fa-home')
+                        a(class='fa fa-home', href='/')
                             span Dashboard
                     li
                         a(class='fa fa-plus', href='add-story')
                             span New
                     li
-                        a(class='fa fa-users')
-                            span Friends
+                        a(class='fa fa-users', href='/users')
+                            span Users
                     li
-                        a(class='fa fa-user')
+                        a(class='fa fa-user', href='/profile')
                             span Profile
                     li
-                        a(class='fa fa-bell')
+                        a(class='fa fa-bell', href='/notifications')
                             span Notifications

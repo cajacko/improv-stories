@@ -1,4 +1,11 @@
 extends layout
 
 block content
-	h1 Hello #{user.displayName}
+    if stories
+        ul(id='storyList')
+            
+            each val in stories
+                li(class='storyItem') 
+                    a(class='storyLink', href='/stories/#{val.id}') #{val.codename}
+    else
+        p Welcome to Improv Stories, <a href="/add-story">start a new story</a> or <a href="/invite">invite friends to join</a>.

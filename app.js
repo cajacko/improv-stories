@@ -127,18 +127,59 @@ app.use(function(err, req, res, next) {
 
 app.get('/', function(req, res, next) {
   if(req.user) {
-    res.render('dashboard', { user: req.user });
+    connection.query('SELECT * from users WHERE facebook_id = "' + req.user._json.id + '"', function(err, rows, fields) {
+      console.log(rows);
+
+      connection.query('SELECT stories.codename, stories.id FROM stories INNER JOIN story_authors ON story_authors.story_id = stories.id WHERE story_authors.user_id = "' + rows[0].id + '"', function(err, stories, fields) {
+        if(stories.length) {
+          res.render('dashboard', { stories: stories });
+        } else {
+          res.render('dashboard', { stories: false });
+        }
+      });
+    });
   } else {
     res.render('login');
   }  
 });
 
-app.get('/add-story', function(req, res, next) {
+app.post('/insert-story', function(req, res, next) {
+  console.log(req.body);
+  res.send('post');
+});
+
+function addStoryPage(req, res, next) {
   if(req.user) {
-    res.render('add_story');
+    if(req.body.action == 'addStory') {
+      connection.query('INSERT INTO stories (codename, entry_time, visibility) VALUES (?, ?, ?)', [req.body.codename, req.body.entryTime, req.body.visibility], function(err, result) {
+        
+        for (i = 0; i < req.body.authors.length; i++) { 
+          connection.query('INSERT INTO story_authors (story_id, user_id) VALUES (?, ?)', [result.insertId, req.body.authors[i]]);
+        }
+
+        connection.query('SELECT * from users WHERE facebook_id = "' + req.user._json.id + '"', function(err, rows, fields) {
+          connection.query('INSERT INTO story_authors (story_id, user_id) VALUES (?, ?)', [result.insertId, rows[0].id], function(err, rows, fields) {
+            res.redirect('/story/' + result.insertId);
+          });
+        });
+
+      });
+    } else {
+      connection.query('SELECT * from users WHERE facebook_id != "' + req.user._json.id + '" ORDER BY rand()', function(err, rows, fields) {
+        res.render('add_story', {users: rows});
+      });
+    }
   } else {
     res.render('login');
-  }  
+  } 
+}
+
+app.post('/add-story', function(req, res, next) {
+   addStoryPage(req, res, next);
+});
+
+app.get('/add-story', function(req, res, next) {
+   addStoryPage(req, res, next);
 });
 
 app.get('/login/facebook',

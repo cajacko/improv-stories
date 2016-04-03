@@ -1,30 +1,32 @@
 extends layout
 
 block content
-    form
-        div
+    form(id='addStoryForm', method='post', action='')
+        div(class='formGroup')
             label Story Codename
-            input(type='text', placeholder='Dibble')
-        div
+            input(name='codename', type='text', placeholder='Dibble')
+                
+        div(class='formGroup')
             label Authors
-            select(multiple)
-                option Author 1
-                option Author 2
-                option Author 3
-                option Author 4
-                option Author 5
-        div
+            select(name='authors', multiple)
+                each val in users
+                    option(value='#{val.id}') #{val.display_name}
+
+        div(class='formGroup')
             label Entry Time
-            select
-                option 10 Sec
-                option 15 Sec
-                option(selected) 20 Sec
-                option 25 Sec
-                option 30 Sec
-        div
+            select(name='entryTime')
+                option(value='10') 10 Sec
+                option(value='15') 15 Sec
+                option(value='20', selected) 20 Sec
+                option(value='25') 25 Sec
+                option(value='30') 30 Sec
+
+        div(class='formGroup')
             label Visibility
-            select
-                option Public
-                option Authors Only
+            select(name='visibility')
+                option(value='public') Public
+                option(value='authors') Authors Only
+
+        input(type='hidden', name='action', value='addStory')
 
         button(type='submit') Start Story
