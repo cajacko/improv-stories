@@ -16,6 +16,8 @@ var connection = mysql.createConnection({
   database : config.MySql.database
 });
 
+connection.connect();
+
 
         // Configure the Facebook strategy for use by Passport.
         //
@@ -27,7 +29,8 @@ var connection = mysql.createConnection({
         passport.use(new Strategy({
             clientID: config.facebook.clientID,
             clientSecret: config.facebook.clientSecret,
-            callbackURL: 'http://localhost:5000/login/facebook/return'
+            callbackURL: 'http://localhost:5000/login/facebook/return',
+            profileFields: ['id', 'displayName', 'email', 'first_name', 'last_name']
           },
           function(accessToken, refreshToken, profile, cb) {
             // In this example, the user's Facebook profile is supplied as the user
@@ -130,13 +133,27 @@ app.get('/', function(req, res, next) {
   }  
 });
 
+app.get('/add-story', function(req, res, next) {
+  if(req.user) {
+    res.render('add_story');
+  } else {
+    res.render('login');
+  }  
+});
+
 app.get('/login/facebook',
-  passport.authenticate('facebook'));   
+  passport.authenticate('facebook', { scope: ['email'] }));   
 
 app.get('/login/facebook/return', 
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  passport.authenticate('facebook', { scope: ['email'], failureRedirect: '/login' }),
   function(req, res) {
-    res.redirect('/');
+    connection.query('SELECT * from users WHERE facebook_id = "' + req.user._json.id + '"', function(err, rows, fields) {
+      if(!rows.length) {
+        connection.query('INSERT INTO users (facebook_id, display_name, first_name, last_name, email) VALUES (' + req.user._json.id + ', "' + req.user._json.name + '", "' + req.user._json.first_name + '", "' + req.user._json.last_name + '", "' + req.user._json.email + '")');
+      }
+
+      res.redirect('/');
+    });  
 });
 
 app.get('/new',function(req, res, next) {
@@ -154,5 +171,7 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+// connection.end();
 
 module.exports = app;

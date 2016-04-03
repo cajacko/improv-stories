@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    form
+        div
+            label Story Codename
+            input(type='text', placeholder='Dibble')
+        div
+            label Authors
+            select(multiple)
+                option Author 1
+                option Author 2
+                option Author 3
+                option Author 4
+                option Author 5
+        div
+            label Entry Time
+            select
+                option 10 Sec
+                option 15 Sec
+                option(selected) 20 Sec
+                option 25 Sec
+                option 30 Sec
+        div
+            label Visibility
+            select
+                option Public
+                option Authors Only
+
+        button(type='submit') Start Story
