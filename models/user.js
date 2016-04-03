@@ -1,11 +1,11 @@
 var db = require('../models/db');
 
-exports.getUser = function(req, cb) {
+exports.getUser = function(req, next) {
 	if(req.user) {
 		db.query('SELECT * from users WHERE facebook_id = "' + req.user._json.id + '"', function(err, rows, fields) {
 			if(err) {
 				console.log('Error getting users');
-				cb(false);
+				next(false);
 			} else if(rows.length) {
 				var user = {
 					id: rows[0].id,
@@ -16,12 +16,12 @@ exports.getUser = function(req, cb) {
 					email: rows[0].email
 				};
 
-				cb(user);
+				next(user);
 			} else {
 				db.query('INSERT INTO users (facebook_id, display_name, first_name, last_name, email) VALUES (' + req.user._json.id + ', "' + req.user._json.name + '", "' + req.user._json.first_name + '", "' + req.user._json.last_name + '", "' + req.user._json.email + '")', function(err, result) {
 					if(err) {
 						console.log('Error inserting new user');
-						cb(false);
+						next(false);
 					} else {
 						var user = {
 							id: result.insertId,
@@ -32,18 +32,18 @@ exports.getUser = function(req, cb) {
 							email: req.user._json.email
 						};
 
-						cb(user);
+						next(user);
 					}
 				});
 			}
 		});  
 	} else {
-		cb(false);
+		next(false);
 	}
 }
 
-exports.allOtherUsers = function(userId, cb) {
+exports.allOtherUsers = function(userId, next) {
 	db.query('SELECT * from users WHERE id != "' + userId + '" ORDER BY rand()', function(err, rows, fields) {
-		cb(err, rows);
+		next(err, rows);
     });
 }

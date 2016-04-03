@@ -59,8 +59,8 @@ $siteFooterBorderWidth: 2px;
 $siteNavHeight: 75px;
 $siteFooterHeight: $siteNavHeight + $siteFooterBorderWidth;
 
-$navZIndex: 2;
-$mainZIndex: $navZIndex - 1;
+$mainZIndex: 2;
+$navZIndex: $mainZIndex - 1;
 
 @mixin tableNav($height) {
 	line-height: 1;
@@ -115,6 +115,13 @@ main {
 	margin-bottom: $siteFooterHeight;
 	z-index: $mainZIndex;
 	overflow: auto;
+	background: #F5F5F5;
+	transition: all 0.5s;
+
+	.editMode & {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
 }
 
 #mainWrap {
@@ -227,4 +234,44 @@ form {
 	font-family: $fontFamily;
 	display: block;
 	margin-top: $padding;
+}
+
+#backButton {
+	$backButtonPadding: $paddingD4;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	font-size: $siteHeaderNavHeight - ($backButtonPadding * 2);
+	padding: $backButtonPadding $padding;
+	line-height: 1;
+}
+
+#storyAction {
+	display: block;
+	text-align: center;
+	padding: $padding;
+	line-height: 1;
+	position: fixed;
+	bottom: $siteFooterHeight + $padding;
+	left: $padding;
+	right: $padding;
+	border-width: 1px;
+	border-style: solid;
+}
+
+button.storyAction {
+	background: $brandBlue;
+	color: white;
+	border-color: darken($brandBlue, 10%);
+
+	&:hover {
+		background: darken($brandBlue, 10%);
+	}
+}
+
+span.storyAction {
+	background: white;
+	border-color: #B9B9B9;
 }

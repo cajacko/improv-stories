@@ -5,6 +5,7 @@ var story = require('../models/story');
 
 router.use('/add-story', require('./add_story'));
 router.use('/login/facebook', require('./login/facebook'));
+router.use('/next-story', require('./next_story'));
 router.use('/story/*', require('./story'));
 
 router.get('/', function(req, res, next) {

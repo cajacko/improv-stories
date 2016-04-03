@@ -33,7 +33,7 @@ a {
   border-bottom: 1px solid #B9B9B9;
   text-align: center;
   line-height: 1;
-  z-index: 2; }
+  z-index: 1; }
   #siteHeader nav {
     line-height: 1;
     text-align: center;
@@ -63,8 +63,13 @@ main {
   bottom: 0;
   margin-top: 46px;
   margin-bottom: 77px;
-  z-index: 1;
-  overflow: auto; }
+  z-index: 2;
+  overflow: auto;
+  background: #F5F5F5;
+  transition: all 0.5s; }
+  .editMode main {
+    margin-top: 0;
+    margin-bottom: 0; }
 
 #mainWrap {
   padding: 20px; }
@@ -76,7 +81,7 @@ main {
   right: 0;
   background: #2D6ED0;
   border-top: 2px solid #2458a6;
-  z-index: 2; }
+  z-index: 1; }
 
 #siteNav {
   line-height: 1;
@@ -163,3 +168,35 @@ form button {
   font-family: "Lato", helvetica, sans-serif;
   display: block;
   margin-top: 20px; }
+
+#backButton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  font-size: 35px;
+  padding: 5px 20px;
+  line-height: 1; }
+
+#storyAction {
+  display: block;
+  text-align: center;
+  padding: 20px;
+  line-height: 1;
+  position: fixed;
+  bottom: 97px;
+  left: 20px;
+  right: 20px;
+  border-width: 1px;
+  border-style: solid; }
+
+button.storyAction {
+  background: #2D6ED0;
+  color: white;
+  border-color: #2458a6; }
+  button.storyAction:hover {
+    background: #2458a6; }
+
+span.storyAction {
+  background: white;
+  border-color: #B9B9B9; }

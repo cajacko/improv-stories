@@ -130,7 +130,12 @@ var gulp            = require('gulp'),
         
         return nodemon({
             script: './bin/www',
-            env: { 'NODE_ENV': 'development' }
+            env: { 'NODE_ENV': 'development' },
+            ignore: [
+                './javascripts/**/*.js',
+                './public/',
+                './gulpfile.js'
+            ]
         }).on('start', function () {
             if (!started) {
                 cb();

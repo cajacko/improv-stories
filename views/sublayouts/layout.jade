@@ -13,7 +13,12 @@ html
             nav
                 ul
                     li
-                        h1(id='pageTitle') Improv Stories
+                        a(id='backButton', class='fa fa-angle-left')
+
+                        if title
+                            h1(id='pageTitle') #{title}
+                        else 
+                            h1(id='pageTitle') Improv Stories
         main
             div(id='mainWrap')
                 block content
@@ -21,18 +26,37 @@ html
         footer(id='siteFooter')
             nav(id='siteNav')
                 ul
-                    li
-                        a(class='fa fa-home', href='/')
-                            span Dashboard
-                    li
-                        a(class='fa fa-plus', href='/add-story')
-                            span New
-                    li
-                        a(class='fa fa-users', href='/users')
-                            span Users
-                    li
-                        a(class='fa fa-user', href='/profile')
-                            span Profile
-                    li
-                        a(class='fa fa-bell', href='/notifications')
-                            span Notifications
+                    if page = 'story'
+                        li
+                            a(class='fa fa-play')
+                                span Play
+                        li
+                            a(class='fa fa-angle-up')
+                                span To Top
+                        li
+                            a(class='fa fa-angle-down')
+                                span To Bottom
+                        li
+                            a(class='fa fa-share')
+                                span Share
+                        li
+                            a(class='fa fa-bars')
+                                span More
+                    else
+                        li
+                            a(class='fa fa-home', href='/')
+                                span Dashboard
+                        li
+                            a(class='fa fa-plus', href='/add-story')
+                                span New
+                        li
+                            a(class='fa fa-users', href='/users')
+                                span Users
+                        li
+                            a(class='fa fa-user', href='/profile')
+                                span Profile
+                        li
+                            a(class='fa fa-bell', href='/notifications')
+                                span Notifications  
+        script(src='/javascripts/lib.min.js')     
+        script(src='/javascripts/script.min.js')                      
