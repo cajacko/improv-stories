@@ -6,6 +6,7 @@ var gulp            = require('gulp'),
     minifyCss       = require('gulp-minify-css'),
     uglify          = require('gulp-uglify'),
     concat          = require('gulp-concat'),
+    fs              = require('fs'),
     browserSync     = require('browser-sync'),
     nodemon         = require('gulp-nodemon'),
     autoprefixer    = require('gulp-autoprefixer');
@@ -50,29 +51,39 @@ var gulp            = require('gulp'),
 ********************************************************/
     gulp.task('scripts', function() {
         var projectScriptDir = './javascripts/';
-        var importFiles = require(projectScriptDir + 'import');
 
-        for(var i in importFiles) {
-            var path = importFiles[i];
-            var res = path.split("/");
-
-            if(res.length > 1) {
-                res[res.length - 1] = '_' + res[res.length - 1];
-
-                path = res.join("/");
-            } else {
-                path = '_' + path;
+        fs.readFile(projectScriptDir + 'import.json', 'utf8', function (err,data) {
+            if (err) {
+                return console.log(err);
             }
 
-            importFiles[i] = projectScriptDir + path + '.js';
-        }
+            data = JSON.parse(data)["import"];
 
-        return gulp.src(importFiles)
-            .pipe(concat('script.js'))
-            .pipe(gulp.dest(projectJsPath))
-            .pipe(rename('script.min.js'))
-            .pipe(uglify())
-            .pipe(gulp.dest(projectJsPath));
+            var jsImport = [];
+
+            for(var i in data) {
+                var path = data[i];
+
+                var res = path.split("/");
+
+                if(res.length > 1) {
+                    res[res.length - 1] = '_' + res[res.length - 1];
+
+                    path = res.join("/");
+                } else {
+                    path = '_' + path;
+                }
+
+                jsImport.push(projectScriptDir + path + '.js');
+            }
+        
+            return gulp.src(jsImport)
+                .pipe(concat('script.js'))
+                .pipe(gulp.dest(projectJsPath))
+                .pipe(rename('script.min.js'))
+                .pipe(uglify())
+                .pipe(gulp.dest(projectJsPath));
+        });
     });
 
 /********************************************************
