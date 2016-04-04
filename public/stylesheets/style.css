@@ -65,6 +65,7 @@ main {
   margin-bottom: 77px;
   z-index: 2;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   background: #F5F5F5;
   transition: all 0.5s; }
   .editMode main {
@@ -188,15 +189,56 @@ form button {
   left: 20px;
   right: 20px;
   border-width: 1px;
-  border-style: solid; }
+  border-style: solid;
+  z-index: 3;
+  border-radius: 0;
+  font-size: 16px; }
+  .editMode #storyAction {
+    bottom: 20px; }
 
-button.storyAction {
+button#storyAction {
   background: #2D6ED0;
   color: white;
   border-color: #2458a6; }
-  button.storyAction:hover {
+  button#storyAction:hover {
     background: #2458a6; }
 
-span.storyAction {
+span#storyAction {
   background: white;
   border-color: #B9B9B9; }
+
+#storyWrap {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 78px; }
+  .editMode #storyWrap {
+    margin-bottom: 200px; }
+
+@-webkit-keyframes flickerAnimation {
+  0% {
+    opacity: 1; }
+  50% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes flickerAnimation {
+  0% {
+    opacity: 1; }
+  50% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+#story {
+  position: relative;
+  z-index: 2; }
+  #story > * {
+    display: inline; }
+
+#contentEdit {
+  opacity: 0;
+  position: absolute;
+  bottom: 0;
+  left: -1000px;
+  width: 100vw; }

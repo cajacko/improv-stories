@@ -115,6 +115,7 @@ main {
 	margin-bottom: $siteFooterHeight;
 	z-index: $mainZIndex;
 	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 	background: #F5F5F5;
 	transition: all 0.5s;
 
@@ -248,20 +249,35 @@ form {
 	line-height: 1;
 }
 
+$storyActionBottomPadding: $padding;
+
+$storyActionFontsize: $baseFontSize;
+$storyActionPadding: $padding;
+$storyActionBorderWidth: 1px;
+
+$storyActionHeight: $storyActionFontsize + (($storyActionPadding + $storyActionBorderWidth) * 2);
+
 #storyAction {
 	display: block;
 	text-align: center;
-	padding: $padding;
+	padding: $storyActionPadding;
 	line-height: 1;
 	position: fixed;
-	bottom: $siteFooterHeight + $padding;
+	bottom: $siteFooterHeight + $storyActionBottomPadding;
 	left: $padding;
 	right: $padding;
-	border-width: 1px;
+	border-width: $storyActionBorderWidth;
 	border-style: solid;
+	z-index: 3;
+	border-radius: 0;
+	font-size: $storyActionFontsize;
+
+	.editMode & {
+		bottom: $storyActionBottomPadding;
+	}
 }
 
-button.storyAction {
+button#storyAction {
 	background: $brandBlue;
 	color: white;
 	border-color: darken($brandBlue, 10%);
@@ -271,7 +287,52 @@ button.storyAction {
 	}
 }
 
-span.storyAction {
+span#storyAction {
 	background: white;
 	border-color: #B9B9B9;
+}
+
+#storyWrap {
+	position: relative;
+	overflow: hidden;
+	margin-bottom: $storyActionHeight + $padding;
+
+	.editMode & {
+		margin-bottom: 200px;
+	}
+}
+
+@keyframes flickerAnimation {
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+
+#story {
+	position: relative;
+	z-index: 2;
+
+	> * {
+		display: inline;
+
+		// &:last-child:after {
+		// 	display: none;
+			
+		// 	.editMode & {
+		// 		display: inline;
+		// 		content: "|";
+		// 		color: $brandBlue;
+		// 		animation: flickerAnimation 1s infinite;
+		// 	}
+			
+		// }
+	}
+}
+
+#contentEdit {
+	opacity: 0;
+	position: absolute;
+	bottom: 0;
+	left: -1000px;
+	width: 100vw;
 }

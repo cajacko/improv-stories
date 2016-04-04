@@ -3,21 +3,19 @@ takeTurn();
 function takeTurn() {
 	$(document).ready(function() {
 		$('button#storyAction').click(function() {
-			
 			$.ajax({
 				url: '/next-story',
 				dataType: 'json'
 			})
 			.done(function(data) {
-				console.log(data);
+				$('#storyAction').after('<span id="temp">Last entry from Charlie</span>').remove();
+				$('#temp').attr('id', 'storyAction');
 				$('body').addClass('editMode');
 				playLastStory(data);
 			})
 			.fail(function() {
-				console.log("error");
 			})
 			.always(function() {
-				console.log("complete");
 			});
 			
 		});
@@ -25,26 +23,30 @@ function takeTurn() {
 }
 
 function playLastStory(story) {
-	$('#story').append('<div id="lastEntry"></div>');
+	scrollToBottom(function() {
+		$('#story').append('<div id="lastEntry"></div>');
 
-	var count = 0;
+		var count = 0;
 
-	var playStory = setInterval(function() {
-		if(story.length > count) {
-			var text = story[count];
-			$('#lastEntry').html(text);
-			count++;
-		} else {
-			clearInterval(playStory);
-			$('#lastEntry').attr('id', '');
-			startWriting();
-		}
-		
-	}, 75);
+		setTimeout(function() {
+			var playStory = setInterval(function() {
+				if(story.length > count) {
+					var text = story[count].content;
+					$('#lastEntry').html(text);
+					count++;
+				} else {
+					clearInterval(playStory);
+					$('#lastEntry').attr('id', '');
+					startWriting();
+				}
+				
+			}, 75);
+		}, 500);
+	});
 }
 
 var timer, interval, playStory;
-var timeout = 20000;
+var timeout = 10000;
 var timeOn = false;
 // var timeOn = true;
 var story = [];
@@ -91,15 +93,15 @@ function startWriting() {
 
 
 
-	$('html').on("click.storyFocus", function() {
+	$('article').on("click.storyFocus", function() {
 		$('#contentEditText').focus();
 	});
 
 	$('#contentEditText').html('').prop('disabled', false).focus();
 
-	// if(!$('#contentEditText').is(':focus')) {
-	// 	$('#status').prepend('<div>Touch the screen to start</div>');
-	// }
+	if(!$('#contentEditText').is(':focus')) {
+		$('#storyAction').prepend('<div>Touch the screen to start</div>');
+	}
 
 	$('#contentEditText').on('keydown', function(event) {
 		if(!timeOn || contains.call(disabledKeys, event.keyCode)) {
@@ -131,29 +133,49 @@ function setTimer() {
 	var time = timeout;
 	timeOn = true;
 
+	$('#storyAction').html('Start writing, you have <span id="time">' + (timeout / 1000) + '</span>s left!');
+
 	interval = setInterval(function() {
 		time = time - intervalPeriod;
 
 		if(time <= 0) {
-			// $('#time').text('Done');
+			$('#storyAction').text('Done');
 			timeOn = false;
 			$('#contentEditText').blur().prop('disabled', true);
-			// $('#contentEdit').removeClass('active');
+			$('body').removeClass('editMode');
 			$('html').off(".storyFocus");
 
-			setTimeout(function() {
-				clearInterval(interval);
-			}, intervalPeriod);
+			clearInterval(interval);
+			saveEntry(story)
 		} else {
 			var currentSeconds = time / 1000;
 			currentSeconds = parseFloat(Math.round(currentSeconds * 100) / 100).toFixed(2); 
-			currentSeconds = currentSeconds + 's';
-
-			console.log(currentSeconds);
-// 
-			// $('#time').text(currentSeconds);
+			currentSeconds = currentSeconds;
+			$('#time').text(currentSeconds);
 		}
 	}, intervalPeriod);
+}
+
+function saveEntry(entry) {
+	entry = JSON.stringify(entry);
+
+	$.ajax({
+		url: '/save-entry',
+		type: 'POST',
+		dataType: 'json',
+		data: {story: entry, action: 'saveEntry', storyId: 15},
+	})
+	.done(function(data) {
+		console.log("success");
+		console.log(data);
+		// location.reload(true);
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	.always(function() {
+		console.log("complete");
+	});
 }
 
 // function scrollToTop() {
@@ -163,9 +185,12 @@ function setTimer() {
 // 	});
 // }
 
-// function scrollToBottom() {
+// function scrollToBottomButton() {
 // 	$('#scrollToBottom').click(function() {
-// 		$('#addStoryWrap').animate({ scrollTop: $('#story').outerHeight() }, 'slow');
-// 		return false; 
+// 		scrollToBottom();
 // 	});
 // }
+
+function scrollToBottom(next) {
+	$('main').animate({ scrollTop: $('#mainWrap').outerHeight() }, 'slow', next());
+}
