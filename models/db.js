@@ -8,6 +8,12 @@ var connection = mysql.createConnection({
   database : config.MySql.database
 });
 
-connection.connect();
+connection.connect(function(err) {
+	if(err) {
+		console.log('Error connecting to the database');
+	} else {
+		console.log('Connected to the Database');
+	}
+});
 
 module.exports = connection;
