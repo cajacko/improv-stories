@@ -13,7 +13,8 @@ html
             nav
                 ul
                     li
-                        a(id='backButton', class='fa fa-angle-left')
+                        if back
+                            a(id='backButton', class='fa fa-angle-left', href='#{back}')
 
                         if title
                             h1(id='pageTitle') #{title}
@@ -26,7 +27,7 @@ html
         footer(id='siteFooter')
             nav(id='siteNav')
                 ul
-                    if page = 'story'
+                    if page == 'story'
                         li
                             a(class='fa fa-play')
                                 span Play
