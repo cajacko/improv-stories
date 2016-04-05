@@ -15,8 +15,14 @@ router.all('/', function(req, res, next) {
           authors = [];
         }
 
-        story.create(req.body.codename, authors, req.body.entryTime, req.body.visibility, function(insertId) {
-          res.redirect('/story/' + insertId);
+        authors.push(userDetails.id);
+
+        story.create(req.body.codename, authors, req.body.entryTime, req.body.visibility, function(err, insertId) {
+          if(err) {
+            res.send('Error adding story');
+          } else {
+            res.redirect('/story/' + insertId);
+          }
         });
       } else {
         user.allOtherUsers(userDetails.id, function(err, rows) {
