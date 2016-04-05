@@ -2,8 +2,8 @@
 * Connect to the database
 */
 
-var mysql   = require('mysql'),
-    config  = require('../config'); // Get the config file that stores all the database details
+var mysql = require('mysql'),
+    config = require('../config'); // Get the config file that stores all the database details
 
 // Set up the database connection with all the required details
 var connection = mysql.createConnection({
