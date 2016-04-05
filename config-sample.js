@@ -1,3 +1,7 @@
+/**
+ * Define config details not be saved in version control
+ */
+
 var config = {};
 
 config.MySql = {

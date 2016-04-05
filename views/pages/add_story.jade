@@ -1,4 +1,4 @@
-extends ../sublayouts/layout
+extends ../sublayouts/layout 
 
 block content
     form(id='addStoryForm', method='post', action='')
@@ -9,8 +9,8 @@ block content
         div(class='formGroup')
             label Authors
             select(name='authors', multiple)
-                each val in users
-                    option(value='#{val.id}') #{val.display_name}
+                each user in users
+                    option(value='#{user.id}') #{user.display_name}
 
         div(class='formGroup')
             label Entry Time

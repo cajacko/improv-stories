@@ -1,0 +1,29 @@
+form {
+    label {
+        display: block;
+        margin-bottom: $paddingD4;
+    }
+
+    input, select, button {
+        width: 100%;
+        display: block;
+        padding: $paddingD2;
+        box-sizing: border-box;
+    }
+
+    button {
+        background: $brandBlue;
+        color: white;
+        border: none;
+        font-weight: 300;
+        margin-top: $paddingX2;
+
+        &:hover {
+            background: darken($brandBlue, 10%);
+        }
+    }
+}
+
+.formGroup {
+    margin-bottom: $padding;
+}

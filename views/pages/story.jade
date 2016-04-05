@@ -10,6 +10,7 @@ block content
         form(id='contentEdit')
             textarea(id='contentEditText', autocomplete='off', autocorrect='off', autocapitalize='none', spellcheck='false', disabled)
 
+    //- If the user can take a turn the show the button, otherwise tell the user it's not their turn yet
     if userTurn
         button(id='storyAction') Take your turn
     else

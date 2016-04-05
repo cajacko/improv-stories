@@ -1,0 +1,30 @@
+#siteFooter {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: $brandBlue;
+    border-top: $siteFooterBorderWidth solid darken($brandBlue, 10%);
+    z-index: $navZIndex;
+}
+
+#siteNav {
+    @include tableNav($siteNavHeight);
+
+    li {
+        width: 20%;
+    }
+
+    a {
+        display: block;
+        font-size: $lFontSize;
+        color: white;
+    }
+
+    span {
+        display: block;
+        font-size: $xsFontSize;
+        margin-top: $paddingD4;
+        font-family: $fontFamily;
+    }
+}

@@ -8,14 +8,17 @@ html
         link(rel='stylesheet', href='/stylesheets/lib.min.css')
         link(rel='stylesheet', href='/stylesheets/style.min.css')
         script(src='https://www.google.com/recaptcha/api.js')
+            
     body
         header(id='siteHeader')
             nav
                 ul
                     li
+                        //- If a back button is specified then include it
                         if back
                             a(id='backButton', class='fa fa-angle-left', href='#{back}')
 
+                        //- If a title is specified then use it, otherwise use the default title
                         if title
                             h1(id='pageTitle') #{title}
                         else 
@@ -27,6 +30,7 @@ html
         footer(id='siteFooter')
             nav(id='siteNav')
                 ul
+                    //- If the page is a story page the show the story menu, otherwise show the main menu
                     if page == 'story'
                         li
                             a(class='fa fa-play')
@@ -59,5 +63,6 @@ html
                         li
                             a(class='fa fa-bell', href='/notifications')
                                 span Notifications  
+
         script(src='/javascripts/lib.min.js')     
         script(src='/javascripts/script.min.js')                      

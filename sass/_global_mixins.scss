@@ -1,0 +1,19 @@
+@mixin tableNav($height) {
+    line-height: 1;
+    text-align: center;
+    display: table;
+    width: 100%;
+    height: $height;
+
+    ul {
+        display: table-row;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    li {
+        display: table-cell;
+        vertical-align: middle;
+    }
+}

@@ -1,0 +1,34 @@
+#siteHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: $siteHeaderBorderWidth solid #B9B9B9;
+    text-align: center;
+    line-height: 1;
+    z-index: $navZIndex;
+
+    nav {
+        @include tableNav($siteHeaderNavHeight);
+    }
+}
+
+#backButton {
+    $backButtonPadding: $paddingD4;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    font-size: $siteHeaderNavHeight - ($backButtonPadding * 2);
+    padding: $backButtonPadding $padding;
+    line-height: 1;
+}
+
+#pageTitle {
+    font-weight: 300;
+    font-size: $lFontSize;
+    margin: 0;
+    padding: 0;
+}

@@ -1,0 +1,46 @@
+#storyList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.storyItem {
+    margin-bottom: $paddingD2;
+}
+
+.storyLink {
+    display: block;
+    padding: $padding;
+    line-height: 1;
+    background: white;
+    border: 1px solid #EAEAEA;
+
+    &:hover {
+        background: $brandBlue;
+        color: white;
+        border-color: darken($brandBlue, 10%);
+    }
+}
+
+#facebookLogin {
+    display: block;
+    text-align: center;
+    font-size: 40px;
+    background: white;
+    padding: $paddingX2;
+    max-width: 250px;
+    margin: $paddingX2 auto 0 auto;
+
+    &:hover {
+        background: $brandBlue;
+        color: white;
+    }
+}
+
+#facebookLoginText {
+    display: block;
+    font-size: $lFontSize;
+    font-family: $fontFamily;
+    display: block;
+    margin-top: $padding;
+}

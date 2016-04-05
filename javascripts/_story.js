@@ -93,7 +93,7 @@ takeTurn(); // Initialise the process
 * 3 - START WRITING AN ENTRY                *
 ********************************************/
     var timer, interval, playStory; // Initialise global variables
-    var timeout = 10000; // Set the amount of time that the user can write an entry for
+    var timeout = 20000; // Set the amount of time that the user can write an entry for
     var timeOn = false; // Indicate that the timer is not on yet
     var story = []; // Initialise a blank array for the new entry to go into
 
@@ -241,7 +241,7 @@ takeTurn(); // Initialise the process
         var time = timeout; // Set the initial time the user has, this will keep decreasing so we want it in this seperate var
         timeOn = true; // Indicate the timer has started
 
-        $('#storyAction').html('Start writing, you have <span id="time">' + (timeout / 1000) + '</span>s left!'); // Update the story status for the user
+        $('#storyAction').html('Start writing, you have <span id="time">' + (time / 1000) + '</span>s left!'); // Update the story status for the user
 
         /**
          * Update the time left for the user and when the 

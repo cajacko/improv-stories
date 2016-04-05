@@ -1,9 +1,3 @@
-html {
-  font-family: "Lato", helvetica, sans-serif;
-  background: #F5F5F5;
-  font-size: 16px;
-  line-height: 1.5; }
-
 h1, h2 {
   margin: 20px 0; }
 
@@ -16,6 +10,34 @@ h2 {
 h3, h4, h5, h6 {
   font-size: 16px;
   margin: 10px 0; }
+
+form label {
+  display: block;
+  margin-bottom: 5px; }
+
+form input, form select, form button {
+  width: 100%;
+  display: block;
+  padding: 10px;
+  box-sizing: border-box; }
+
+form button {
+  background: #2D6ED0;
+  color: white;
+  border: none;
+  font-weight: 300;
+  margin-top: 40px; }
+  form button:hover {
+    background: #2458a6; }
+
+.formGroup {
+  margin-bottom: 20px; }
+
+html {
+  font-family: "Lato", helvetica, sans-serif;
+  background: #F5F5F5;
+  font-size: 16px;
+  line-height: 1.5; }
 
 a {
   cursor: pointer;
@@ -48,6 +70,15 @@ a {
     #siteHeader nav li {
       display: table-cell;
       vertical-align: middle; }
+
+#backButton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  font-size: 35px;
+  padding: 5px 20px;
+  line-height: 1; }
 
 #pageTitle {
   font-weight: 300;
@@ -110,28 +141,6 @@ main {
     margin-top: 5px;
     font-family: "Lato", helvetica, sans-serif; }
 
-form label {
-  display: block;
-  margin-bottom: 5px; }
-
-form input, form select, form button {
-  width: 100%;
-  display: block;
-  padding: 10px;
-  box-sizing: border-box; }
-
-form button {
-  background: #2D6ED0;
-  color: white;
-  border: none;
-  font-weight: 300;
-  margin-top: 40px; }
-  form button:hover {
-    background: #2458a6; }
-
-.formGroup {
-  margin-bottom: 20px; }
-
 #storyList {
   margin: 0;
   padding: 0;
@@ -169,15 +178,6 @@ form button {
   font-family: "Lato", helvetica, sans-serif;
   display: block;
   margin-top: 20px; }
-
-#backButton {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  font-size: 35px;
-  padding: 5px 20px;
-  line-height: 1; }
 
 #storyAction {
   display: block;
