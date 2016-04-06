@@ -1,3 +1,5 @@
+var $ = require('jquery');
+
 // TODO: Handle the first entry
 
 /**

@@ -9,7 +9,10 @@ var gulp            = require('gulp'),
     fs              = require('fs'),
     browserSync     = require('browser-sync'),
     nodemon         = require('gulp-nodemon'),
-    autoprefixer    = require('gulp-autoprefixer');
+    autoprefixer    = require('gulp-autoprefixer'),
+    browserify      = require('browserify'),
+    source          = require('vinyl-source-stream'),
+    buffer          = require('vinyl-buffer');
 
 /********************************************************
 * DEFINE PROJECTS AND THEIR PATHS                       *
@@ -50,52 +53,14 @@ var gulp            = require('gulp'),
 * SCRIPTS                                               *
 ********************************************************/
     gulp.task('scripts', function() {
-        var projectScriptDir = './javascripts/';
-
-        fs.readFile(projectScriptDir + 'import.json', 'utf8', function (err,data) {
-            if (err) {
-                return console.log(err);
-            }
-
-            data = JSON.parse(data)["import"];
-
-            var jsImport = [];
-
-            for(var i in data) {
-                var path = data[i];
-
-                var res = path.split("/");
-
-                if(res.length > 1) {
-                    res[res.length - 1] = '_' + res[res.length - 1];
-
-                    path = res.join("/");
-                } else {
-                    path = '_' + path;
-                }
-
-                jsImport.push(projectScriptDir + path + '.js');
-            }
-        
-            return gulp.src(jsImport)
-                .pipe(concat('script.js'))
-                .pipe(gulp.dest(projectJsPath))
-                .pipe(rename('script.min.js'))
-                .pipe(uglify())
-                .pipe(gulp.dest(projectJsPath));
-        });
-    });
-
-/********************************************************
-* LIBRARY SCRIPTS                                       *
-********************************************************/
-    gulp.task('libscripts', function() {
-        return gulp.src(['./node_modules/jquery/dist//jquery.js'])
-            .pipe(concat('lib.js'))
-            .pipe(gulp.dest(projectJsPath))
-            .pipe(rename('lib.min.js'))
-            .pipe(uglify())
-            .pipe(gulp.dest(projectJsPath));
+        return browserify('./javascripts/main.js')
+            .bundle() // Compile the js
+            .pipe(source('script.js')) //Pass desired output filename to vinyl-source-stream
+            .pipe(gulp.dest(projectJsPath)) // Output the file
+            .pipe(buffer()) // convert from streaming to buffered vinyl file object
+            .pipe(rename('script.min.js')) // Rename the minified version
+            .pipe(uglify()) // Minify the file
+            .pipe(gulp.dest(projectJsPath)); // Output the minified file
     });
 
 /********************************************************
@@ -109,7 +74,7 @@ var gulp            = require('gulp'),
 /********************************************************
 * INIT TASK                                             *
 ********************************************************/
-    gulp.task('init',['libcss', 'libscripts', 'fonts']);
+    gulp.task('init',['libcss', 'scripts', 'fonts']);
 
 /********************************************************
 * SETUP BROWSER SYNC                                    *

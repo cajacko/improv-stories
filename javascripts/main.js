@@ -1,0 +1,1 @@
+var story = require('./modules/story');
