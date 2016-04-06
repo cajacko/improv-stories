@@ -53,7 +53,7 @@ var gulp            = require('gulp'),
 * SCRIPTS                                               *
 ********************************************************/
     gulp.task('scripts', function() {
-        return browserify('./javascripts/main.js')
+        return browserify('./javascripts/import.js')
             .bundle() // Compile the js
             .pipe(source('script.js')) //Pass desired output filename to vinyl-source-stream
             .pipe(gulp.dest(projectJsPath)) // Output the file
