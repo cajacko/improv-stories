@@ -53,7 +53,7 @@ var gulp            = require('gulp'),
 * SCRIPTS                                               *
 ********************************************************/
     gulp.task('scripts', function() {
-        return browserify('./javascripts/import.js')
+        return browserify('./client_javascripts/import.js')
             .bundle() // Compile the js
             .pipe(source('script.js')) //Pass desired output filename to vinyl-source-stream
             .pipe(gulp.dest(projectJsPath)) // Output the file
@@ -97,7 +97,7 @@ var gulp            = require('gulp'),
             script: './bin/www',
             env: { 'NODE_ENV': 'development' },
             ignore: [
-                './javascripts/**/*.js',
+                './client_javascripts/**/*.js',
                 './public/',
                 './gulpfile.js'
             ]
@@ -114,7 +114,7 @@ var gulp            = require('gulp'),
 ********************************************************/
     gulp.task('watch', function () {
         gulp.watch(['./sass/**/*.scss'], ['sass']);
-        gulp.watch(['./javascripts/**/*.js'], ['scripts']);
+        gulp.watch(['./client_javascripts/**/*.js'], ['scripts']);
     });
 
 /********************************************************
