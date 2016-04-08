@@ -1,0 +1,45 @@
+#########################
+## Sample Sass Lint File
+#########################
+# Rule Configuration
+rules:
+  indentation:
+    - 2
+    -
+      size: 4
+  class-name-format:
+    - 1
+    -
+      convention: 'camelcase'
+  mixin-name-format: 
+    - 1
+    -
+      convention: 'camelcase'
+  variable-name-format: 
+    - 1
+    -
+      convention: 'camelcase'
+  no-vendor-prefix:
+    - 1
+    -
+      'excluded-identifiers':
+        - 'webkit'
+  hex-notation:
+    - 0
+  hex-length:
+    - 1
+    - 
+      style: long
+  border-zero:
+    - 1
+    -
+      convention: 'none'
+  leading-zero:
+    - 1
+    -
+      include: true
+  no-misspelled-properties:
+  - 1
+  -
+    'extra-properties':
+      - '-webkit-overflow-scrolling'
