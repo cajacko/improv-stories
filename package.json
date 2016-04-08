@@ -31,7 +31,8 @@
     "jquery": "^2.1.4",
     "normalize.css": "^3.0.3",
     "sass-mq": "^3.2.5",
-    "vinyl-buffer": "^1.0.0"
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
