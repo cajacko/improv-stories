@@ -1,7 +1,7 @@
-#storyList {
+.storyList {
+    list-style: none;
     margin: 0;
     padding: 0;
-    list-style: none;
 }
 
 .storyItem {
@@ -9,38 +9,37 @@
 }
 
 .storyLink {
+    background: $brandWhite;
+    border: 1px solid $brandWhite;
     display: block;
-    padding: $padding;
     line-height: 1;
-    background: white;
-    border: 1px solid #EAEAEA;
+    padding: $padding;
 
     &:hover {
         background: $brandBlue;
-        color: white;
         border-color: darken($brandBlue, 10%);
+        color: $brandWhite;
     }
 }
 
-#facebookLogin {
+.facebookLogin {
+    background: $brandWhite;
     display: block;
-    text-align: center;
     font-size: 40px;
-    background: white;
-    padding: $paddingX2;
+    margin: $paddingX2 auto 0;
     max-width: 250px;
-    margin: $paddingX2 auto 0 auto;
+    padding: $paddingX2;
+    text-align: center;
 
     &:hover {
         background: $brandBlue;
-        color: white;
+        color: $brandWhite;
     }
 }
 
-#facebookLoginText {
+.facebookLoginText {
     display: block;
-    font-size: $lFontSize;
     font-family: $fontFamily;
-    display: block;
+    font-size: $lFontSize;
     margin-top: $padding;
 }

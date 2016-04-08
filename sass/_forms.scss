@@ -4,17 +4,19 @@ form {
         margin-bottom: $paddingD4;
     }
 
-    input, select, button {
-        width: 100%;
+    input, 
+    select, 
+    button {
+        box-sizing: border-box;
         display: block;
         padding: $paddingD2;
-        box-sizing: border-box;
+        width: 100%;
     }
 
     button {
         background: $brandBlue;
-        color: white;
         border: none;
+        color: $brandWhite;
         font-weight: 300;
         margin-top: $paddingX2;
 

@@ -10,25 +10,25 @@ html
         script(src='https://www.google.com/recaptcha/api.js')
             
     body
-        header(id='siteHeader')
+        header(class='siteHeader')
             nav
                 ul
                     li
                         //- If a back button is specified then include it
                         if back
-                            a(id='backButton', class='fa fa-angle-left', href='#{back}')
+                            a(class='backButton fa fa-angle-left', href='#{back}')
 
                         //- If a title is specified then use it, otherwise use the default title
                         if title
-                            h1(id='pageTitle') #{title}
+                            h1(class='pageTitle') #{title}
                         else 
-                            h1(id='pageTitle') Improv Stories
+                            h1(class='pageTitle') Improv Stories
         main
-            div(id='mainWrap')
+            div(class='mainWrap')
                 block content
 
-        footer(id='siteFooter')
-            nav(id='siteNav')
+        footer(class='siteFooter')
+            nav(class='siteNav')
                 ul
                     //- If the page is a story page the show the story menu, otherwise show the main menu
                     if page == 'story'

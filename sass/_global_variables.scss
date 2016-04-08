@@ -13,16 +13,17 @@ $fontFamily: 'Lato', helvetica, sans-serif;
 
 $brandBlue: #2D6ED0;
 
-
 $siteHeaderNavHeight: 45px;
 $siteHeaderBorderWidth: 1px;
 $siteHeaderHeight: $siteHeaderNavHeight + $siteHeaderBorderWidth;
-
 
 $siteFooterBorderWidth: 2px;
 $siteNavHeight: 75px;
 $siteFooterHeight: $siteNavHeight + $siteFooterBorderWidth;
 
-
 $mainZIndex: 2;
 $navZIndex: $mainZIndex - 1;
+
+$brandWhite: #FFFFFF;
+$brandLightGrey: #F5F5F5;
+$brandDarkerLightGrey: darken($brandLightGrey, 20%);

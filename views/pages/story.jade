@@ -4,14 +4,14 @@ block content
     header
 
     div(id='storyWrap')
-        article(id='story')
+        article(id='story', class="story")
             each val in entries
                 div(data-user-id='#{val.user_id}', data-user-name='Charlie Jackson') #{val.content}
-        form(id='contentEdit')
-            textarea(id='contentEditText', autocomplete='off', autocorrect='off', autocapitalize='none', spellcheck='false', disabled)
+        form(class="contentEdit")
+            textarea(id='contentEditText', class='contentEditText', autocomplete='off', autocorrect='off', autocapitalize='none', spellcheck='false', disabled)
 
     //- If the user can take a turn the show the button, otherwise tell the user it's not their turn yet
     if userTurn
-        button(id='storyAction') Take your turn
+        button(id='storyAction', class="storyAction") Take your turn
     else
-        span(id='storyAction') It is not your turn yet
+        span(id='storyAction', class="storyAction") It is not your turn yet

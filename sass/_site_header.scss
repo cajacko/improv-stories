@@ -1,12 +1,12 @@
-#siteHeader {
-    position: fixed;
-    top: 0;
+.siteHeader {
+    background: $brandWhite;
+    border-bottom: $siteHeaderBorderWidth solid $brandDarkerLightGrey;
     left: 0;
-    right: 0;
-    background: white;
-    border-bottom: $siteHeaderBorderWidth solid #B9B9B9;
-    text-align: center;
     line-height: 1;
+    position: fixed;
+    right: 0;
+    text-align: center;
+    top: 0;
     z-index: $navZIndex;
 
     nav {
@@ -14,21 +14,21 @@
     }
 }
 
-#backButton {
+.backButton {
     $backButtonPadding: $paddingD4;
 
-    position: absolute;
-    top: 0;
-    left: 0;
     bottom: 0;
     font-size: $siteHeaderNavHeight - ($backButtonPadding * 2);
-    padding: $backButtonPadding $padding;
+    left: 0;
     line-height: 1;
+    padding: $backButtonPadding $padding;
+    position: absolute;
+    top: 0;
 }
 
-#pageTitle {
-    font-weight: 300;
+.pageTitle {
     font-size: $lFontSize;
+    font-weight: 300;
     margin: 0;
     padding: 0;
 }

@@ -2,15 +2,15 @@
  * Initialise the app
  */
 
-var express = require('express'),
-    path = require('path'),
-    favicon = require('serve-favicon'),
-    logger = require('morgan'),
-    cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-    passport = require('passport'),
-    Strategy = require('passport-facebook').Strategy,
-    config = require('./config');
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var passport = require('passport');
+var Strategy = require('passport-facebook').Strategy;
+var config = require('./config');
 
 /**
  * Configure the Facebook strategy for use by Passport.
@@ -36,7 +36,7 @@ passport.use(new Strategy({
      */
     return cb(null, profile);
 }));
- 
+
 /**
  * Configure Passport authenticated session persistence.
  *
@@ -66,11 +66,14 @@ app.set('view engine', 'jade');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
-
+app.use(require('express-session')({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true
+}));
 
 // error handlers
 

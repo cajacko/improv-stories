@@ -1,14 +1,14 @@
-#siteFooter {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+.siteFooter {
     background: $brandBlue;
     border-top: $siteFooterBorderWidth solid darken($brandBlue, 10%);
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
     z-index: $navZIndex;
 }
 
-#siteNav {
+.siteNav {
     @include tableNav($siteNavHeight);
 
     li {
@@ -16,15 +16,15 @@
     }
 
     a {
+        color: $brandWhite;
         display: block;
         font-size: $lFontSize;
-        color: white;
     }
 
     span {
         display: block;
+        font-family: $fontFamily;
         font-size: $xsFontSize;
         margin-top: $paddingD4;
-        font-family: $fontFamily;
     }
 }

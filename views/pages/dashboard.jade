@@ -3,7 +3,7 @@ extends ../sublayouts/layout
 block content
     //- If there are stories show them, otherwise tell the user to add a story
     if stories
-        ul(id='storyList')
+        ul(class='storyList')
 
             each val in stories
                 li(class='storyItem') 
