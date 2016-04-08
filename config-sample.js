@@ -5,15 +5,15 @@
 var config = {};
 
 config.MySql = {
-	host: '',
-	user: '',
-	password: '',
-	database: ''
+    host: '',
+    user: '',
+    password: '',
+    database: ''
 };
 
 config.facebook = {
-	clientID: '',
-	clientSecret: ''
+    clientID: '',
+    clientSecret: ''
 };
 
 module.exports = config;

@@ -2,27 +2,27 @@
  * If a valid request comes in add the story or handle errors
  */
 
-var express = require('express'),
-    router = express.Router(),
-    story = require('../models/story'),
-    user = require('../models/user');
+var express = require('express');
+var router = express.Router();
+var story = require('../models/story');
+var user = require('../models/user');
 
 // For all routes into '/add-story'
-router.all('/', function(req, res, next) {
+router.all('/', function(req, res) {
     // Get the current user
     user.getUser(req, function(userDetails) {
         // If the user is logged in then add the story, otherwise redirect to home
-        if(userDetails) {
+        if (userDetails) {
             // If the POST action is 'addStory' then add the story, otherwise render the add story page
-            if(req.body.action == 'addStory') {
+            if (req.body.action == 'addStory') {
                 // TODO: validate that the correct fields exist and handle errors
 
                 var authors = req.body.authors; // Get the authors
 
                 // If the authors var is a string turn it into an array, otherwise if it is blank initiate a blank array
-                if(typeof authors === 'string') {
-                    authors = [ authors ];
-                } else if(typeof authors === 'undefined') {
+                if (typeof authors === 'string') {
+                    authors = [authors];
+                } else if (typeof authors === 'undefined') {
                     authors = [];
                 }
 
@@ -31,7 +31,7 @@ router.all('/', function(req, res, next) {
                 // Create the story and redirect to that story page, or handle the error
                 story.create(req.body.codename, authors, req.body.entryTime, req.body.visibility, function(err, insertId) {
                     // If there is an error then notify the user
-                    if(err) {
+                    if (err) {
                         res.send('Error adding story');
                     } else {
                         res.redirect('/story/' + insertId); // Redirect to the story page
@@ -41,7 +41,7 @@ router.all('/', function(req, res, next) {
                 // Not a POST request so show the add story page. First get all the other users to show in the author box
                 user.allOtherUsers(userDetails.id, function(err, rows) {
                     // If there was an error getting the other users then alert the user
-                    if(err) {
+                    if (err) {
                         // TODO: error page if something went wrong
                         res.redirect('/');
                     } else {
