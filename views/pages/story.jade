@@ -4,7 +4,7 @@ block content
     header
 
     div(class='storyWrap')
-        article(id='story', class="story")
+        article(id='story', class="story", data-entry-time="#{entryTime}")
             each val in entries
                 div(data-user-id='#{val.user_id}', data-user-name='Charlie Jackson') !{val.content}
             div(id='lastEntry')

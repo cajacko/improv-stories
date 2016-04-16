@@ -113,7 +113,25 @@ exports.getStory = function(storyId, next) {
             }
         }
 
-        next(err, filteredEntries); // Perform the callback function whilst passing the error status and the story entries
+        // TODO: return the last user as a param as well, and handle if was last user
+
+        // Get the story details
+        var query = '';
+        query += 'SELECT * ';
+        query += 'FROM stories ';
+        query += 'WHERE id = ? ';
+        query += 'LIMIT 1';
+
+        // Perform the query
+        db.query(query, [storyId], function(err, story) {
+            if (err) {
+                next(err);
+            } else {
+                // TODO: if no story of that id, put this query before getting posts.
+
+                next(err, filteredEntries, story[0]); // Perform the callback function whilst passing the error status and the story entries
+            }
+        });
     });
 };
 

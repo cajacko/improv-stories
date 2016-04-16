@@ -100,7 +100,7 @@ function playLastStory(story) {
 * 3 - START WRITING AN ENTRY                *
 ********************************************/
 var interval;
-var timeout = 20000; // Set the amount of time that the user can write an entry for
+var timeout = $('#story').data('entry-time') * 1000; // Set the amount of time that the user can write an entry for
 var timeOn = false; // Indicate that the timer is not on yet
 var story = []; // Initialise a blank array for the new entry to go into
 var lastKey; // Store the last keypress so we can remove multiple line breaks
@@ -147,10 +147,16 @@ var disabledKeys = [
     9, // Tab
 ];
 
+// Show the tap screen to continue screen
 function showTapMessage() {
-    if(!$('#tapMessage').length) {
-        $('main').append('<div id="tapMessage" class="tapMessage"><div><div><p>Tap the screen!</p><p>Your go has started!</p><p id="tapMessageTime"></p></div></div></div>');
-        // TODO: Bring this open only on not focus
+    // If the message isn't already showing then show it
+    if (!$('#tapMessage').length) {
+        var div = '';
+        div += '<div id="tapMessage" class="tapMessage"><div><div>'; // Open the divs
+        div += '<p>Tap the screen!</p><p>Your go has started!</p><p id="tapMessageTime"></p>'; // Define the message
+        div += '</div></div></div>'; // close the divs
+
+        $('main').append(div); // Show the message
     }
 }
 
@@ -178,15 +184,14 @@ function startWriting() {
         $('#tapMessage').remove();
     });
 
-    // TODO: test if ios
-    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; // If iOS
     /**
-     * If the textarea does not have focus at this stage then show a
-     * message indicating that the user must tap the screen to start
-     * writing. Used on iOS.
+     * If the user is on an iOS device show the tap to continue
+     * screen, as iOS does not let you programatically focus
+     * after a timeout.
      */
-    if(iOS) {
-        showTapMessage();
+    if (iOS) {
+        showTapMessage(); // Show the tap message
     }
 
     /**
@@ -263,7 +268,6 @@ function setTimer() {
     var time = timeout; // Set the initial time the user has, this will keep decreasing so we want it in this seperate var
     timeOn = true; // Indicate the timer has started
 
-    // TODO: put countdown at end of cursor so you can always see it
     $('#storyStatus').html('Start writing, you have <span id="time">' + (time / 1000) + '</span>s left!'); // Update the story status for the user
 
     /**
@@ -286,9 +290,8 @@ function setTimer() {
             saveEntry(story); // Save the entry
         } else {
             /**
-             * If the textarea does not have focus at this stage then show a
-             * message indicating that the user must tap the screen to start
-             * writing. Used on iOS.
+             * If the textarea looses focus during the timer then show
+             * the tap to edit screen.
              */
             if (!$('#contentEditText').is(':focus')) {
                 showTapMessage();
@@ -353,7 +356,7 @@ function scrollToBottom(next) {
 // When on the story page, prevent backspace from navigating to the previous page
 $(document).on('keydown', function(event) {
     // If the key was backspace and the textarea isn't focussed then do nothing
-    if(event.keyCode == 8 && !$('#contentEditText').is(':focus')) {
+    if (event.keyCode == 8 && !$('#contentEditText').is(':focus')) {
         event.preventDefault();
     }
 });

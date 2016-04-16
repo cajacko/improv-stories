@@ -17,12 +17,12 @@ router.get('/', function(req, res) {
     //     // If the user is logged in save the entry otherwise return an error
     //     if (userDetails) {
             // Get the story
-            story.getStory(15, function(err, entries) {
+            story.getStory(15, function(err, entries, story) {
                 // If there was an error getting the story then display the error, otherwise show the story
                 if (err) {
 
                 } else {
-                    res.render('pages/story', {page: 'story', title: 'Story Title', userTurn: true, back: '/', entries: entries});
+                    res.render('pages/story', {page: 'story', title: story.codename, entryTime: story.entry_time, userTurn: true, back: '/', entries: entries});
                 }
             });
     //     } else {
