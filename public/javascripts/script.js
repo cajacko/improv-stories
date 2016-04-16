@@ -2,7 +2,12 @@
 require('./modules/story');
 
 },{"./modules/story":2}],2:[function(require,module,exports){
-var $ = require('jquery');
+/**
+ * Play, save and display storires
+ */
+
+var $ = require('jquery'); // Get jquery
+var general = require('../../helpers/general'); // Get the general helper functions
 
 // TODO: Handle the first entry
 
@@ -63,6 +68,7 @@ function takeTurn() {
  * Play the last story and then let the user start writing
  */
 function playLastStory(story) {
+    // TODO: add a countdown at end of cursor
     // Scroll to the bottom of the story and then allow editing
     scrollToBottom(function() {
         $('#story').append('<div id="lastEntry"></div>'); // Ad a blank div to add the last story to
@@ -82,6 +88,7 @@ function playLastStory(story) {
                 // If there is more story
                 if (story.length > count) {
                     var text = story[count].content; // Get the next content
+                    text = general.returnStoryWithBr(text); // Turn line breaks into <br> elements
                     $('#lastEntry').html(text); // Replace the lastEntry content
                     count++;
                 } else {
@@ -102,6 +109,7 @@ var interval;
 var timeout = 20000; // Set the amount of time that the user can write an entry for
 var timeOn = false; // Indicate that the timer is not on yet
 var story = []; // Initialise a blank array for the new entry to go into
+var lastKey; // Store the last keypress so we can remove multiple line breaks
 
 /**
  * Check if the needle is in the haystack.
@@ -193,9 +201,15 @@ function startWriting() {
      * isn't allowed.
      */
     $('#contentEditText').on('keydown', function(event) {
-        // If the time has run out or the key is not allowed then ignore this action
-        if (!timeOn || contains.call(disabledKeys, event.keyCode)) {
+        /**
+         * If the time has run out, or the key is not allowed,
+         * or multiple line breaks are being entered then ignore
+         * this action
+         */
+        if (!timeOn || contains.call(disabledKeys, event.keyCode) || (lastKey == 13 && event.keyCode == 13)) {
             event.preventDefault();
+        } else {
+            lastKey = event.keyCode; // Indicate the last valid key that was pressed
         }
     }).bind('paste', function(event) {
         // Ignore all paste actions
@@ -218,7 +232,7 @@ function startWriting() {
             addToStory(text); // Add the content to the story array
 
             var content = story[story.length - 1].content; // Get the last item in the story array
-            content = content.replace(/(?:\r\n|\r|\n)/g, '<br><br>'); // Replace newlines with html elements
+            content = general.returnStoryWithBr(content); // Replace newlines with html elements
 
             $('#currentEntry').html(content); // Show the new entry content
         }
@@ -246,6 +260,7 @@ function setTimer() {
     var time = timeout; // Set the initial time the user has, this will keep decreasing so we want it in this seperate var
     timeOn = true; // Indicate the timer has started
 
+    // TODO: put countdown at end of cursor so you can always see it
     $('#storyAction').html('Start writing, you have <span id="time">' + (time / 1000) + '</span>s left!'); // Update the story status for the user
 
     /**
@@ -323,9 +338,30 @@ function scrollToBottom(next) {
 //  });
 // }
 
-},{"jquery":3}],3:[function(require,module,exports){
+// When on the story page, prevent backspace from navigating to the previous page
+$(document).on('keydown', function(event) {
+    // If the key was backspace and the textarea isn't focussed then do nothing
+    if(event.keyCode == 8 && !$('#contentEditText').is(':focus')) {
+        event.preventDefault();
+    }
+});
+
+},{"../../helpers/general":3,"jquery":4}],3:[function(require,module,exports){
+/**
+ * This file provides general function to be
+ * used by client and server side scripts
+ */
+
+// Replace line breaks with >br> elements
+exports.returnStoryWithBr = function(content) {
+    content = content.replace(/\n\s*\n/g, '\n'); // Turn multiple line breaks into single ones
+    content = content.replace(/(?:\r\n|\r|\n)/g, '<br><br>'); // Replace newlines with html
+    return content; // Return the content
+};
+
+},{}],4:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.2.2
+ * jQuery JavaScript Library v2.2.3
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -335,7 +371,7 @@ function scrollToBottom(next) {
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-03-17T17:51Z
+ * Date: 2016-04-05T19:26Z
  */
 
 (function( global, factory ) {
@@ -391,7 +427,7 @@ var support = {};
 
 
 var
-	version = "2.2.2",
+	version = "2.2.3",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -9801,7 +9837,7 @@ jQuery.fn.load = function( url, params, callback ) {
 		// If it fails, this function gets "jqXHR", "status", "error"
 		} ).always( callback && function( jqXHR, status ) {
 			self.each( function() {
-				callback.apply( self, response || [ jqXHR.responseText, status, jqXHR ] );
+				callback.apply( this, response || [ jqXHR.responseText, status, jqXHR ] );
 			} );
 		} );
 	}

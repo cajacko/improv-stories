@@ -6,7 +6,7 @@ block content
     div(id='storyWrap')
         article(id='story', class="story")
             each val in entries
-                div(data-user-id='#{val.user_id}', data-user-name='Charlie Jackson') #{val.content}
+                div(data-user-id='#{val.user_id}', data-user-name='Charlie Jackson') !{val.content}
         form(class="contentEdit")
             textarea(id='contentEditText', class='contentEditText', autocomplete='off', autocorrect='off', autocapitalize='none', spellcheck='false', disabled)
 

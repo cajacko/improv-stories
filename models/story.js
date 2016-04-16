@@ -3,6 +3,7 @@
  */
 
 var db = require('../models/db'); // Load the database connection
+var general = require('../helpers/general'); // Get the general helper functions
 
 // Create a new story
 exports.create = function(codename, authors, entryTime, visibility, next) {
@@ -107,7 +108,8 @@ exports.getStory = function(storyId, next) {
         for (i = 0; i < entries.length; i++) {
             // Don't add the entry if it is blank
             if ((entries.length - 1) != i) {
-                filteredEntries.push(entries[i]);
+                entries[i].content = general.returnStoryWithBr(entries[i].content); // Remove new lines with br tags
+                filteredEntries.push(entries[i]); // Add the elements to the array
             }
         }
 
