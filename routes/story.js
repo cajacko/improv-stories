@@ -13,9 +13,9 @@ router.get('/', function(req, res) {
     // TODO: Validate the id
 
     // Get the current user
-    user.getUser(req, function(userDetails) {
-        // If the user is logged in save the entry otherwise return an error
-        if (userDetails) {
+    // user.getUser(req, function(userDetails) {
+    //     // If the user is logged in save the entry otherwise return an error
+    //     if (userDetails) {
             // Get the story
             story.getStory(15, function(err, entries) {
                 // If there was an error getting the story then display the error, otherwise show the story
@@ -25,11 +25,11 @@ router.get('/', function(req, res) {
                     res.render('pages/story', {page: 'story', title: 'Story Title', userTurn: true, back: '/', entries: entries});
                 }
             });
-        } else {
-            // The user is not logged in, redirect
-            res.redirect('/'); // Redirect to the story page
-        }
-    });
+    //     } else {
+    //         // The user is not logged in, redirect
+    //         res.redirect('/'); // Redirect to the story page
+    //     }
+    // });
 });
 
 module.exports = router;

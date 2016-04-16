@@ -42,8 +42,8 @@ function takeTurn() {
                 // TODO: Check the the data returned is valid, if not then tell the user
 
                 // Replace the storyAction button with a span indicating the user who is writing
-                $('#storyAction').after('<span id="temp">Last entry from Charlie</span>').remove();
-                $('#temp').attr('id', 'storyAction').addClass('storyAction');
+                $('#storyStatus').html('Last entry from Charlie');
+                $('#storyAction').hide();
 
                 $('body').addClass('editMode'); // Set the edit mode
                 playLastStory(data); // Playe the story
@@ -67,8 +67,6 @@ function playLastStory(story) {
     // TODO: add a countdown at end of cursor
     // Scroll to the bottom of the story and then allow editing
     scrollToBottom(function() {
-        $('#story').append('<div id="lastEntry"></div>'); // Ad a blank div to add the last story to
-
         // Set a brief timeout, as it feels nicer
         setTimeout(function() {
             var count = 0; // Set the default count, in order to get each array item from the story
@@ -149,14 +147,20 @@ var disabledKeys = [
     9, // Tab
 ];
 
+function showTapMessage() {
+    $('main').append('<div id="tapMessage" class="tapMessage"><div><div><p>Tap the screen!</p><p>Your go has started!</p><p id="tapMessageTime"></p></div></div></div>');
+    // TODO: Bring this open only on not focus
+}
+
 /**
  * Allow the user to start writing a new entry
  */
 function startWriting() {
-    $('#story').append('<div id="currentEntry"></div>'); // Add a blank div to the end of the story to start inserting the new entry content
     setTimer(); // Stop content entry after the designated time
 
-    // TODO: Notify user to start writing in the #storyAction span
+    $('#currentEntry').css('display', 'inline');
+
+    showTapMessage();
 
     /**
      * Focus on the textarea whenever a user clicks on the story.
@@ -169,8 +173,9 @@ function startWriting() {
      * This is also used for iOS, as we can't automatically focus
      * on the textarea after a timeout on iOS.
      */
-    $('article').on('click.storyFocus', function() {
+    $('main').on('click.storyFocus', function() {
         $('#contentEditText').focus();
+        $('#tapMessage').remove();
     });
 
     /**
@@ -188,7 +193,7 @@ function startWriting() {
      * writing. Used on iOS.
      */
     if (!$('#contentEditText').is(':focus')) {
-        $('#storyAction').prepend('<div>Touch the screen to start</div>');
+        // showTapMessage();
     }
 
     /**
@@ -257,7 +262,7 @@ function setTimer() {
     timeOn = true; // Indicate the timer has started
 
     // TODO: put countdown at end of cursor so you can always see it
-    $('#storyAction').html('Start writing, you have <span id="time">' + (time / 1000) + '</span>s left!'); // Update the story status for the user
+    $('#storyStatus').html('Start writing, you have <span id="time">' + (time / 1000) + '</span>s left!'); // Update the story status for the user
 
     /**
      * Update the time left for the user and when the
@@ -273,14 +278,14 @@ function setTimer() {
             timeOn = false; // Indicate that the timer is not on anymore
             $('#contentEditText').blur().prop('disabled', true); // Lose focus and disable the textarea
             $('body').removeClass('editMode'); // Remove the editMode
-            $('html').off('.storyFocus'); // Remove the click function that would focus on the textarea
+            $('main').off('.storyFocus'); // Remove the click function that would focus on the textarea
 
             clearInterval(interval); // Clear the timer
             saveEntry(story); // Save the entry
         } else {
             var currentSeconds = time / 1000; // Get the time in seconds
             currentSeconds = parseFloat(Math.round(currentSeconds * 100) / 100).toFixed(2); // Parse the time to 2 decimal places
-            $('#time').text(currentSeconds); // Show the updated time
+            $('#time, #tapMessageTime').text(currentSeconds); // Show the updated time
         }
     }, intervalPeriod);
 }

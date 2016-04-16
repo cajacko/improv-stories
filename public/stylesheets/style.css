@@ -110,7 +110,7 @@ main {
     margin-top: 0; }
 
 .mainWrap {
-  padding: 20px 20px 120px; }
+  padding: 20px; }
 
 .siteFooter {
   background: #2D6ED0;
@@ -217,7 +217,7 @@ span.storyAction {
   overflow: hidden;
   position: relative; }
   .editMode .storyWrap {
-    margin-bottom: 200px; }
+    margin-bottom: 50vh; }
 
 @-webkit-keyframes flickerAnimation {
   0% {
@@ -241,9 +241,43 @@ span.storyAction {
   .story > * {
     display: inline; }
 
+.currentEntry {
+  display: none; }
+  .currentEntry:after {
+    display: inline;
+    content: "|";
+    color: #2D6ED0;
+    -webkit-animation: flickerAnimation 1s infinite;
+    animation: flickerAnimation 1s infinite; }
+
 .contentEdit {
   bottom: 0;
   left: -1000px;
   opacity: 0;
   position: absolute;
   width: 100vw; }
+
+.storyStatus {
+  display: block;
+  margin-top: 20px;
+  color: red; }
+
+.tapMessage {
+  position: fixed;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: table;
+  width: 100%;
+  height: 100%; }
+  .tapMessage > * {
+    display: table-row; }
+    .tapMessage > * > * {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 2rem;
+      color: red; }
