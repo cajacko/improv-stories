@@ -152,8 +152,10 @@ var disabledKeys = [
 ];
 
 function showTapMessage() {
-    $('main').append('<div id="tapMessage" class="tapMessage"><div><div><p>Tap the screen!</p><p>Your go has started!</p><p id="tapMessageTime"></p></div></div></div>');
-    // TODO: Bring this open only on not focus
+    if(!$('#tapMessage').length) {
+        $('main').append('<div id="tapMessage" class="tapMessage"><div><div><p>Tap the screen!</p><p>Your go has started!</p><p id="tapMessageTime"></p></div></div></div>');
+        // TODO: Bring this open only on not focus
+    }
 }
 
 /**
@@ -163,8 +165,6 @@ function startWriting() {
     setTimer(); // Stop content entry after the designated time
 
     $('#currentEntry').css('display', 'inline');
-
-    showTapMessage();
 
     /**
      * Focus on the textarea whenever a user clicks on the story.
@@ -182,6 +182,17 @@ function startWriting() {
         $('#tapMessage').remove();
     });
 
+    // TODO: test if ios
+    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    /**
+     * If the textarea does not have focus at this stage then show a
+     * message indicating that the user must tap the screen to start
+     * writing. Used on iOS.
+     */
+    if(iOS) {
+        showTapMessage();
+    }
+
     /**
      * Make sure the textarea is empty, enable it and then focus on it.
      *
@@ -190,15 +201,6 @@ function startWriting() {
      * there is a timeout inbetween action and focus.
      */
     $('#contentEditText').html('').prop('disabled', false).focus();
-
-    /**
-     * If the textarea does not have focus at this stage then show a
-     * message indicating that the user must tap the screen to start
-     * writing. Used on iOS.
-     */
-    if (!$('#contentEditText').is(':focus')) {
-        // showTapMessage();
-    }
 
     /**
      * When content is being entered into the textarea check if it is
@@ -287,6 +289,15 @@ function setTimer() {
             clearInterval(interval); // Clear the timer
             saveEntry(story); // Save the entry
         } else {
+            /**
+             * If the textarea does not have focus at this stage then show a
+             * message indicating that the user must tap the screen to start
+             * writing. Used on iOS.
+             */
+            if (!$('#contentEditText').is(':focus')) {
+                showTapMessage();
+            }
+
             var currentSeconds = time / 1000; // Get the time in seconds
             currentSeconds = parseFloat(Math.round(currentSeconds * 100) / 100).toFixed(2); // Parse the time to 2 decimal places
             $('#time, #tapMessageTime').text(currentSeconds); // Show the updated time
