@@ -9,27 +9,32 @@ var user = require('../models/user');
 
 // Route all requests for '/story/*'
 router.get('/', function(req, res) {
-    // TODO: Get the story via the id
-    // TODO: Validate the id
+    var path = req._parsedOriginalUrl.path; // Get the url path
+    path = path.split('/'); // Split the path by the slashes
 
-    // Get the current user
-    // user.getUser(req, function(userDetails) {
-    //     // If the user is logged in save the entry otherwise return an error
-    //     if (userDetails) {
-            // Get the story
-            story.getStory(15, function(err, entries, story) {
-                // If there was an error getting the story then display the error, otherwise show the story
-                if (err) {
-
-                } else {
-                    res.render('pages/story', {page: 'story', title: story.codename, entryTime: story.entry_time, userTurn: true, back: '/', entries: entries});
-                }
-            });
-    //     } else {
-    //         // The user is not logged in, redirect
-    //         res.redirect('/'); // Redirect to the story page
-    //     }
-    // });
+    // If the path has the correct amount of params and the id is numeric than continue
+    if (path.length == 3 && !isNaN(!path[2])) {
+        // Get the current user
+        user.getUser(req, function(userDetails) {
+            // If the user is logged in save the entry otherwise return an error
+            if (userDetails) {
+                // Get the story
+                story.getStory(path[2], function(err, entries, story) {
+                    // If there was an error getting the story then display the error, otherwise show the story
+                    if (err) {
+                        res.send('Error getting the story');
+                    } else {
+                        res.render('pages/story', {page: 'story', title: story.codename, entryTime: story.entry_time, userTurn: true, back: '/', entries: entries});
+                    }
+                });
+            } else {
+                // The user is not logged in, redirect
+                res.redirect('/'); // Redirect to the story page
+            }
+        });
+    } else {
+        res.send('Bad url');
+    }
 });
 
 module.exports = router;
