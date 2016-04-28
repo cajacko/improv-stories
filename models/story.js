@@ -44,7 +44,8 @@ exports.getUserStories = function(userId, next) {
     query += 'FROM stories ';
     query += 'INNER JOIN story_authors ';
     query += 'ON story_authors.story_id = stories.id ';
-    query += 'WHERE story_authors.user_id = ?';
+    query += 'WHERE story_authors.user_id = ? ';
+    query += 'ORDER BY id DESC';
 
     db.query(query, userId, function(err, stories) {
         next(err, stories); // Return the error status and the stories to the callback function
