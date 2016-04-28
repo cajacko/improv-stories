@@ -4,6 +4,7 @@
 
 var db = require('../models/db'); // Load the database connection
 var general = require('../helpers/general'); // Get the general helper functions
+var email = require('../helpers/emails');
 
 // Create a new story
 exports.create = function(codename, authors, entryTime, visibility, next) {
@@ -26,6 +27,8 @@ exports.create = function(codename, authors, entryTime, visibility, next) {
             // For each story author, link them to the story
             for (i = 0; i < authors.length; i++) {
                 db.query('INSERT INTO story_authors (story_id, user_id) VALUES (?, ?)', [result.insertId, authors[i]]);
+                email.notification('addedToStory', authors[i], result.insertId);
+                // TODO: don't send to current user
             }
 
             next(err, result.insertId); // Perform the callback function whilst passing the error status and story id that was inserted
@@ -86,6 +89,21 @@ exports.saveEntry = function(userId, storyId, entryData) {
 
         lastContent = obj[i].content; // Set the last content var to the current content
     }
+
+    var query2 = '';
+    query2 += 'SELECT * ';
+    query2 += 'FROM story_authors ';
+    query2 += 'WHERE story_id = ? AND user_id != ? ';
+
+    db.query(query2, [storyId, userId], function(err, users) {
+        if (err) {
+
+        } else {
+            for (i = 0; i < users.length; i++) {
+                email.notification('yourturn', users[i], storyId);
+            }
+        }
+    });
 };
 
 // Get all of the specified story that the current user is allowed to see
