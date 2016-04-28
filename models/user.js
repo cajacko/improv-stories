@@ -3,9 +3,14 @@
  */
 
 var db = require('../models/db'); // Load the database connection
+var config = require('../config');
 
 // Get the current user
 exports.getUser = function(req, next) {
+    // Auto send the user data from config, using whilst in dev
+    next(config.user);
+    return false;
+
     /**
      * If there is a user in the request then set them up. This
      * req.user gets set up by passbook-facebook when someone

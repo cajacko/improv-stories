@@ -26,4 +26,13 @@ config.email = {
     }
 };
 
+config.user = {
+    id: '',
+    facebookId: '',
+    displayName: '',
+    firstName: '',
+    lastName: '',
+    email: ''
+};
+
 module.exports = config;
