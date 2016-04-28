@@ -19,12 +19,18 @@ router.get('/', function(req, res) {
             // If the user is logged in save the entry otherwise return an error
             if (userDetails) {
                 // Get the story
-                story.getStory(path[2], function(err, entries, story) {
+                story.getStory(path[2], userDetails.id, function(err, entries, story, currentUserWasLast) {
                     // If there was an error getting the story then display the error, otherwise show the story
                     if (err) {
                         res.send('Error getting the story');
                     } else {
-                        res.render('pages/story', {page: 'story', title: story.codename, entryTime: story.entry_time, userTurn: true, back: '/', entries: entries});
+                        var userTurn = true;
+
+                        if (currentUserWasLast) {
+                            userTurn = false;
+                        }
+
+                        res.render('pages/story', {page: 'story', title: story.codename, entryTime: story.entry_time, userTurn: userTurn, back: '/', entries: entries});
                     }
                 });
             } else {

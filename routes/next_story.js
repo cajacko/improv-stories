@@ -11,12 +11,13 @@ router.get('/', function(req, res) {
     // TODO: move this to the story page and get the id from there
 
     // Get the last entry for the specified story
-    story.getLastEntry(15, function(err, entries) {
+    story.getLastEntry(15, function(err, entries, user) {
         // If there was an error getting the next entry then return false, otherwise return the entry
         if (err) {
             res.json(false);
         } else {
-            res.json(entries); // Return the entry
+            var json = {user: user, entries: entries};
+            res.json(json); // Return the entry
         }
     });
 });

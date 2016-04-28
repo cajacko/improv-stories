@@ -90,7 +90,7 @@ exports.saveEntry = function(userId, storyId, entryData) {
 
 // Get all of the specified story that the current user is allowed to see
 // TODO: pass the user id to the function and return the whole story if the current user was the last author, otherwise show all but the last entry
-exports.getStory = function(storyId, next) {
+exports.getStory = function(storyId, userId, next) {
     // TODO: validate the values
 
     // Define the query
@@ -103,11 +103,17 @@ exports.getStory = function(storyId, next) {
     // Get all the story entries
     db.query(query, [storyId], function(err, entries) {
         var filteredEntries = []; // Set up an empty array to insert the story content into
+        var currentUserWasLast = false;
 
         // For each entry in the story add it to the array
         for (i = 0; i < entries.length; i++) {
-            // Don't add the entry if it is blank
-            if ((entries.length - 1) != i) {
+            // Is the last post the users
+            if((entries.length - 1) == i && entries[i].user_id == userId) {
+                currentUserWasLast = true;
+            }
+
+            // Don't get the last entry unless it was written by the current user
+            if ((entries.length - 1) != i || currentUserWasLast) {
                 entries[i].content = general.returnStoryWithBr(entries[i].content); // Remove new lines with br tags
                 filteredEntries.push(entries[i]); // Add the elements to the array
             }
@@ -129,7 +135,7 @@ exports.getStory = function(storyId, next) {
             } else {
                 // TODO: if no story of that id, put this query before getting posts.
 
-                next(err, filteredEntries, story[0]); // Perform the callback function whilst passing the error status and the story entries
+                next(err, filteredEntries, story[0], currentUserWasLast); // Perform the callback function whilst passing the error status and the story entries
             }
         });
     });
@@ -162,7 +168,27 @@ exports.getLastEntry = function(storyId, next) {
 
             // Get all the content from the last entry in the story, in time order
             db.query(query, [storyId, groupId], function(err, entries) {
-                next(err, entries); // Perform the callback whilst passing the error and entry content
+                if (err) {
+                    // TODO
+                } else {
+                    // TODO: if no results
+                    var userId = entries[0].user_id;
+
+                    var query = '';
+                    query += 'SELECT * ';
+                    query += 'FROM users ';
+                    query += 'WHERE id = ?';
+
+                    // Get all the content from the last entry in the story, in time order
+                    db.query(query, [userId], function(err, users) {
+                        if (err) {
+
+                        } else {
+                            // TODO: if no result
+                            next(err, entries, users[0]); // Perform the callback whilst passing the error and entry content
+                        }
+                    });
+                }
             });
         }
     });

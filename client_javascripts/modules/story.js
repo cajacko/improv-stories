@@ -42,11 +42,11 @@ function takeTurn() {
                 // TODO: Check the the data returned is valid, if not then tell the user
 
                 // Replace the storyAction button with a span indicating the user who is writing
-                $('#storyStatus').html('Last entry from Charlie');
+                $('#storyStatus').html('Last entry from ' + data['user'].display_name);
                 $('#storyAction').hide();
 
                 $('body').addClass('editMode'); // Set the edit mode
-                playLastStory(data); // Playe the story
+                playLastStory(data['entries']); // Playe the story
             })
             .fail(function() {
                 // If the ajax called failed
