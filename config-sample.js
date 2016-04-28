@@ -16,4 +16,14 @@ config.facebook = {
     clientSecret: ''
 };
 
+config.email = {
+    host: '',
+    port: '',
+    secure: '',
+    auth: {
+        user: '',
+        pass: ''
+    }
+};
+
 module.exports = config;
