@@ -108,7 +108,7 @@ exports.saveEntry = function(userId, storyId, entryData, next) {
         } else {
             // Foreach user send the notification
             for (i = 0; i < users.length; i++) {
-                email.notification('yourturn', users[i], storyId);
+                email.notification('yourturn', users[i].user_id, storyId);
             }
         }
     });

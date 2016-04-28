@@ -33,12 +33,10 @@ exports.notification = function(type, toUserId, storyId) {
     query += 'WHERE id = ?';
 
     // Get all the content from the last entry in the story, in time order
-    db.query(query, [toUserId], function(err, users) {
+    db.query(query, toUserId, function(err, users) {
         if (err) {
 
         } else {
-            console.log(users);
-            
             var storyUrl = 'https://stories.supercouth.co.uk/stories/' + storyId;
             var userEmail = users[0].email;
             var subject;
@@ -46,13 +44,13 @@ exports.notification = function(type, toUserId, storyId) {
             var html;
 
             if (type == 'addedToStory') {
-                subject = 'Improv Stories - New story';
+                subject = 'Improv Stories - New story!';
                 text = 'You have been added to a new story on Improv Stories. Take your turn here: https://stories.supercouth.co.uk/stories/' + storyId;
                 html = 'You have been added to a new story on Improv Stories. Take your turn here: <a href="' + storyUrl + '">' + storyUrl + '</a>';
             } else if (type == 'yourturn') {
-                subject = 'Improv Stories - New story';
-                text = 'You have been added to a new story on Improv Stories. Take your turn here: https://stories.supercouth.co.uk/stories/' + storyId;
-                html = 'You have been added to a new story on Improv Stories. Take your turn here: <a href="' + storyUrl + '">' + storyUrl + '</a>';
+                subject = 'Improv Stories - Your turn!';
+                text = 'It is your turn to carry on the story!. Take your turn here on Improv Stories: https://stories.supercouth.co.uk/stories/' + storyId;
+                html = 'It is your turn to carry on the story!. Take your turn here on Improv Stories: <a href="' + storyUrl + '">' + storyUrl + '</a>';
             }
 
             sendEmail(userEmail, subject, text, html);
