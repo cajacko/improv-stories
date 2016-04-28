@@ -21,6 +21,11 @@ var general = require('../../helpers/general'); // Get the general helper functi
  */
 takeTurn(); // Initialise the process
 
+// Get the story id
+var storyId = window.location.pathname;
+storyId = storyId.split('/');
+storyId = storyId[2];
+
 /********************************************
 * 1 - TAKE TURN                             *
 ********************************************/
@@ -34,23 +39,32 @@ function takeTurn() {
     $(document).ready(function() {
         // Set up the click handler
         $('button#storyAction').click(function() {
-
             // Get the next story
             $.ajax({
                 url: '/next-story',
-                dataType: 'json'
+                dataType: 'json',
+                type: 'POST',
+                data: {action: 'nextEntry', storyId: storyId}
             })
             .done(function(data) {
                 // If the ajax call is successful
-
                 // TODO: Check the the data returned is valid, if not then tell the user
 
-                // Replace the storyAction button with a span indicating the user who is writing
-                $('#storyStatus').html('Last entry from ' + data['user'].display_name);
-                $('#storyAction').hide();
-
+                $('#storyAction').hide(); // Hide the action bar
                 $('body').addClass('editMode'); // Set the edit mode
-                playLastStory(data['entries']); // Playe the story
+
+                /**
+                 * If the story has just started then let the author
+                 * start writing straight away. Otherwise show the
+                 * previous story
+                 */
+                if (data.newStory) {
+                    startWriting();
+                } else {
+                    // Replace the storyAction button with a span indicating the user who is writing
+                    $('#storyStatus').html('Last entry from ' + data.user.display_name);
+                    playLastStory(data.entries); // Playe the story
+                }
             })
             .fail(function() {
                 // If the ajax called failed
@@ -316,7 +330,7 @@ function saveEntry(entry) {
         url: '/save-entry',
         type: 'POST',
         dataType: 'json',
-        data: {story: entry, action: 'saveEntry', storyId: 15},
+        data: {story: entry, action: 'saveEntry', storyId: storyId},
     })
     .done(function() {
         // The data was successfully posts

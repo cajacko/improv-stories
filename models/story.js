@@ -52,7 +52,7 @@ exports.getUserStories = function(userId, next) {
 };
 
 // Save a new entry for a story
-exports.saveEntry = function(userId, storyId, entryData) {
+exports.saveEntry = function(userId, storyId, entryData, next) {
     var obj = JSON.parse(entryData); // Deserialize the entry data
 
     // TODO: validate all values
@@ -62,34 +62,41 @@ exports.saveEntry = function(userId, storyId, entryData) {
 
     var lastContent = ''; // Set the default lastContent value, for checking duplicates
 
-    /**
-     * For each item in the entry array, check it's not the
-     * same as the last and then add it to the database
-     */
+    var items = []; // Set up a blank array to put in all unique entries
+
+    // For each entry push all unique entries to the items array
     for (i = 0; i < obj.length; i++) {
-        // If the current content is not the same as the last then add it to the database
+        // If the current content is not the same as the last then add it to the array
         if (lastContent != obj[i].content) {
-            var lastEntry = 0; // Indicate is the content is the last entry, default to false
-
-            // If the content is the last entry the change the lastEntry var
-            if ((obj.length - 1) == i) {
-                lastEntry = 1;
-            }
-
-            // TODO: Group all the queries and perform at the same time so we can check for errors and perform a callback
-
-            // Define the query
-            var query = '';
-            query += 'INSERT INTO story_entries (story_id, time_stamp, content, user_id, group_id, last_entry) ';
-            query += 'VALUES (?, ?, ?, ?, ?, ?)';
-
-            // Insert the content into the database
-            db.query(query, [storyId, obj[i].time, obj[i].content, userId, groupId, lastEntry]);
+            items.push(obj[i]);
         }
 
         lastContent = obj[i].content; // Set the last content var to the current content
     }
 
+    /**
+     * For each item in the entry array add it to the database
+     */
+    for (i = 0; i < items.length; i++) {
+        var lastEntry = 0; // Indicate is the content is the last entry, default to false
+
+        // If the content is the last entry the change the lastEntry var
+        if ((items.length - 1) == i) {
+            lastEntry = 1;
+        }
+
+        // TODO: Group all the queries and perform at the same time so we can check for errors and perform a callback
+
+        // Define the query
+        var query = '';
+        query += 'INSERT INTO story_entries (story_id, time_stamp, content, user_id, group_id, last_entry) ';
+        query += 'VALUES (?, ?, ?, ?, ?, ?)';
+
+        // Insert the content into the database
+        db.query(query, [storyId, items[i].time, items[i].content, userId, groupId, lastEntry]);
+    }
+
+    // Get all the authors of the story, except the current user, and notify them about the new entry
     var query2 = '';
     query2 += 'SELECT * ';
     query2 += 'FROM story_authors ';
@@ -99,11 +106,14 @@ exports.saveEntry = function(userId, storyId, entryData) {
         if (err) {
 
         } else {
+            // Foreach user send the notification
             for (i = 0; i < users.length; i++) {
                 email.notification('yourturn', users[i], storyId);
             }
         }
     });
+
+    next(true); // TODO: Need to call this when all the queries have run
 };
 
 // Get all of the specified story that the current user is allowed to see
@@ -126,7 +136,7 @@ exports.getStory = function(storyId, userId, next) {
         // For each entry in the story add it to the array
         for (i = 0; i < entries.length; i++) {
             // Is the last post the users
-            if((entries.length - 1) == i && entries[i].user_id == userId) {
+            if ((entries.length - 1) == i && entries[i].user_id == userId) {
                 currentUserWasLast = true;
             }
 
@@ -153,7 +163,8 @@ exports.getStory = function(storyId, userId, next) {
             } else {
                 // TODO: if no story of that id, put this query before getting posts.
 
-                next(err, filteredEntries, story[0], currentUserWasLast); // Perform the callback function whilst passing the error status and the story entries
+                // Perform the callback function whilst passing the error status and the story entries
+                next(err, filteredEntries, story[0], currentUserWasLast);
             }
         });
     });
@@ -176,38 +187,43 @@ exports.getLastEntry = function(storyId, next) {
         } else {
             // TODO: Check if a result is returned
 
-            var groupId = lastEntry[0].group_id; // Define the group id
+            // If there is a last entry then get it. Otherwise indicate that there is no entry
+            if (lastEntry.length) {
+                var groupId = lastEntry[0].group_id; // Define the group id
 
-            var query = '';
-            query += 'SELECT * ';
-            query += 'FROM story_entries ';
-            query += 'WHERE story_id = ? AND group_id = ? ';
-            query += 'ORDER BY time_stamp ASC';
+                var query = '';
+                query += 'SELECT * ';
+                query += 'FROM story_entries ';
+                query += 'WHERE story_id = ? AND group_id = ? ';
+                query += 'ORDER BY time_stamp ASC';
 
-            // Get all the content from the last entry in the story, in time order
-            db.query(query, [storyId, groupId], function(err, entries) {
-                if (err) {
-                    // TODO
-                } else {
-                    // TODO: if no results
-                    var userId = entries[0].user_id;
+                // Get all the content from the last entry in the story, in time order
+                db.query(query, [storyId, groupId], function(err, entries) {
+                    if (err) {
+                        // TODO
+                    } else {
+                        // TODO: if no results
+                        var userId = entries[0].user_id;
 
-                    var query = '';
-                    query += 'SELECT * ';
-                    query += 'FROM users ';
-                    query += 'WHERE id = ?';
+                        var query = '';
+                        query += 'SELECT * ';
+                        query += 'FROM users ';
+                        query += 'WHERE id = ?';
 
-                    // Get all the content from the last entry in the story, in time order
-                    db.query(query, [userId], function(err, users) {
-                        if (err) {
+                        // Get all the content from the last entry in the story, in time order
+                        db.query(query, [userId], function(err, users) {
+                            if (err) {
 
-                        } else {
-                            // TODO: if no result
-                            next(err, entries, users[0]); // Perform the callback whilst passing the error and entry content
-                        }
-                    });
-                }
-            });
+                            } else {
+                                // TODO: if no result
+                                next(err, entries, users[0]); // Perform the callback whilst passing the error and entry content
+                            }
+                        });
+                    }
+                });
+            } else {
+                next(false, 'noEntries');
+            }
         }
     });
 };

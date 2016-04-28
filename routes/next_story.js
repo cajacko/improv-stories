@@ -5,19 +5,38 @@
 var express = require('express');
 var router = express.Router();
 var story = require('../models/story');
+var user = require('../models/user');
 
 // Get all requests to '/next-story'
-router.get('/', function(req, res) {
-    // TODO: move this to the story page and get the id from there
+router.post('/', function(req, res) {
+    // Get the current user
+    user.getUser(req, function(userDetails) {
+        // If the user is logged in get the next entry otherwise return an error
+        if (userDetails) {
+            // If the post request is for nextEntry then get it, otherwise return false
+            if (req.body.action == 'nextEntry') {
+                // TODO: validate the values
 
-    // Get the last entry for the specified story
-    story.getLastEntry(15, function(err, entries, user) {
-        // If there was an error getting the next entry then return false, otherwise return the entry
-        if (err) {
-            res.json(false);
+                // Get the next entry
+                story.getLastEntry(req.body.storyId, function(err, entries, user) {
+                    // If there was an error getting the next entry then return false, otherwise return the entry
+                    if (err) {
+                        res.json(false);
+                    } else {
+                        // If there are no entries then return that it is a new story
+                        if (entries == 'noEntries') {
+                            res.json({newStory: true}); // Return the entry
+                        } else {
+                            var json = {user: user, entries: entries};
+                            res.json(json); // Return the entry
+                        }
+                    }
+                });
+            } else {
+                res.json(false);
+            }
         } else {
-            var json = {user: user, entries: entries};
-            res.json(json); // Return the entry
+            res.json(false);
         }
     });
 });
