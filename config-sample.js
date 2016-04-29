@@ -35,4 +35,6 @@ config.user = {
     email: ''
 };
 
+config.development = true;
+
 module.exports = config;
