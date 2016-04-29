@@ -37,7 +37,7 @@ exports.notification = function(type, toUserId, storyId) {
         if (err) {
 
         } else {
-            var storyUrl = 'https://stories.supercouth.co.uk/stories/' + storyId;
+            var storyUrl = 'http://stories.supercouth.co.uk/stories/' + storyId;
             var userEmail = users[0].email;
             var subject;
             var text;
@@ -45,11 +45,11 @@ exports.notification = function(type, toUserId, storyId) {
 
             if (type == 'addedToStory') {
                 subject = 'Improv Stories - New story!';
-                text = 'You have been added to a new story on Improv Stories. Take your turn here: https://stories.supercouth.co.uk/stories/' + storyId;
+                text = 'You have been added to a new story on Improv Stories. Take your turn here: ' + storyUrl;
                 html = 'You have been added to a new story on Improv Stories. Take your turn here: <a href="' + storyUrl + '">' + storyUrl + '</a>';
             } else if (type == 'yourturn') {
                 subject = 'Improv Stories - Your turn!';
-                text = 'It is your turn to carry on the story!. Take your turn here on Improv Stories: https://stories.supercouth.co.uk/stories/' + storyId;
+                text = 'It is your turn to carry on the story!. Take your turn here on Improv Stories: ' + storyUrl;
                 html = 'It is your turn to carry on the story!. Take your turn here on Improv Stories: <a href="' + storyUrl + '">' + storyUrl + '</a>';
             }
 

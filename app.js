@@ -24,7 +24,7 @@ var config = require('./config');
 passport.use(new Strategy({
     clientID: config.facebook.clientID,
     clientSecret: config.facebook.clientSecret,
-    callbackURL: 'http://localhost:5000/login/facebook',
+    callbackURL: 'http://stories.supercouth.co.uk/login/facebook',
     profileFields: ['id', 'displayName', 'email', 'first_name', 'last_name']
 }, function(accessToken, refreshToken, profile, cb) {
     /**
