@@ -15,5 +15,10 @@
   ],
   "devDependencies": {
     "lerna": "^2.5.1"
-  }
+  },
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "https://github.com/cajacko/improv-stories-app.git",
+  "author": "Charlie Jackson",
+  "license": "MIT"
 }
