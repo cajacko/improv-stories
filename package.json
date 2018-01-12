@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "lerna": "lerna publish",
-    "init": "lerna init",
+    "init": "exp init packages/app",
     "test:lint": "eslint --ext .js --ext .jsx packages",
     "test": "yarn test:lint"
   },
