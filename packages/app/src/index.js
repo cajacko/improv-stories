@@ -1,61 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import state from './state';
 
-const storyEntries = [
-  {
-    id: '2',
-    author: 'Charlie',
-    entryPartials: [
-      {
-        id: 'a',
-        text:
-          'Once upon a time there was a turkey called Rob.\nOne day Rob went to the toilet',
-      },
-    ],
-  },
-  {
-    id: '1',
-    author: 'Bob',
-    entryPartials: [{ id: 'b', text: '.\nIn the toilet he did a piss' }],
-  },
-];
-
-const nextEntryPartials = [
-  {
-    id: '3',
-    author: 'Viki',
-    entryPartials: [
-      { id: 'c', text: ' ' },
-      { id: 'd', text: ' a' },
-      { id: 'e', text: ' an' },
-      { id: 'f', text: ' and' },
-      { id: 'g', text: ' and ' },
-      { id: 'h', text: ' and p' },
-      { id: 'i', text: ' and po' },
-      { id: 'j', text: ' and poo' },
-      { id: 'k', text: ' and pooe' },
-      { id: 'l', text: ' and pooed' },
-      { id: 'm', text: ' and pooed.' },
-    ],
-  },
-  {
-    id: '4',
-    author: 'Viki',
-    entryPartials: [
-      { id: 'n', text: '\n' },
-      { id: 'o', text: '\nW' },
-      { id: 'p', text: '\nWh' },
-      { id: 'q', text: '\nWhe' },
-      { id: 'r', text: '\nWhen' },
-      { id: 's', text: '\nWhen ' },
-      { id: 't', text: '\nWhen h' },
-      { id: 'u', text: '\nWhen he' },
-      { id: 'v', text: '\nWhen h' },
-      { id: 'w', text: '\nWhen hi' },
-      { id: 'x', text: '\nWhen his' },
-    ],
-  },
-];
+const { prevEntries, nextEntries, authors } = state;
 
 export default class App extends React.Component {
   constructor(props) {
@@ -69,11 +16,11 @@ export default class App extends React.Component {
     this.addEntryTextToStoryParagraphs = this.addEntryTextToStoryParagraphs.bind(
       this,
     );
-    this.hasNextEntryPartials = this.hasNextEntryPartials.bind(this);
+    this.hasNextEntries = this.hasNextEntries.bind(this);
 
     let storyParagraphs = [];
 
-    storyEntries.forEach(({ author, entryPartials }) => {
+    prevEntries.forEach(({ author, entryPartials }) => {
       const { text, id } = entryPartials[entryPartials.length - 1];
 
       storyParagraphs = this.addEntryTextToStoryParagraphs(
@@ -84,11 +31,11 @@ export default class App extends React.Component {
     });
 
     this.prevStoryParagraphs = storyParagraphs;
-    this.nextEntryPartials = nextEntryPartials;
+    this.nextEntries = nextEntries;
 
     this.state = {
       storyParagraphs,
-      hasNextEntryPartials: this.hasNextEntryPartials(),
+      hasNextEntries: this.hasNextEntries(),
       playing: false,
     };
   }
@@ -99,11 +46,11 @@ export default class App extends React.Component {
   }
 
   play() {
-    if (this.nextEntryPartials.length) {
+    if (this.nextEntries.length) {
       this.setState({ playing: true });
 
       this.interval = setInterval(() => {
-        if (this.nextEntryPartials.length) {
+        if (this.nextEntries.length) {
           this.addNextEntryPartialToStoryParagraphs();
         } else {
           this.clearPlay();
@@ -113,12 +60,12 @@ export default class App extends React.Component {
   }
 
   addNextEntryPartialToStoryParagraphs() {
-    if (!this.state.hasNextEntryPartials) {
+    if (!this.state.hasNextEntries) {
       this.clearPlay();
       return;
     }
 
-    const { text, id } = this.nextEntryPartials[0].entryPartials[0];
+    const { text, id } = this.nextEntries[0].entryPartials[0];
 
     const nextStoryParagraphs = this.addEntryTextToStoryParagraphs(
       text,
@@ -126,18 +73,18 @@ export default class App extends React.Component {
       id,
     );
 
-    if (this.nextEntryPartials[0].entryPartials.length === 1) {
+    if (this.nextEntries[0].entryPartials.length === 1) {
       this.prevStoryParagraphs = nextStoryParagraphs;
-      this.nextEntryPartials = this.nextEntryPartials.slice(1);
+      this.nextEntries = this.nextEntries.slice(1);
     } else {
-      this.nextEntryPartials[0].entryPartials = this.nextEntryPartials[0].entryPartials.slice(
+      this.nextEntries[0].entryPartials = this.nextEntries[0].entryPartials.slice(
         1,
       );
     }
 
     this.setState({
       storyParagraphs: nextStoryParagraphs,
-      hasNextEntryPartials: this.hasNextEntryPartials(),
+      hasNextEntries: this.hasNextEntries(),
     });
   }
 
@@ -170,15 +117,14 @@ export default class App extends React.Component {
     return nextStoryParagraphs;
   }
 
-  hasNextEntryPartials() {
+  hasNextEntries() {
     return (
-      !!this.nextEntryPartials.length &&
-      !!this.nextEntryPartials[0].entryPartials.length
+      !!this.nextEntries.length && !!this.nextEntries[0].entryPartials.length
     );
   }
 
   render() {
-    const showButton = this.state.hasNextEntryPartials && !this.state.playing;
+    const showButton = this.state.hasNextEntries && !this.state.playing;
 
     return (
       <View style={styles.container}>
