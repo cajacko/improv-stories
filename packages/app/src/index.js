@@ -172,12 +172,14 @@ export default class App extends React.Component {
 
   hasNextEntryPartials() {
     return (
-      this.nextEntryPartials.length &&
-      this.nextEntryPartials[0].entryPartials.length
+      !!this.nextEntryPartials.length &&
+      !!this.nextEntryPartials[0].entryPartials.length
     );
   }
 
   render() {
+    const showButton = this.state.hasNextEntryPartials && !this.state.playing;
+
     return (
       <View style={styles.container}>
         <View>
@@ -185,14 +187,13 @@ export default class App extends React.Component {
             <Text key={id}>{text}</Text>
           ))}
         </View>
-        {this.state.hasNextEntryPartials &&
-          !this.state.playing && (
-            <TouchableOpacity onPress={this.play}>
-              <View style={styles.button}>
-                <Text style={styles.buttonText}>Play</Text>
-              </View>
-            </TouchableOpacity>
-          )}
+        {showButton && (
+          <TouchableOpacity onPress={this.play}>
+            <View style={styles.button}>
+              <Text style={styles.buttonText}>Play</Text>
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
