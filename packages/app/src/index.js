@@ -1,13 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
 import state from './state';
 
 const { prevEntries, nextEntries, authors } = state;
+
+let id = 3000;
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
+    this.onChangeText = this.onChangeText.bind(this);
+    this.setInputRef = this.setInputRef.bind(this);
     this.play = this.play.bind(this);
     this.clearPlay = this.clearPlay.bind(this);
     this.addNextEntryPartialToStoryParagraphs = this.addNextEntryPartialToStoryParagraphs.bind(
@@ -37,12 +47,21 @@ export default class App extends React.Component {
       storyParagraphs,
       hasNextEntries: this.hasNextEntries(),
       playing: false,
+      inputText: '',
+      inputTextHistory: [],
     };
   }
 
   clearPlay() {
     this.setState({ playing: false });
     clearInterval(this.interval);
+
+    this.takeTurn();
+  }
+
+  takeTurn() {
+    this.prevStoryParagraphs = this.state.storyParagraphs;
+    this.input.focus();
   }
 
   play() {
@@ -123,6 +142,25 @@ export default class App extends React.Component {
     );
   }
 
+  setInputRef(inputRef) {
+    this.input = inputRef;
+  }
+
+  onChangeText(inputText) {
+    const inputTextHistory = this.state.inputTextHistory.slice();
+    inputTextHistory.push(inputText);
+
+    const storyParagraphs = this.addEntryTextToStoryParagraphs(
+      inputText,
+      this.prevStoryParagraphs,
+      `${id}`,
+    );
+
+    this.setState({ inputText, inputTextHistory, storyParagraphs });
+
+    id += 1;
+  }
+
   render() {
     const showButton = this.state.hasNextEntries && !this.state.playing;
 
@@ -133,6 +171,20 @@ export default class App extends React.Component {
             <Text key={id}>{text}</Text>
           ))}
         </View>
+
+        <TextInput
+          style={styles.input}
+          ref={this.setInputRef}
+          onChangeText={this.onChangeText}
+          value={this.state.inputText}
+          multiline
+          caretHidden
+          returnKeyType="done"
+          disableFullscreenUI
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+
         {showButton && (
           <TouchableOpacity onPress={this.play}>
             <View style={styles.button}>
@@ -146,6 +198,8 @@ export default class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  input: { opacity: 0 },
+
   container: {
     flex: 1,
     backgroundColor: '#fff',
