@@ -49,6 +49,7 @@ export default class App extends React.Component {
       playing: false,
       inputText: '',
       inputTextHistory: [],
+      takingTurn: false,
     };
   }
 
@@ -61,7 +62,22 @@ export default class App extends React.Component {
 
   takeTurn() {
     this.prevStoryParagraphs = this.state.storyParagraphs;
-    this.input.focus();
+
+    this.setState({ takingTurn: true, turnSecondsLeft: 20 }, () => {
+      if (this.input) this.input.focus();
+    });
+
+    setInterval(() => {
+      const turnSecondsLeft = this.state.turnSecondsLeft - 1;
+
+      if (turnSecondsLeft <= 0) {
+        if (this.input) this.input.blur();
+
+        this.setState({ turnSecondsLeft: null, takingTurn: false });
+      } else {
+        this.setState({ turnSecondsLeft });
+      }
+    }, 1000);
   }
 
   play() {
@@ -172,18 +188,25 @@ export default class App extends React.Component {
           ))}
         </View>
 
-        <TextInput
-          style={styles.input}
-          ref={this.setInputRef}
-          onChangeText={this.onChangeText}
-          value={this.state.inputText}
-          multiline
-          caretHidden
-          returnKeyType="done"
-          disableFullscreenUI
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+        {typeof this.state.turnSecondsLeft === 'number' && (
+          <Text>Time left: {this.state.turnSecondsLeft}</Text>
+        )}
+
+        {this.state.takingTurn && (
+          <TextInput
+            style={styles.input}
+            ref={this.setInputRef}
+            onChangeText={this.onChangeText}
+            value={this.state.inputText}
+            multiline
+            caretHidden
+            returnKeyType="done"
+            disableFullscreenUI
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoFocus
+          />
+        )}
 
         {showButton && (
           <TouchableOpacity onPress={this.play}>
