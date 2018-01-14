@@ -10,12 +10,13 @@ import state from './state';
 
 const { prevEntries, nextEntries, authors } = state;
 
-let id = 3000;
+let globalId = 0;
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
+    this.setTurnContent = this.setTurnContent.bind(this);
     this.onChangeText = this.onChangeText.bind(this);
     this.setInputRef = this.setInputRef.bind(this);
     this.play = this.play.bind(this);
@@ -67,17 +68,40 @@ export default class App extends React.Component {
       if (this.input) this.input.focus();
     });
 
-    setInterval(() => {
+    this.turnInterval = setInterval(() => {
       const turnSecondsLeft = this.state.turnSecondsLeft - 1;
 
       if (turnSecondsLeft <= 0) {
+        clearInterval(this.turnInterval);
         if (this.input) this.input.blur();
 
         this.setState({ turnSecondsLeft: null, takingTurn: false });
+        this.setTurnContent();
       } else {
         this.setState({ turnSecondsLeft });
       }
     }, 1000);
+  }
+
+  setTurnContent() {
+    globalId += 1;
+
+    const entry = {
+      id: `newEntry-${globalId}`,
+      author: 'author1',
+      savedToServerDate: new Date(),
+      entryPartials: this.state.inputTextHistory.map(text => {
+        globalId += 1;
+
+        return {
+          text,
+          id: `newEntryPartial-${globalId}`,
+        };
+      }),
+    };
+
+    // Log here to get dummy data
+    // console.log(JSON.stringify(entry));
   }
 
   play() {
@@ -169,12 +193,12 @@ export default class App extends React.Component {
     const storyParagraphs = this.addEntryTextToStoryParagraphs(
       inputText,
       this.prevStoryParagraphs,
-      `${id}`,
+      `inputText-${globalId}`,
     );
 
     this.setState({ inputText, inputTextHistory, storyParagraphs });
 
-    id += 1;
+    globalId += 1;
   }
 
   render() {
