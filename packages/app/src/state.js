@@ -70,7 +70,7 @@ const state = {
 
 storyEntries.forEach(storyEntry => {
   const arr =
-    state.seenUntil > storyEntry.savedToServerDate
+    state.seenUntil >= storyEntry.savedToServerDate
       ? 'prevEntries'
       : 'nextEntries';
 
