@@ -26,11 +26,22 @@ class StoryComponent extends Component<Props, State> {
     this.props.history.push('/profile');
   };
 
+  scrollToTop = () => {};
+  scrollToBottom = () => {};
+  reload = () => {};
+
   /**
    * Render the component
    */
   render() {
-    return <Story toProfile={this.toProfile} />;
+    return (
+      <Story
+        toProfile={this.toProfile}
+        scrollToTop={this.scrollToTop}
+        scrollToBottom={this.scrollToBottom}
+        reload={this.reload}
+      />
+    );
   }
 }
 

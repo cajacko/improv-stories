@@ -3,7 +3,13 @@
 import React from 'react';
 // import styled from 'styled-components';
 import HeaderWithContent from '@cajacko/lib/components/Layout/HeaderWithContent';
-import { PROFILE } from '@cajacko/lib/config/icons';
+import ContentWithTabNav from '@cajacko/lib/components/Layout/ContentWithTabNav';
+import {
+  PROFILE,
+  CHEVRON_UP,
+  CHEVRON_DOWN,
+  RELOAD,
+} from '@cajacko/lib/config/icons';
 // import { Div } from '@cajacko/lib/components/UI';
 
 // const Container = styled(Div)`
@@ -14,9 +20,10 @@ import { PROFILE } from '@cajacko/lib/config/icons';
 /**
  * The profile scene, let the user change their name
  */
-const Story = ({ toProfile }) => (
+const Story = ({
+  toProfile, scrollToTop, scrollToBottom, reload,
+}) => (
   <HeaderWithContent
-    hasPadding
     header={{
       title: 'Story.Title',
       rightButtons: [
@@ -28,7 +35,17 @@ const Story = ({ toProfile }) => (
       ],
     }}
   >
-    {null}
+    <ContentWithTabNav
+      tabNav={{
+        items: [
+          { key: 'up', icon: CHEVRON_UP, action: scrollToTop },
+          { key: 'down', icon: CHEVRON_DOWN, action: scrollToBottom },
+          { key: 'refresh', icon: RELOAD, action: reload },
+        ],
+      }}
+    >
+      {null}
+    </ContentWithTabNav>
   </HeaderWithContent>
 );
 
