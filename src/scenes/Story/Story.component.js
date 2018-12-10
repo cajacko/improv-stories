@@ -26,9 +26,27 @@ class StoryComponent extends Component<Props, State> {
     this.props.history.push('/profile');
   };
 
-  scrollToTop = () => {};
-  scrollToBottom = () => {};
+  scrollToTop = () => {
+    if (this.storyRef) {
+      this.storyRef.scrollToEnd({ animated: false });
+    }
+  };
+
+  scrollToBottom = () => {
+    if (this.storyRef) {
+      this.storyRef.scrollToIndex({
+        animated: false,
+        index: 0,
+      });
+    }
+  };
+
   reload = () => {};
+
+  setRef = (ref) => {
+    logger.log('setRef');
+    this.storyRef = ref;
+  };
 
   /**
    * Render the component
@@ -36,6 +54,7 @@ class StoryComponent extends Component<Props, State> {
   render() {
     return (
       <Story
+        setRef={this.setRef}
         toProfile={this.toProfile}
         scrollToTop={this.scrollToTop}
         scrollToBottom={this.scrollToBottom}
