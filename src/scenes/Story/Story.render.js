@@ -1,7 +1,6 @@
 // @flow
 
 import React from 'react';
-// import styled from 'styled-components';
 import HeaderWithContent from '@cajacko/lib/components/Layout/HeaderWithContent';
 import ContentWithTabNav from '@cajacko/lib/components/Layout/ContentWithTabNav';
 import {
@@ -10,12 +9,7 @@ import {
   CHEVRON_DOWN,
   RELOAD,
 } from '@cajacko/lib/config/icons';
-// import { Div } from '@cajacko/lib/components/UI';
-
-// const Container = styled(Div)`
-//   flex: 1;
-//   align-items: center;
-// `;
+import StoryList from '../../components/Story/List';
 
 /**
  * The profile scene, let the user change their name
@@ -44,7 +38,7 @@ const Story = ({
         ],
       }}
     >
-      {null}
+      <StoryList />
     </ContentWithTabNav>
   </HeaderWithContent>
 );
