@@ -7,5 +7,8 @@
       "NoName": "You must set a name",
       "TooShort": "Name must ${length} characters or longer"
     }
+  },
+  "Story": {
+    "Title": "Improv Stories"
   }
 }
