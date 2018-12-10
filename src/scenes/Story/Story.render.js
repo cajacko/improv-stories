@@ -15,7 +15,12 @@ import StoryList from '../../components/Story/List';
  * The profile scene, let the user change their name
  */
 const Story = ({
-  toProfile, scrollToTop, scrollToBottom, reload, setRef,
+  toProfile,
+  scrollToTop,
+  scrollToBottom,
+  reload,
+  setRef,
+  add,
 }) => (
   <HeaderWithContent
     header={{
@@ -38,7 +43,7 @@ const Story = ({
         ],
       }}
     >
-      <StoryList storyID="only-story" innerRef={setRef} />
+      <StoryList storyID="only-story" innerRef={setRef} add={add} />
     </ContentWithTabNav>
   </HeaderWithContent>
 );

@@ -47,6 +47,10 @@ class StoryComponent extends Component<Props, State> {
     this.storyRef = ref;
   };
 
+  add = () => {
+    logger.log('ADD');
+  };
+
   /**
    * Render the component
    */
@@ -58,6 +62,7 @@ class StoryComponent extends Component<Props, State> {
         scrollToTop={this.scrollToTop}
         scrollToBottom={this.scrollToBottom}
         reload={this.reload}
+        add={this.add}
       />
     );
   }
