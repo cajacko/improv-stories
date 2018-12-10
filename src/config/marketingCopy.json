@@ -1,1 +1,11 @@
-{}
+{
+  "Profile": {
+    "Title": "Profile",
+    "Label": "Name",
+    "Button": "Save",
+    "Errors": {
+      "NoName": "You must set a name",
+      "TooShort": "Name must ${length} characters or longer"
+    }
+  }
+}
