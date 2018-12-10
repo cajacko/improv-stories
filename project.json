@@ -1,0 +1,22 @@
+{
+  "title": "Improv Stories",
+  "slug": "improv-stories",
+  "version": "0.1.0",
+  "description": "An app to write improvised stories with friends.",
+  "authorName": "Charlie Jackson",
+  "authorUrl": "https://charliejackson.com",
+  "authorEmail": "contact@charliejackson.com",
+  "license": "MIT",
+  "templates": {
+    "main-app": {
+      "entryFile": "src/appEntry.js",
+      "name": "improv-stories",
+      "displayName": "Impro",
+      "splashIcon": "src/assets/splash-icon.png",
+      "splashBackgroundColor": "#26c6da",
+      "icon": "src/assets/icon.png",
+      "type": "mobile-app"
+    }
+  },
+  "templateInitVersion": "1.2.0"
+}
