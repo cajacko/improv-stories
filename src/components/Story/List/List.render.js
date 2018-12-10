@@ -4,16 +4,14 @@ import React from 'react';
 import CardsList from '@cajacko/lib/components/Cards/List';
 import ListItem from '../ListItem';
 
-const cards = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-const renderItem = () => <ListItem />;
+const renderItem = ({ item }) => <ListItem storyItemID={item} />;
 
 /**
  * Story list
  */
-const List = ({ innerRef }) => (
+const List = ({ storyItems, innerRef }) => (
   <CardsList
-    cards={cards}
+    cards={storyItems}
     keyExtractor={id => id}
     renderItem={renderItem}
     innerRef={innerRef}

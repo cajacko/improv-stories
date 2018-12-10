@@ -44,7 +44,6 @@ class StoryComponent extends Component<Props, State> {
   reload = () => {};
 
   setRef = (ref) => {
-    logger.log('setRef');
     this.storyRef = ref;
   };
 

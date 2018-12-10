@@ -6,10 +6,8 @@ import { Div } from '@cajacko/lib/components/UI';
 import CardsListItem from '@cajacko/lib/components/Cards/ListItem';
 import Text from '@cajacko/lib/components/Text';
 
-const text =
-  'Once upon a time there was a little goose called Charlie. Today Charlie wanted to give his friend a little smile';
-
 const Container = styled(Div)`
+  flex: 1;
   padding-horizontal: ${({ horizontalSpacing }) => horizontalSpacing};
   padding-vertical: ${({ verticalSpacing }) => verticalSpacing};
 `;
@@ -25,7 +23,7 @@ const Content = styled(Text)`
 /**
  * Story list item
  */
-const ListItem = () => (
+const ListItem = ({ text, name }) => (
   <CardsListItem>
     {({ horizontalSpacing, verticalSpacing, backgroundColor }) => (
       <Container
@@ -35,7 +33,7 @@ const ListItem = () => (
         <Name
           type="overline"
           backgroundColor={backgroundColor}
-          text={{ _textFromConst: 'Charlie' }}
+          text={{ _textFromConst: name }}
         />
         <Content
           type="body2"
