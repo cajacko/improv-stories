@@ -3,7 +3,6 @@
 import React from 'react';
 // import styled from 'styled-components';
 import HeaderWithContent from '@cajacko/lib/components/Layout/HeaderWithContent';
-import withRouter from '@cajacko/lib/components/HOCs/withRouter';
 import { PROFILE } from '@cajacko/lib/config/icons';
 // import { Div } from '@cajacko/lib/components/UI';
 
@@ -15,7 +14,7 @@ import { PROFILE } from '@cajacko/lib/config/icons';
 /**
  * The profile scene, let the user change their name
  */
-const Story = ({ history: { push } }) => (
+const Story = ({ toProfile }) => (
   <HeaderWithContent
     hasPadding
     header={{
@@ -24,7 +23,7 @@ const Story = ({ history: { push } }) => (
         {
           key: 'profile',
           icon: PROFILE,
-          action: () => push('/profile'),
+          action: toProfile,
         },
       ],
     }}
@@ -33,4 +32,4 @@ const Story = ({ history: { push } }) => (
   </HeaderWithContent>
 );
 
-export default withRouter(Story);
+export default Story;

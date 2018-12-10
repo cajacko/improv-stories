@@ -1,3 +1,3 @@
 // @flow
 
-export { default } from './Story.render';
+export { default } from './Story.container';
