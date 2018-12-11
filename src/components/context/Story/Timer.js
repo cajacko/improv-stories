@@ -28,7 +28,7 @@ class Timer extends React.Component {
       isRunning: false,
     };
 
-    this.initialTimeout = props.timeout || 10;
+    this.initialTimeout = props.timeout || 30;
     this.timeLeft = null;
     this.interval = null;
 
