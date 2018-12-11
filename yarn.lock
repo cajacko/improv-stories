@@ -677,10 +677,10 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@cajacko/lib@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@cajacko/lib/-/lib-5.1.0.tgz#155cd552515302d2fa317330901b132ee3f89a92"
-  integrity sha512-mhTFxEOk1dCHdL7LBhCJ/886ZuZDlALwTvcaCHKb6Cij+7qhrgjQY6+yTb+ThK7nHFdU0JAoagFFr/pVVQjAng==
+"@cajacko/lib@5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@cajacko/lib/-/lib-5.2.0.tgz#16d9e040fc3ba4a1e5bbed9772d085d7fb15aca3"
+  integrity sha512-Igo7yrcHdwIM5JlSaTggK2YWqp/i+e6umLbaX7bnUWNEeP/pBbriGX2uVYkJerzixUcRFkR8+BIYSuxjKsib1Q==
   dependencies:
     apollo-server-express "2.0.4"
     babel-cli "6.26.0"
@@ -710,6 +710,7 @@
     native-base "2.7.2"
     react "16.6.3"
     react-native "0.57.7"
+    react-native-keyboard-spacer "^0.4.1"
     react-native-splash-screen "3.1.1"
     react-redux "5.0.7"
     react-router-native "4.3.0"
@@ -740,10 +741,10 @@
     simple-git "^1.96.0"
     watch "^1.0.2"
 
-"@cajacko/template@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@cajacko/template/-/template-1.2.0.tgz#765d0002182739474ffb468f6f0d7d5d3da947b9"
-  integrity sha512-jKD2z1CljE+kjRJKhO1m5dro39HPo6gaOrp9i3ywyikDqws7PQ8kGSGGk2Fz3SIPJiiphcUn2TthfVGcDYRVJQ==
+"@cajacko/template@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@cajacko/template/-/template-1.3.0.tgz#08999a73a324c6418901158f5d275a8b8f02db42"
+  integrity sha512-aN0s43Ury7uYmt3gtky0GSw4Jw/ZGzFtPtyZ/GQS0Ljc+SkNRBThTCx3LaKY+zselnbC7yGBznLEDg/QkAjhVw==
   dependencies:
     "@babel/polyfill" "^7.0.0"
     "@cajacko/template-utils" "^1.2.0"
@@ -8819,6 +8820,11 @@ react-native-keyboard-aware-scroll-view@0.5.0:
   dependencies:
     prop-types "^15.6.0"
     react-native-iphone-x-helper "^1.0.1"
+
+react-native-keyboard-spacer@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-spacer/-/react-native-keyboard-spacer-0.4.1.tgz#46f18a320432098a25ea9fa89f5143dd254d332d"
+  integrity sha1-RvGKMgQyCYol6p+on1FD3SVNMy0=
 
 react-native-splash-screen@3.1.1:
   version "3.1.1"
