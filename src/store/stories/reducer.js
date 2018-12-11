@@ -27,7 +27,7 @@ exampleStory.forEach((text, i) => {
   });
 });
 
-const storyItems = List(Object.keys(storyItemsByID));
+const initStoryItems = List(Object.keys(storyItemsByID));
 
 const initialState = Map({
   storiesByID: Map({
@@ -37,7 +37,7 @@ const initialState = Map({
         type: 'INIT',
         payload: null,
       }),
-      storyItems,
+      storyItems: initStoryItems,
     }),
   }),
   storyItemsByID: Map(storyItemsByID),
@@ -46,17 +46,49 @@ const initialState = Map({
 /**
  * Set the state of a specific story
  */
-const setStoryState = type => (state, payload) =>
+const setStoryState = (type, ignorePayload) => (state, payload) =>
   state.setIn(
     ['storiesByID', payload.storyID, 'state'],
     Map({
       type,
-      payload: fromJS(payload),
+      payload: ignorePayload ? null : fromJS(payload),
     })
   );
 
+/**
+ * Set the story items given a specific story ID
+ */
+const setStoryItems = (state, { storyID, storyItems }) => {
+  const keys = [];
+
+  const finalState = storyItems.reduce((nextState, { id, userName, text }) => {
+    keys.push(id);
+
+    const location = ['storyItemsByID', id];
+
+    if (nextState.hasIn(location)) return nextState;
+
+    return nextState.setIn(
+      location,
+      Map({
+        id,
+        userName,
+        text,
+      })
+    );
+  }, state);
+
+  return finalState.setIn(['storiesByID', storyID, 'storyItems'], List(keys));
+};
+
 export default createReducer(initialState, {
   [SAVE_STORY_ITEM.REQUESTED]: setStoryState(SAVE_STORY_ITEM.REQUESTED),
-  [SAVE_STORY_ITEM.SUCCEEDED]: setStoryState(SAVE_STORY_ITEM.SUCCEEDED),
+  [SAVE_STORY_ITEM.SUCCEEDED]: (state, payload) => {
+    const newState = setStoryState(SAVE_STORY_ITEM.SUCCEEDED, true)(
+      state,
+      payload
+    );
+    return setStoryItems(newState, payload);
+  },
   [SAVE_STORY_ITEM.FAILED]: setStoryState(SAVE_STORY_ITEM.FAILED),
 });

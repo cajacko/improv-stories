@@ -4,13 +4,15 @@ import makeActionCreator from '@cajacko/lib/utils/makeActionCreator';
 import store from '@cajacko/lib/utils/store';
 import uuid from '@cajacko/lib/utils/uuid';
 import getAsyncActions from '@cajacko/lib/utils/getAsyncActions';
+import api from '../../utils/api';
 
 export const SAVE_STORY_ITEM = getAsyncActions('SAVE_STORY_ITEM');
 
 const saveStoryItemSuccess = makeActionCreator(
   SAVE_STORY_ITEM.SUCCEEDED,
   'storyID',
-  'storyItemID'
+  'storyItemID',
+  'storyItems'
 );
 
 const saveStoryItemFailed = makeActionCreator(
@@ -40,17 +42,18 @@ export const saveStoryItem = makeActionCreator(
       userName,
     };
 
-    // Simulated api response
-    setTimeout(() => {
-      // success
-      store().dispatch(saveStoryItemSuccess(storyID, storyItemID));
-
-      // failed, but can still retry submitting
-      // store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
-
-      // failed, but can not retry
-      // store().dispatch(saveStoryItemFailed(storyID, storyItemID, false));
-    }, 1000);
+    api
+      .saveStoryItem(storyItem)
+      .then(({ success, canRetry, storyItems }) => {
+        if (success) {
+          store().dispatch(saveStoryItemSuccess(storyID, storyItemID, storyItems));
+        } else {
+          store().dispatch(saveStoryItemFailed(storyID, storyItemID, canRetry));
+        }
+      })
+      .catch(() => {
+        store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
+      });
 
     return storyItem;
   }
