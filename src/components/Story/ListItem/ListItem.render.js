@@ -11,7 +11,7 @@ export const TEXT_TYPE = 'body2';
 const Container = styled(Div)`
   flex: 1;
   padding-horizontal: ${({ horizontalSpacing }) => horizontalSpacing};
-  padding-vertical: ${({ verticalSpacing }) => verticalSpacing};
+  padding-top: 10;
 `;
 
 const Name = styled(Text)`
@@ -27,13 +27,15 @@ const Content = styled(Text)`
  * used for the text input
  */
 const ListItem = ({ text, name, children }) => (
-  <CardsListItem>
+  <CardsListItem noBorder>
     {({ horizontalSpacing, verticalSpacing, backgroundColor }) => (
-      <Container
-        horizontalSpacing={horizontalSpacing}
-        verticalSpacing={verticalSpacing}
-      >
-        <Name type="overline" backgroundColor={backgroundColor} text={name} />
+      <Container horizontalSpacing={horizontalSpacing}>
+        <Name
+          type="overline"
+          backgroundColor={backgroundColor}
+          text={name}
+          greyedOut
+        />
         {children || (
           <Content
             type={TEXT_TYPE}
