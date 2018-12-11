@@ -10,7 +10,18 @@ import { withConsumer } from '../../context/Story/Input';
  */
 const Input = ({ value, setValue }) => (
   <ListItem name="Story.You">
-    <TextArea value={value} onChange={setValue} autoFocus type={TEXT_TYPE} />
+    <TextArea
+      value={value}
+      onChange={setValue}
+      autoFocus
+      type={TEXT_TYPE}
+      autoCorrect={false}
+      contextMenuHidden
+      disableFullscreenUI
+      placeholder="Story.Placeholder"
+      spellCheck={false}
+      selectTextOnFocus={false}
+    />
   </ListItem>
 );
 

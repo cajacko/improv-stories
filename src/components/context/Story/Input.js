@@ -25,7 +25,7 @@ class Input extends React.Component {
     super(props);
 
     this.state = {
-      value: null,
+      value: '',
     };
 
     if (props.innerRef) props.innerRef(this);
@@ -34,10 +34,27 @@ class Input extends React.Component {
   /**
    * Set the value of the input
    */
-  setValue = (value) => {
-    this.setState({ value });
+  setValue = (newText) => {
+    const text = this.processText(newText);
 
-    if (this.props.onSetValue) this.props.onSetValue(value);
+    if (this.state.value === text) return;
+
+    this.setState({ value: text });
+
+    if (this.props.onSetValue) this.props.onSetValue(text);
+  };
+
+  /**
+   * Ensure only 1 character change at a time
+   */
+  processText = (newText) => {
+    const { value } = this.state;
+
+    const diff = newText.length - value.length;
+
+    if (diff === 1 || diff === -1) return newText;
+
+    return value;
   };
 
   /**
