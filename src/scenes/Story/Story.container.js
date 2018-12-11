@@ -2,7 +2,7 @@
 
 import { connect } from '@cajacko/lib/lib/react-redux';
 import Story from './Story.component';
-import { saveStoryItem } from '../../store/stories/actions';
+import { saveStoryItem, getStoryItems } from '../../store/stories/actions';
 
 const storyID = 'only-story';
 
@@ -20,6 +20,7 @@ const mapStateToProps = ({ profile, stories }) => ({
  */
 const mapDispatchToProps = dispatch => ({
   saveStoryItem: text => dispatch(saveStoryItem(storyID, text)),
+  getStoryItems: () => dispatch(getStoryItems(storyID)),
 });
 
 export default connect(

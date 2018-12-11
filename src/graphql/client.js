@@ -56,7 +56,7 @@ const saveStoryItem = storyItem =>
 /**
  * Get story items, mock functionality
  */
-const getStoryItems = () =>
+const getStoryItems = storyID =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve({

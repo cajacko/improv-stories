@@ -2,7 +2,7 @@
 
 import createReducer from '@cajacko/lib/utils/createReducer';
 import { Map, List, fromJS } from 'immutable';
-import { SAVE_STORY_ITEM } from './actions';
+import { SAVE_STORY_ITEM, GET_STORY_ITEMS } from './actions';
 
 const exampleStory = [
   'Llama was a cheeky little puppy, one day she decided to try and eat an entire christmas tree. When Llamas',
@@ -81,14 +81,20 @@ const setStoryItems = (state, { storyID, storyItems }) => {
   return finalState.setIn(['storiesByID', storyID, 'storyItems'], List(keys));
 };
 
+/**
+ * Set the state and story items in a successful response
+ */
+const setStateAndItems = type => (state, payload) => {
+  const newState = setStoryState(type, true)(state, payload);
+
+  return setStoryItems(newState, payload);
+};
+
 export default createReducer(initialState, {
   [SAVE_STORY_ITEM.REQUESTED]: setStoryState(SAVE_STORY_ITEM.REQUESTED),
-  [SAVE_STORY_ITEM.SUCCEEDED]: (state, payload) => {
-    const newState = setStoryState(SAVE_STORY_ITEM.SUCCEEDED, true)(
-      state,
-      payload
-    );
-    return setStoryItems(newState, payload);
-  },
+  [SAVE_STORY_ITEM.SUCCEEDED]: setStateAndItems(SAVE_STORY_ITEM.SUCCEEDED),
   [SAVE_STORY_ITEM.FAILED]: setStoryState(SAVE_STORY_ITEM.FAILED),
+  [GET_STORY_ITEMS.REQUESTED]: setStoryState(GET_STORY_ITEMS.REQUESTED),
+  [GET_STORY_ITEMS.SUCCEEDED]: setStateAndItems(GET_STORY_ITEMS.SUCCEEDED),
+  [GET_STORY_ITEMS.FAILED]: setStoryState(GET_STORY_ITEMS.FAILED),
 });

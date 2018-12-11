@@ -44,8 +44,6 @@ class StoryComponent extends Component<Props, State> {
     }
   };
 
-  reload = () => {};
-
   setRef = (ref) => {
     this.storyRef = ref;
   };
@@ -79,7 +77,7 @@ class StoryComponent extends Component<Props, State> {
               toProfile={this.toProfile}
               scrollToTop={this.scrollToTop}
               scrollToBottom={this.scrollToBottom}
-              reload={this.reload}
+              reload={this.props.getStoryItems}
               isAdding={isRunning}
               cancel={this.cancelTimer(cancelTimer)}
             />
