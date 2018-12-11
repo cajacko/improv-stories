@@ -3,47 +3,39 @@
 import createReducer from '@cajacko/lib/utils/createReducer';
 import { Map, List } from 'immutable';
 
+const exampleStory = [
+  'Llama was a cheeky little puppy, one day she decided to try and eat an entire christmas tree. When Llamas',
+  'owners, Charlie and Viki, got back home, they found the biggest mess in the world',
+  '. There were most displeased with how the cute little puppy had acted. So they took here to the ',
+  'witch doctor. Who was well known in the area for helping to get puppies to play nice',
+  '. When Chalrie and Viki took Llama to the witchdoctor, they found an old wizend man who',
+  'had no face. This really surprised Charlie and Viki, who had never met anyone without a face before.',
+  'They were not sure how the witch doctor was going to answer their questions about the naughty pup. Anyway Charlie',
+  'decided to ask the witch doctor "Help, our puppy is so cute, but she is so naughty, is there anything you can do"',
+];
+
+const storyItemsByID = {};
+
+exampleStory.forEach((text, i) => {
+  const id = String(i);
+
+  storyItemsByID[id] = Map({
+    id,
+    userID: i % 2 ? 'user-1' : 'user-2',
+    text,
+  });
+});
+
+const storyItems = List(Object.keys(storyItemsByID));
+
 const initialState = Map({
   storiesByID: Map({
     'only-story': Map({
       id: 'only-story',
-      storyItems: List(['-1', '-2', '-3', '-4', '-5', '-6']),
+      storyItems,
     }),
   }),
-  storyItemsByID: Map({
-    '-1': Map({
-      id: '1',
-      userID: 'user-1',
-      text:
-        'Once upon a time there was a little goose called Charlie. Today Charlie wanted to give his friend a little smile',
-    }),
-    '-2': Map({
-      id: '1',
-      userID: 'user-2',
-      text: ', but there was one problem. Charlie could not',
-    }),
-    '-3': Map({
-      id: '1',
-      userID: 'user-1',
-      text: 'smile. So he went to the best smile doctor around. Mr',
-    }),
-    '-4': Map({
-      id: '1',
-      userID: 'user-2',
-      text: 'P.M. Squiggle. Mr P.M. Squiggle was a rough',
-    }),
-    '-5': Map({
-      id: '1',
-      userID: 'user-1',
-      text:
-        'looking dude, who always had a manic smile on his face. Charlie stepped into his smile-emporium and enquired',
-    }),
-    '-6': Map({
-      id: '1',
-      userID: 'user-2',
-      text: 'as to when he may get an appointment',
-    }),
-  }),
+  storyItemsByID: Map(storyItemsByID),
 });
 
 export default createReducer(initialState, {});

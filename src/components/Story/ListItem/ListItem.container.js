@@ -8,10 +8,12 @@ import ListItem from './ListItem.render';
  */
 const mapStateToProps = ({ stories, users }, { storyItemID }) => ({
   text: stories.getIn(['storyItemsByID', storyItemID, 'text']),
-  name: users.getIn([
-    stories.getIn(['storyItemsByID', storyItemID, 'userID']),
-    'name',
-  ]),
+  name: {
+    _textFromConst: users.getIn([
+      stories.getIn(['storyItemsByID', storyItemID, 'userID']),
+      'name',
+    ]),
+  },
 });
 
 export default connect(mapStateToProps)(ListItem);

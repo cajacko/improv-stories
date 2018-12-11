@@ -10,6 +10,8 @@
   },
   "Story": {
     "Title": "Improv Stories",
-    "AddButton": "Add to story"
+    "AddButton": "Add to story",
+    "Adding": "Adding to story",
+    "You": "You"
   }
 }

@@ -3,6 +3,8 @@
 import React, { Component } from 'react';
 import withRouter from '@cajacko/lib/components/HOCs/withRouter';
 import Story from './Story.render';
+import * as Timer from '../../components/context/Story/Timer';
+import * as Input from '../../components/context/Story/Input';
 
 type Props = {};
 type State = {};
@@ -47,8 +49,12 @@ class StoryComponent extends Component<Props, State> {
     this.storyRef = ref;
   };
 
-  add = () => {
-    logger.log('ADD');
+  onFinishTimer = () => {
+    logger.log('onFinishTimer', this.inputRef.state.value);
+  };
+
+  setInputRef = (ref) => {
+    this.inputRef = ref;
   };
 
   /**
@@ -56,14 +62,20 @@ class StoryComponent extends Component<Props, State> {
    */
   render() {
     return (
-      <Story
-        setRef={this.setRef}
-        toProfile={this.toProfile}
-        scrollToTop={this.scrollToTop}
-        scrollToBottom={this.scrollToBottom}
-        reload={this.reload}
-        add={this.add}
-      />
+      <Input.Provider innerRef={this.setInputRef}>
+        <Timer.Provider onFinishTimer={this.onFinishTimer}>
+          {({ isRunning }) => (
+            <Story
+              setRef={this.setRef}
+              toProfile={this.toProfile}
+              scrollToTop={this.scrollToTop}
+              scrollToBottom={this.scrollToBottom}
+              reload={this.reload}
+              isAdding={isRunning}
+            />
+          )}
+        </Timer.Provider>
+      </Input.Provider>
     );
   }
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import HeaderWithContent from '@cajacko/lib/components/Layout/HeaderWithContent';
 import ContentWithTabNav from '@cajacko/lib/components/Layout/ContentWithTabNav';
+import KeyboardSpacer from '@cajacko/lib/components/KeyboardSpacer';
 import {
   PROFILE,
   CHEVRON_UP,
@@ -10,6 +11,12 @@ import {
   RELOAD,
 } from '@cajacko/lib/config/icons';
 import StoryList from '../../components/Story/List';
+import Action from '../../components/Story/Action';
+import Input from '../../components/Story/Input';
+import Timer from '../../components/Story/Timer';
+
+const TabNavOrChildren = ({ hideTabNav, ...props }) =>
+  (hideTabNav ? props.children : <ContentWithTabNav {...props} />);
 
 /**
  * The profile scene, let the user change their name
@@ -20,21 +27,24 @@ const Story = ({
   scrollToBottom,
   reload,
   setRef,
-  add,
+  isAdding,
 }) => (
   <HeaderWithContent
     header={{
-      title: 'Story.Title',
-      rightButtons: [
-        {
-          key: 'profile',
-          icon: PROFILE,
-          action: toProfile,
-        },
-      ],
+      title: isAdding ? 'Story.Adding' : 'Story.Title',
+      rightButtons: isAdding
+        ? null
+        : [
+            {
+              key: 'profile',
+              icon: PROFILE,
+              action: toProfile,
+            },
+          ],
     }}
   >
-    <ContentWithTabNav
+    <TabNavOrChildren
+      hideTabNav={isAdding}
       tabNav={{
         items: [
           { key: 'up', icon: CHEVRON_UP, action: scrollToTop },
@@ -43,8 +53,14 @@ const Story = ({
         ],
       }}
     >
-      <StoryList storyID="only-story" innerRef={setRef} add={add} />
-    </ContentWithTabNav>
+      <StoryList
+        storyID="only-story"
+        innerRef={setRef}
+        headerComponent={isAdding ? Input : Action}
+      />
+      {isAdding ? <Timer /> : null}
+    </TabNavOrChildren>
+    {isAdding ? <KeyboardSpacer /> : null}
   </HeaderWithContent>
 );
 
