@@ -1,7 +1,8 @@
 // @flow
 
 import createReducer from '@cajacko/lib/utils/createReducer';
-import { Map, List } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
+import { SAVE_STORY_ITEM } from './actions';
 
 const exampleStory = [
   'Llama was a cheeky little puppy, one day she decided to try and eat an entire christmas tree. When Llamas',
@@ -32,10 +33,30 @@ const initialState = Map({
   storiesByID: Map({
     'only-story': Map({
       id: 'only-story',
+      state: Map({
+        type: 'INIT',
+        payload: null,
+      }),
       storyItems,
     }),
   }),
   storyItemsByID: Map(storyItemsByID),
 });
 
-export default createReducer(initialState, {});
+/**
+ * Set the state of a specific story
+ */
+const setStoryState = type => (state, payload) =>
+  state.setIn(
+    ['storiesByID', payload.storyID, 'state'],
+    Map({
+      type,
+      payload: fromJS(payload),
+    })
+  );
+
+export default createReducer(initialState, {
+  [SAVE_STORY_ITEM.REQUESTED]: setStoryState(SAVE_STORY_ITEM.REQUESTED),
+  [SAVE_STORY_ITEM.SUCCEEDED]: setStoryState(SAVE_STORY_ITEM.SUCCEEDED),
+  [SAVE_STORY_ITEM.FAILED]: setStoryState(SAVE_STORY_ITEM.FAILED),
+});

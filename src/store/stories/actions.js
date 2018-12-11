@@ -7,11 +7,16 @@ import getAsyncActions from '@cajacko/lib/utils/getAsyncActions';
 
 export const SAVE_STORY_ITEM = getAsyncActions('SAVE_STORY_ITEM');
 
-const saveStoryItemSuccess = makeActionCreator(SAVE_STORY_ITEM.SUCCEEDED, 'id');
+const saveStoryItemSuccess = makeActionCreator(
+  SAVE_STORY_ITEM.SUCCEEDED,
+  'storyID',
+  'storyItemID'
+);
 
 const saveStoryItemFailed = makeActionCreator(
   SAVE_STORY_ITEM.FAILED,
-  'id',
+  'storyID',
+  'storyItemID',
   'canRetry'
 );
 
@@ -24,9 +29,11 @@ export const saveStoryItem = makeActionCreator(
       .getState()
       .profile.get('name');
 
+    const storyItemID = uuid();
+
     const storyItem = {
       storyID,
-      id: uuid(),
+      storyItemID,
       text,
       dateLastModified: now,
       dateCreated: now,
@@ -36,13 +43,13 @@ export const saveStoryItem = makeActionCreator(
     // Simulated api response
     setTimeout(() => {
       // success
-      store().dispatch(saveStoryItemSuccess(storyItem.id));
+      store().dispatch(saveStoryItemSuccess(storyID, storyItemID));
 
       // failed, but can still retry submitting
-      // store().dispatch(saveStoryItemFailed(storyItem.id, true));
+      // store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
 
       // failed, but can not retry
-      // store().dispatch(saveStoryItemFailed(storyItem.id, false));
+      // store().dispatch(saveStoryItemFailed(storyID, storyItemID, false));
     }, 1000);
 
     return storyItem;

@@ -5,6 +5,7 @@ import withRouter from '@cajacko/lib/components/HOCs/withRouter';
 import Story from './Story.render';
 import * as Timer from '../../components/context/Story/Timer';
 import * as Input from '../../components/context/Story/Input';
+import { SAVE_STORY_ITEM } from '../../store/stories/actions';
 
 type Props = {};
 type State = {};
@@ -72,6 +73,7 @@ class StoryComponent extends Component<Props, State> {
         <Timer.Provider onFinishTimer={this.onFinishTimer}>
           {({ isRunning, cancelTimer }) => (
             <Story
+              saving={this.props.storyState.type === SAVE_STORY_ITEM.REQUESTED}
               storyID={this.props.storyID}
               setRef={this.setRef}
               toProfile={this.toProfile}

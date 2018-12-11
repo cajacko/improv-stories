@@ -9,9 +9,10 @@ const storyID = 'only-story';
 /**
  * Get the checklist title from the store
  */
-const mapStateToProps = ({ profile }) => ({
+const mapStateToProps = ({ profile, stories }) => ({
   name: profile.get('name'),
   storyID,
+  storyState: stories.getIn(['storiesByID', storyID, 'state']).toJS(),
 });
 
 /**

@@ -12,11 +12,22 @@ import {
 } from '@cajacko/lib/config/icons';
 import StoryList from '../../components/Story/List';
 import Action from '../../components/Story/Action';
+import Loading from '../../components/Story/Loading';
 import Input from '../../components/Story/Input';
 import Timer from '../../components/Story/Timer';
 
 const TabNavOrChildren = ({ hideTabNav, ...props }) =>
   (hideTabNav ? props.children : <ContentWithTabNav {...props} />);
+
+/**
+ * Get the header component for the story list
+ */
+const getHeaderComponent = (saving, isAdding) => {
+  if (saving) return () => <Loading text="Story.Saving" />;
+  if (isAdding) return Input;
+
+  return Action;
+};
 
 /**
  * The profile scene, let the user change their name
@@ -30,6 +41,7 @@ const Story = ({
   isAdding,
   cancel,
   storyID,
+  saving,
 }) => (
   <HeaderWithContent
     header={{
@@ -59,7 +71,7 @@ const Story = ({
       <StoryList
         storyID={storyID}
         innerRef={setRef}
-        headerComponent={isAdding ? Input : Action}
+        headerComponent={getHeaderComponent(saving, isAdding)}
       />
       {isAdding ? <Timer /> : null}
     </TabNavOrChildren>
