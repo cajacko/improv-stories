@@ -50,7 +50,7 @@ class StoryComponent extends Component<Props, State> {
   };
 
   onFinishTimer = () => {
-    logger.log('onFinishTimer', this.inputRef.state.value);
+    this.props.saveStoryItem(this.inputRef.state.value);
     this.inputRef.reset();
   };
 
@@ -72,6 +72,7 @@ class StoryComponent extends Component<Props, State> {
         <Timer.Provider onFinishTimer={this.onFinishTimer}>
           {({ isRunning, cancelTimer }) => (
             <Story
+              storyID={this.props.storyID}
               setRef={this.setRef}
               toProfile={this.toProfile}
               scrollToTop={this.scrollToTop}

@@ -21,7 +21,7 @@ exampleStory.forEach((text, i) => {
 
   storyItemsByID[id] = Map({
     id,
-    userID: i % 2 ? 'user-1' : 'user-2',
+    userName: i % 2 ? 'Charlie' : 'Viki',
     text,
   });
 });

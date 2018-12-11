@@ -29,6 +29,7 @@ const Story = ({
   setRef,
   isAdding,
   cancel,
+  storyID,
 }) => (
   <HeaderWithContent
     header={{
@@ -56,7 +57,7 @@ const Story = ({
       }}
     >
       <StoryList
-        storyID="only-story"
+        storyID={storyID}
         innerRef={setRef}
         headerComponent={isAdding ? Input : Action}
       />
