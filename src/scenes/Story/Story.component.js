@@ -25,6 +25,10 @@ class StoryComponent extends Component<Props, State> {
     }
   }
 
+  componentDidMount() {
+    this.props.getStoryItems();
+  }
+
   toProfile = () => {
     this.props.history.push('/profile');
   };
