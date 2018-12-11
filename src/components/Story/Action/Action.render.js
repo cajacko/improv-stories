@@ -6,7 +6,7 @@ import { Div } from '@cajacko/lib/components/UI';
 import CardsListItem from '@cajacko/lib/components/Cards/ListItem';
 import Button from '@cajacko/lib/components/Button';
 import buttons from '@cajacko/lib/config/styles/buttons';
-import { withConsumer } from '../../context/Story/Timer';
+import Text from '@cajacko/lib/components/Text';
 
 const Container = styled(Div)`
   flex: 1;
@@ -17,16 +17,19 @@ const Container = styled(Div)`
 /**
  * The story action component
  */
-const Action = ({ startTimer }) => (
+const Action = ({ text, action, buttonText }) => (
   <CardsListItem>
-    <Container>
-      <Button
-        action={startTimer}
-        type={buttons.CONTAINED.SECONDARY}
-        text="Story.AddButton"
-      />
-    </Container>
+    {({ backgroundColor }) => (
+      <Container>
+        {text && <Text backgroundColor={backgroundColor} text={text} />}
+        <Button
+          action={action}
+          type={buttons.CONTAINED.SECONDARY}
+          text={buttonText}
+        />
+      </Container>
+    )}
   </CardsListItem>
 );
 
-export default withConsumer(Action);
+export default Action;

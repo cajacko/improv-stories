@@ -15,6 +15,11 @@
     "You": "You",
     "Placeholder": "Continue the story",
     "Saving": "Saving new entry",
-    "Loading": "Loading new content"
+    "Loading": "Loading new content",
+    "Reload": "Reload",
+    "Errors": {
+      "GetItems": "Could not load latest entries, try again",
+      "SaveStory": "Could not save your story entry, try again"
+    }
   }
 }
