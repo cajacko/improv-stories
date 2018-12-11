@@ -41,9 +41,9 @@ class StoryComponent extends Component<Props, State> {
 
   scrollToBottom = () => {
     if (this.storyRef) {
-      this.storyRef.scrollToIndex({
+      this.storyRef.scrollToOffset({
         animated: false,
-        index: 0,
+        offset: 0,
       });
     }
   };
