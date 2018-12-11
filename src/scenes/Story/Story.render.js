@@ -28,9 +28,11 @@ const Story = ({
   reload,
   setRef,
   isAdding,
+  cancel,
 }) => (
   <HeaderWithContent
     header={{
+      cancel: isAdding ? cancel : null,
       title: isAdding ? 'Story.Adding' : 'Story.Title',
       rightButtons: isAdding
         ? null

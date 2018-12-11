@@ -40,8 +40,10 @@ class Input extends React.Component {
     if (this.state.value === text) return;
 
     this.setState({ value: text });
+  };
 
-    if (this.props.onSetValue) this.props.onSetValue(text);
+  reset = () => {
+    this.setState({ value: '' });
   };
 
   /**
