@@ -3,8 +3,9 @@
 import { connect } from '@cajacko/lib/lib/react-redux';
 import Story from './Story.component';
 import { saveStoryItem, getStoryItems } from '../../store/stories/actions';
+import { ONLY_STORY_ID } from '../../config/general';
 
-const storyID = 'only-story';
+const storyID = ONLY_STORY_ID;
 
 /**
  * Get the checklist title from the store

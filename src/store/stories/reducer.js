@@ -3,11 +3,12 @@
 import createReducer from '@cajacko/lib/utils/createReducer';
 import { Map, List, fromJS } from 'immutable';
 import { SAVE_STORY_ITEM, GET_STORY_ITEMS } from './actions';
+import { ONLY_STORY_ID } from '../../config/general';
 
 const initialState = Map({
   storiesByID: Map({
-    'only-story': Map({
-      id: 'only-story',
+    [ONLY_STORY_ID]: Map({
+      id: ONLY_STORY_ID,
       state: Map({
         type: 'INIT',
         payload: null,

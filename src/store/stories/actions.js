@@ -52,7 +52,7 @@ export const saveStoryItem = makeActionCreator(
           store().dispatch(saveStoryItemFailed(storyID, storyItemID, canRetry));
         }
       })
-      .catch(() => {
+      .catch((e) => {
         store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
       });
 
@@ -76,7 +76,7 @@ export const getStoryItems = makeActionCreator(
   (storyID) => {
     api
       .getStoryItems(storyID)
-      .then(({ storyItems }) => {
+      .then((storyItems) => {
         store().dispatch(getStoryItemsSuccess(storyID, storyItems));
       })
       .catch(() => {

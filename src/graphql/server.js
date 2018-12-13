@@ -1,12 +1,12 @@
 // @flow
 
-// import * as postResolvers from './post/resolvers';
-// import * as postTypeDefs from './post/typeDefs';
+import * as storyTypeDefs from './story/typeDefs';
+import * as storyResolvers from './story/resolvers';
 
 export const resolvers = {
-  // postResolvers,
+  storyResolvers,
 };
 
 export const typeDefs = {
-  // postTypeDefs,
+  storyTypeDefs,
 };
