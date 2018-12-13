@@ -7,6 +7,7 @@
   "plugins": [
     "transform-react-jsx-source",
     "babel-plugin-styled-components",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "transform-class-properties"
   ]
 }
