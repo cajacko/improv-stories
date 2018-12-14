@@ -3,5 +3,9 @@ sudo: required
 services:
   - docker
 
-script:
-  - ./.scripts/deploy/api.sh
+jobs:
+  include:
+    - stage: deploy
+      script: ./.scripts/deploy/api.sh
+    - # stage name not required, will continue to use `test`
+      script: ./.scripts/deploy/android.sh
