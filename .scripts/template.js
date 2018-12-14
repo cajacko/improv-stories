@@ -157,7 +157,9 @@ const getCommandToRun = useLocalLibs => {
 
   const args = process.argv.slice(index + 1);
 
-  return useLocalLibs ? ['template', args] : ['npx', ['template'].concat(args)];
+  return useLocalLibs
+    ? ['template', args]
+    : ['./node_modules/.bin/template', args];
 };
 
 const loopPromise = promiseFuncs => {

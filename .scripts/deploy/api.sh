@@ -1,5 +1,5 @@
-docker stop android
-docker rm android
+docker stop api
+docker rm api
 
 set -e
 
@@ -17,16 +17,17 @@ do
   command="${command} -e ${ary2[0]}"
 done
 
-command="${command} -it --name=android cajacko/android:0.2.0 sh ./.scripts/deploy/runAndroid.sh"
+command="${command} -it --name=api node:6.15.1-alpine sh /App/.scripts/deploy/runApi.sh"
 
 # Execute the docker run command with all the env set
 eval $command
 
-docker cp . android:/App
-docker start android
-docker logs --follow android
-code=$(docker inspect android --format='{{.State.ExitCode}}')
-docker stop android
-docker rm android
+docker cp . api:/App
+# docker cp ../lib/packages/template/dist api:/App/dist
+docker start api
+docker logs --follow api
+code=$(docker inspect api --format='{{.State.ExitCode}}')
+docker stop api
+docker rm api
 
 exit $code
