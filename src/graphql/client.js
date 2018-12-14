@@ -10,5 +10,5 @@ const client = {
 
 export default graphqlClient(
   client,
-  'http://localhost:5000/remember-when-6b84a/us-central1/graphql/graphql'
+  'http://localhost:5000/improv-stories/us-central1/graphql/graphql'
 );
