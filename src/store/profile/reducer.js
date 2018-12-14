@@ -5,7 +5,7 @@ import { Map } from 'immutable';
 import { SET_NAME } from './actions';
 
 const initialState = Map({
-  name: 'Charlie',
+  name: null,
 });
 
 export default createReducer(initialState, {
