@@ -742,10 +742,10 @@
     simple-git "^1.96.0"
     watch "^1.0.2"
 
-"@cajacko/template@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@cajacko/template/-/template-1.4.0.tgz#93150b89f5741b28802b4b4dde4305a7930a6c28"
-  integrity sha512-cNaseK0SltsrWItayEIN6kLCuH9Mp7Qy/n4a8V3bz2gdYKiFd8Nt+HCiinTszuPVsKOWZDKjf7qCvMjRrLKDJA==
+"@cajacko/template@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@cajacko/template/-/template-1.4.1.tgz#6b89ec8372f0b3392799ebbec6578f027c2e5a44"
+  integrity sha512-dyRtFsql2OSFYYwzwJT3xmp+JTQp657lFb0r8A+Eb5iYkSuEOhcLgSlJ/oaG7VdsVUlFBg5Jop29r8lpfElVFg==
   dependencies:
     "@babel/polyfill" "^7.0.0"
     "@cajacko/template-utils" "^1.3.0"
