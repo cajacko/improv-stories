@@ -10,5 +10,5 @@ const client = {
 
 export default graphqlClient(
   client,
-  'http://localhost:5000/improv-stories/us-central1/graphql/graphql'
+  'https://us-central1-improv-stories.cloudfunctions.net/graphql/graphql'
 );
