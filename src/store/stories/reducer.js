@@ -22,19 +22,26 @@ const initialState = Map({
 /**
  * Set the state of a specific story
  */
-const setStoryState = (type, ignorePayload) => (state, payload) =>
-  state.setIn(
+const setStoryState = (type, ignoreStoryItems) => (state, payload) => {
+  const newPayload = Object.assign({}, payload);
+
+  if (ignoreStoryItems) delete newPayload.storyItems;
+
+  return state.setIn(
     ['storiesByID', payload.storyID, 'state'],
     Map({
       type,
-      payload: ignorePayload ? null : fromJS(payload),
+      payload: fromJS(newPayload),
     })
   );
+};
 
 /**
  * Set the story items given a specific story ID
  */
 const setStoryItems = (state, { storyID, storyItems }) => {
+  if (!storyItems) return state;
+
   const keys = [];
 
   const finalState = storyItems.reduce((nextState, { id, userName, text }) => {
@@ -69,7 +76,7 @@ const setStateAndItems = type => (state, payload) => {
 export default createReducer(initialState, {
   [SAVE_STORY_ITEM.REQUESTED]: setStoryState(SAVE_STORY_ITEM.REQUESTED),
   [SAVE_STORY_ITEM.SUCCEEDED]: setStateAndItems(SAVE_STORY_ITEM.SUCCEEDED),
-  [SAVE_STORY_ITEM.FAILED]: setStoryState(SAVE_STORY_ITEM.FAILED),
+  [SAVE_STORY_ITEM.FAILED]: setStateAndItems(SAVE_STORY_ITEM.FAILED),
   [GET_STORY_ITEMS.REQUESTED]: setStoryState(GET_STORY_ITEMS.REQUESTED),
   [GET_STORY_ITEMS.SUCCEEDED]: setStateAndItems(GET_STORY_ITEMS.SUCCEEDED),
   [GET_STORY_ITEMS.FAILED]: setStoryState(GET_STORY_ITEMS.FAILED),

@@ -20,6 +20,8 @@ class StoryComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.lastStoryItemID = null;
+
     if (!props.name || props.name === '') {
       this.toProfile();
     }
@@ -53,7 +55,7 @@ class StoryComponent extends Component<Props, State> {
   };
 
   onFinishTimer = () => {
-    this.props.saveStoryItem(this.inputRef.state.value);
+    this.props.saveStoryItem(this.inputRef.state.value, this.lastStoryItemID);
     this.inputRef.reset();
   };
 
@@ -62,8 +64,17 @@ class StoryComponent extends Component<Props, State> {
   };
 
   cancelTimer = cancel => () => {
+    this.lastStoryItemID = null;
     cancel();
     this.inputRef.reset();
+  };
+
+  startTimer = startTimer => () => {
+    // Store a ref to the lastStoryItemID at the time the user started writing
+    // We'll submit this later
+    this.lastStoryItemID = this.props.lastStoryItemID;
+
+    return startTimer();
   };
 
   getError = (startTimer) => {
@@ -99,8 +110,8 @@ class StoryComponent extends Component<Props, State> {
         <Timer.Provider onFinishTimer={this.onFinishTimer}>
           {({ isRunning, cancelTimer, startTimer }) => (
             <Story
-              {...this.getError(startTimer)}
-              startTimer={startTimer}
+              {...this.getError(this.startTimer(startTimer))}
+              startTimer={this.startTimer(startTimer)}
               loading={type === GET_STORY_ITEMS.REQUESTED}
               saving={type === SAVE_STORY_ITEM.REQUESTED}
               storyID={this.props.storyID}

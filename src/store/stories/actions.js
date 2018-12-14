@@ -20,12 +20,13 @@ const saveStoryItemFailed = makeActionCreator(
   SAVE_STORY_ITEM.FAILED,
   'storyID',
   'storyItemID',
-  'canRetry'
+  'canRetry',
+  'storyItems'
 );
 
 export const saveStoryItem = makeActionCreator(
   SAVE_STORY_ITEM.REQUESTED,
-  (storyID, text) => {
+  (storyID, text, lastStoryItemID) => {
     const now = new Date().getTime();
 
     const userName = store()
@@ -41,6 +42,7 @@ export const saveStoryItem = makeActionCreator(
       dateLastModified: now,
       dateCreated: now,
       userName,
+      lastStoryItemID,
     };
 
     api
@@ -49,10 +51,10 @@ export const saveStoryItem = makeActionCreator(
         if (success) {
           store().dispatch(saveStoryItemSuccess(storyID, storyItemID, storyItems));
         } else {
-          store().dispatch(saveStoryItemFailed(storyID, storyItemID, canRetry));
+          store().dispatch(saveStoryItemFailed(storyID, storyItemID, canRetry, storyItems));
         }
       })
-      .catch((e) => {
+      .catch(() => {
         store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
       });
 

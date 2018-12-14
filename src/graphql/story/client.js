@@ -24,15 +24,17 @@ export const setStoryItem = ({
   storyItemID,
   text,
   userName,
+  lastStoryItemID,
 }: {
   storyID: string,
   storyItemID: string,
   text: string,
   userName: string,
+  lastStoryItemID: string,
 }) => ({
   mutation: `
-    mutation SetStoryItem($storyID: StoryID, $storyItemID: StoryItemID, $text: String, $userName: String) {
-      setStoryItem(storyID: $storyID, storyItemID: $storyItemID, text: $text, userName: $userName) {
+    mutation SetStoryItem($storyID: StoryID, $storyItemID: StoryItemID, $text: String, $userName: String, $lastStoryItemID: StoryItemID) {
+      setStoryItem(storyID: $storyID, storyItemID: $storyItemID, text: $text, userName: $userName, lastStoryItemID: $lastStoryItemID) {
         success
         canRetry
         storyItems {
@@ -48,5 +50,6 @@ export const setStoryItem = ({
     storyItemID,
     text,
     userName,
+    lastStoryItemID,
   },
 });

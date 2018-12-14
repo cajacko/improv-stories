@@ -27,5 +27,5 @@ export const query = `
 `;
 
 export const mutation = `
-  setStoryItem(storyID: StoryID, storyItemID: StoryItemID, text: String, userName: String): SetStoryItemResponse
+  setStoryItem(storyID: StoryID, storyItemID: StoryItemID, text: String, userName: String, lastStoryItemID: StoryItemID): SetStoryItemResponse
 `;
