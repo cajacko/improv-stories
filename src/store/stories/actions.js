@@ -20,7 +20,7 @@ const saveStoryItemFailed = makeActionCreator(
   SAVE_STORY_ITEM.FAILED,
   'storyID',
   'storyItemID',
-  'canRetry',
+  'error',
   'storyItems'
 );
 
@@ -47,15 +47,15 @@ export const saveStoryItem = makeActionCreator(
 
     api
       .saveStoryItem(storyItem)
-      .then(({ success, canRetry, storyItems }) => {
-        if (success) {
-          store().dispatch(saveStoryItemSuccess(storyID, storyItemID, storyItems));
+      .then(({ storyItems, error }) => {
+        if (error) {
+          store().dispatch(saveStoryItemFailed(storyID, storyItemID, error, storyItems));
         } else {
-          store().dispatch(saveStoryItemFailed(storyID, storyItemID, canRetry, storyItems));
+          store().dispatch(saveStoryItemSuccess(storyID, storyItemID, storyItems));
         }
       })
       .catch(() => {
-        store().dispatch(saveStoryItemFailed(storyID, storyItemID, true));
+        store().dispatch(saveStoryItemFailed(storyID, storyItemID, 'UNKNOWN_SERVER_ERROR'));
       });
 
     return storyItem;

@@ -21,7 +21,9 @@ const Action = ({ text, action, buttonText }) => (
   <CardsListItem>
     {({ backgroundColor }) => (
       <Container>
-        {text && <Text backgroundColor={backgroundColor} text={text} />}
+        {text && (
+          <Text backgroundColor={backgroundColor} text={text} type="body2" />
+        )}
         <Button
           action={action}
           type={buttons.CONTAINED.SECONDARY}

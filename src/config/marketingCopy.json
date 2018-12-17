@@ -19,7 +19,11 @@
     "Reload": "Reload",
     "Errors": {
       "GetItems": "Could not load latest entries, try again",
-      "SaveStory": "Could not save your story entry, try again"
+      "Save": {
+        "Retry": "Could not save your story entry, try again",
+        "WasLastUser": "You went last, greedy! You cannot save 2 entries in a row.",
+        "lastIDMismatch": "Woops! New story entries have been added since you wrote yours. Write a new one."
+      }
     }
   }
 }

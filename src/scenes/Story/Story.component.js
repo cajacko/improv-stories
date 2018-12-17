@@ -78,7 +78,7 @@ class StoryComponent extends Component<Props, State> {
   };
 
   getError = (startTimer) => {
-    const { type } = this.props.storyState;
+    const { type, payload } = this.props.storyState;
 
     if (type === GET_STORY_ITEMS.FAILED) {
       return {
@@ -89,8 +89,26 @@ class StoryComponent extends Component<Props, State> {
     }
 
     if (type === SAVE_STORY_ITEM.FAILED) {
+      const stateError = payload && payload.error;
+      let error;
+
+      switch (stateError) {
+        case 'STORY_ITEM_ALREADY_ADDED':
+          return {};
+        case 'LAST_STORY_ID_MISMATCH':
+          error = 'Story.Errors.Save.lastIDMismatch';
+          break;
+        case 'WAS_LAST_USER':
+          error = 'Story.Errors.Save.WasLastUser';
+          break;
+        case 'UNKNOWN_SERVER_ERROR':
+        default:
+          error = 'Story.Errors.Save.Retry';
+          break;
+      }
+
       return {
-        error: 'Story.Errors.SaveStory',
+        error,
         errorAction: startTimer,
         errorActionText: 'Story.AddButton',
       };

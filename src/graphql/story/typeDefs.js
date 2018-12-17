@@ -16,8 +16,7 @@ export const types = `
   }
 
   type SetStoryItemResponse {
-    success: Boolean!
-    canRetry: Boolean
+    error: String
     storyItems: [StoryItem]!
   }
 `;

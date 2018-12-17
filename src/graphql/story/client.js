@@ -35,8 +35,7 @@ export const setStoryItem = ({
   mutation: `
     mutation SetStoryItem($storyID: StoryID, $storyItemID: StoryItemID, $text: String, $userName: String, $lastStoryItemID: StoryItemID) {
       setStoryItem(storyID: $storyID, storyItemID: $storyItemID, text: $text, userName: $userName, lastStoryItemID: $lastStoryItemID) {
-        success
-        canRetry
+        error
         storyItems {
           id
           text
