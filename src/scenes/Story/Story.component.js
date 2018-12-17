@@ -96,10 +96,13 @@ class StoryComponent extends Component<Props, State> {
         case 'STORY_ITEM_ALREADY_ADDED':
           return {};
         case 'LAST_STORY_ID_MISMATCH':
-          error = 'Story.Errors.Save.lastIDMismatch';
+          error = 'Story.Errors.Save.LastIDMismatch';
           break;
         case 'WAS_LAST_USER':
           error = 'Story.Errors.Save.WasLastUser';
+          break;
+        case 'TIMEOUT':
+          error = 'Story.Errors.Save.Timeout';
           break;
         case 'UNKNOWN_SERVER_ERROR':
         default:

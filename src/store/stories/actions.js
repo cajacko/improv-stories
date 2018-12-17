@@ -54,8 +54,12 @@ export const saveStoryItem = makeActionCreator(
           store().dispatch(saveStoryItemSuccess(storyID, storyItemID, storyItems));
         }
       })
-      .catch(() => {
-        store().dispatch(saveStoryItemFailed(storyID, storyItemID, 'UNKNOWN_SERVER_ERROR'));
+      .catch((e) => {
+        store().dispatch(saveStoryItemFailed(
+          storyID,
+          storyItemID,
+          e.timeout ? 'TIMEOUT' : 'UNKNOWN_SERVER_ERROR'
+        ));
       });
 
     return storyItem;
