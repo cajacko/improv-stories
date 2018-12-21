@@ -55,7 +55,9 @@ class StoryComponent extends Component<Props, State> {
   };
 
   onFinishTimer = () => {
-    this.props.saveStoryItem(this.inputRef.state.value, this.lastStoryItemID);
+    const { value } = this.inputRef.state;
+    this.lastInputVal = value;
+    this.props.saveStoryItem(value, this.lastStoryItemID);
     this.inputRef.reset();
   };
 
@@ -91,29 +93,45 @@ class StoryComponent extends Component<Props, State> {
     if (type === SAVE_STORY_ITEM.FAILED) {
       const stateError = payload && payload.error;
       let error;
+      let errorAction;
+      let errorActionText;
+      const retry = () =>
+        this.props.saveStoryItem(
+          this.lastInputVal,
+          this.lastStoryItemID,
+          payload && payload.storyItemID
+        );
 
       switch (stateError) {
         case 'STORY_ITEM_ALREADY_ADDED':
           return {};
         case 'LAST_STORY_ID_MISMATCH':
           error = 'Story.Errors.Save.LastIDMismatch';
+          errorAction = startTimer;
+          errorActionText = 'Story.AddButton';
           break;
         case 'WAS_LAST_USER':
           error = 'Story.Errors.Save.WasLastUser';
+          errorAction = startTimer;
+          errorActionText = 'Story.AddButton';
           break;
         case 'TIMEOUT':
           error = 'Story.Errors.Save.Timeout';
+          errorAction = retry;
+          errorActionText = 'Story.Retry';
           break;
         case 'UNKNOWN_SERVER_ERROR':
         default:
           error = 'Story.Errors.Save.Retry';
+          errorAction = retry;
+          errorActionText = 'Story.Retry';
           break;
       }
 
       return {
         error,
-        errorAction: startTimer,
-        errorActionText: 'Story.AddButton',
+        errorAction,
+        errorActionText,
       };
     }
 

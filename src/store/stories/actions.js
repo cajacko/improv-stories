@@ -26,14 +26,14 @@ const saveStoryItemFailed = makeActionCreator(
 
 export const saveStoryItem = makeActionCreator(
   SAVE_STORY_ITEM.REQUESTED,
-  (storyID, text, lastStoryItemID) => {
+  (storyID, text, lastStoryItemID, existingStoryItemID) => {
     const now = new Date().getTime();
 
     const userName = store()
       .getState()
       .profile.get('name');
 
-    const storyItemID = uuid();
+    const storyItemID = existingStoryItemID || uuid();
 
     const storyItem = {
       storyID,

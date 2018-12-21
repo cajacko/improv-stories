@@ -37,8 +37,8 @@ const mapStateToProps = ({ profile, stories }) => ({
  * Wrap the save story actions in redux dispatch and pass as props
  */
 const mapDispatchToProps = dispatch => ({
-  saveStoryItem: (text, lastStoryItemID) =>
-    dispatch(saveStoryItem(storyID, text, lastStoryItemID)),
+  saveStoryItem: (text, lastStoryItemID, storyItemID) =>
+    dispatch(saveStoryItem(storyID, text, lastStoryItemID, storyItemID)),
   getStoryItems: () => dispatch(getStoryItems(storyID)),
 });
 

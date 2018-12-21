@@ -17,6 +17,7 @@
     "Saving": "Saving new entry",
     "Loading": "Loading new content",
     "Reload": "Reload",
+    "Retry": "Retry",
     "Errors": {
       "GetItems": "Could not load latest entries, try again",
       "Save": {
