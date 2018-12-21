@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Div } from '@cajacko/lib/components/UI';
 import CardsListItem from '@cajacko/lib/components/Cards/ListItem';
-import Text from '@cajacko/lib/components/Text';
+import Spinner from '@cajacko/lib/components/Spinner';
 
 const Container = styled(Div)`
   flex: 1;
@@ -19,7 +19,7 @@ const Loading = ({ text }) => (
   <CardsListItem>
     {({ backgroundColor }) => (
       <Container>
-        <Text backgroundColor={backgroundColor} text={text} />
+        <Spinner backgroundColor={backgroundColor} text={text} />
       </Container>
     )}
   </CardsListItem>
