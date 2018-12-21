@@ -5,14 +5,16 @@ import { Map, List, fromJS } from 'immutable';
 import { SAVE_STORY_ITEM, GET_STORY_ITEMS } from './actions';
 import { ONLY_STORY_ID } from '../../config/general';
 
+const initState = Map({
+  type: 'INIT',
+  payload: null,
+});
+
 const initialState = Map({
   storiesByID: Map({
     [ONLY_STORY_ID]: Map({
       id: ONLY_STORY_ID,
-      state: Map({
-        type: 'INIT',
-        payload: null,
-      }),
+      state: initState,
       storyItems: List(),
     }),
   }),
@@ -74,6 +76,12 @@ const setStateAndItems = type => (state, payload) => {
 };
 
 export default createReducer(initialState, {
+  // Reset the state of each story on rehydrate
+  'persist/REHYDRATE': state =>
+    state.set(
+      'storiesByID',
+      state.get('storiesByID').map(value => value.set('state', initState))
+    ),
   [SAVE_STORY_ITEM.REQUESTED]: setStoryState(SAVE_STORY_ITEM.REQUESTED),
   [SAVE_STORY_ITEM.SUCCEEDED]: setStateAndItems(SAVE_STORY_ITEM.SUCCEEDED),
   [SAVE_STORY_ITEM.FAILED]: setStateAndItems(SAVE_STORY_ITEM.FAILED),
