@@ -143,6 +143,8 @@ class StoryComponent extends Component<Props, State> {
    */
   render() {
     const { type } = this.props.storyState;
+    const loading = type === GET_STORY_ITEMS.REQUESTED;
+    const saving = type === SAVE_STORY_ITEM.REQUESTED;
 
     return (
       <Input.Provider innerRef={this.setInputRef}>
@@ -151,8 +153,8 @@ class StoryComponent extends Component<Props, State> {
             <Story
               {...this.getError(this.startTimer(startTimer))}
               startTimer={this.startTimer(startTimer)}
-              loading={type === GET_STORY_ITEMS.REQUESTED}
-              saving={type === SAVE_STORY_ITEM.REQUESTED}
+              loading={loading}
+              saving={saving}
               storyID={this.props.storyID}
               setRef={this.setRef}
               toProfile={this.toProfile}
@@ -162,6 +164,7 @@ class StoryComponent extends Component<Props, State> {
               isAdding={isRunning}
               cancel={this.cancelTimer(cancelTimer)}
               wasLastUser={this.props.wasLastUser}
+              disableRefresh={loading || saving}
             />
           )}
         </Timer.Provider>

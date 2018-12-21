@@ -81,7 +81,13 @@ const Story = props => (
         items: [
           { key: 'up', icon: CHEVRON_UP, action: props.scrollToTop },
           { key: 'down', icon: CHEVRON_DOWN, action: props.scrollToBottom },
-          { key: 'refresh', icon: RELOAD, action: props.reload },
+          {
+            key: 'refresh',
+            icon: RELOAD,
+            action: props.disableRefresh,
+            greyedOut: props.disableRefresh,
+            noButton: props.disableRefresh,
+          },
         ],
       }}
     >
