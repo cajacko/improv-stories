@@ -4,6 +4,8 @@ import React from 'react';
 import HeaderWithContent from '@cajacko/lib/components/Layout/HeaderWithContent';
 import ContentWithTabNav from '@cajacko/lib/components/Layout/ContentWithTabNav';
 import KeyboardSpacer from '@cajacko/lib/components/KeyboardSpacer';
+import Text from '@cajacko/lib/components/Text';
+import { BACKGROUND_COLORS } from '@cajacko/lib/config/styles/textIconColors';
 import {
   PROFILE,
   CHEVRON_UP,
@@ -30,6 +32,7 @@ const getHeaderComponent = ({
   errorAction,
   errorActionText,
   startTimer,
+  wasLastUser,
 }) => {
   if (isAdding) return Input;
   if (saving) return () => <Loading text="Story.Saving" />;
@@ -38,6 +41,15 @@ const getHeaderComponent = ({
   if (error) {
     return () => (
       <Action text={error} action={errorAction} buttonText={errorActionText} />
+    );
+  }
+
+  if (wasLastUser) {
+    return () => (
+      <Text
+        text="Story.WasLastUser"
+        backgroundColor={BACKGROUND_COLORS.WHITE}
+      />
     );
   }
 

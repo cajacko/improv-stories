@@ -161,6 +161,7 @@ class StoryComponent extends Component<Props, State> {
               reload={this.props.getStoryItems}
               isAdding={isRunning}
               cancel={this.cancelTimer(cancelTimer)}
+              wasLastUser={this.props.wasLastUser}
             />
           )}
         </Timer.Provider>

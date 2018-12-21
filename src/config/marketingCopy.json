@@ -18,6 +18,7 @@
     "Loading": "Loading new content",
     "Reload": "Reload",
     "Retry": "Retry",
+    "WasLastUser": "You went last, waiting for someone else to take a turn before you can go again.",
     "Errors": {
       "GetItems": "Could not load latest entries, try again",
       "Save": {

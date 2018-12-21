@@ -26,12 +26,22 @@ const lastStoryItemSelector = createSelector(
 /**
  * Get the checklist title from the store
  */
-const mapStateToProps = ({ profile, stories }) => ({
-  name: profile.get('name'),
-  storyID,
-  storyState: stories.getIn(['storiesByID', storyID, 'state']).toJS(),
-  lastStoryItemID: lastStoryItemSelector(stories, storyID),
-});
+const mapStateToProps = ({ profile, stories }) => {
+  const lastStoryItemID = lastStoryItemSelector(stories, storyID);
+  const name = profile.get('name');
+
+  const wasLastUser =
+    !!lastStoryItemID &&
+    stories.getIn(['storyItemsByID', lastStoryItemID, 'userName']) === name;
+
+  return {
+    name,
+    storyID,
+    storyState: stories.getIn(['storiesByID', storyID, 'state']).toJS(),
+    lastStoryItemID,
+    wasLastUser,
+  };
+};
 
 /**
  * Wrap the save story actions in redux dispatch and pass as props
