@@ -14,21 +14,45 @@ const Container = styled(Div)`
   align-items: center;
 `;
 
+const MaxWidth = styled(Div)`
+  max-width: 300;
+  align-items: center;
+`;
+
+const TextContainer = styled(Div)`
+  ${({ hasBottomMargin }) => (hasBottomMargin ? 'margin-bottom: 10;' : '')}
+`;
+
 /**
  * The story action component
  */
-const Action = ({ text, action, buttonText }) => (
+const Action = ({
+  text, action, buttonText, greyedOut, error,
+}) => (
   <CardsListItem>
     {({ backgroundColor }) => (
       <Container>
-        {text && (
-          <Text backgroundColor={backgroundColor} text={text} type="body2" />
-        )}
-        <Button
-          action={action}
-          type={buttons.CONTAINED.SECONDARY}
-          text={buttonText}
-        />
+        <MaxWidth>
+          {text && (
+            <TextContainer hasBottomMargin={!!action}>
+              <Text
+                backgroundColor={backgroundColor}
+                text={text}
+                type="body2"
+                center
+                greyedOut={greyedOut}
+                error={error}
+              />
+            </TextContainer>
+          )}
+          {action && (
+            <Button
+              action={action}
+              type={buttons.CONTAINED.SECONDARY}
+              text={buttonText}
+            />
+          )}
+        </MaxWidth>
       </Container>
     )}
   </CardsListItem>

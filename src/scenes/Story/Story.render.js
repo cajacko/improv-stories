@@ -40,17 +40,17 @@ const getHeaderComponent = ({
 
   if (error) {
     return () => (
-      <Action text={error} action={errorAction} buttonText={errorActionText} />
+      <Action
+        text={error}
+        action={errorAction}
+        buttonText={errorActionText}
+        error
+      />
     );
   }
 
   if (wasLastUser) {
-    return () => (
-      <Text
-        text="Story.WasLastUser"
-        backgroundColor={BACKGROUND_COLORS.WHITE}
-      />
-    );
+    return () => <Action text="Story.WasLastUser" greyedOut />;
   }
 
   return () => <Action action={startTimer} buttonText="Story.AddButton" />;

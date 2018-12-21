@@ -20,9 +20,9 @@
     "Retry": "Retry",
     "WasLastUser": "You went last, waiting for someone else to take a turn before you can go again.",
     "Errors": {
-      "GetItems": "Could not load latest entries, try again",
+      "GetItems": "Could not load latest entries! Try again.",
       "Save": {
-        "Retry": "Could not save your story entry, try again",
+        "Retry": "Could not save your story entry! Try again.",
         "WasLastUser": "You went last, greedy! You cannot save 2 entries in a row.",
         "LastIDMismatch": "Woops! New story entries have been added since you wrote yours. Write a new one.",
         "Timeout": "Saving took too long, check your internet and try again"
