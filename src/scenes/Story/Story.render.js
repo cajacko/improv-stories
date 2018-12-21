@@ -84,7 +84,7 @@ const Story = props => (
           {
             key: 'refresh',
             icon: RELOAD,
-            action: props.disableRefresh,
+            action: props.reload,
             greyedOut: props.disableRefresh,
             noButton: props.disableRefresh,
           },
