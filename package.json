@@ -82,7 +82,7 @@
     "jsdoc": "3.5.5"
   },
   "dependencies": {
-    "@cajacko/lib": "5.4.1",
-    "@cajacko/template": "1.5.1"
+    "@cajacko/lib": "5.4.3",
+    "@cajacko/template": "1.5.3"
   }
 }
