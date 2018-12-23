@@ -1,3 +1,3 @@
 set -e
-yarn install --network-concurrency 1
+npm install
 yarn deploy -t main-app --deploy-env alpha-deploygate --android
