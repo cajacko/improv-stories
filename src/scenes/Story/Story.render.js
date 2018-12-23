@@ -62,17 +62,9 @@ const getHeaderComponent = ({
 const Story = props => (
   <HeaderWithContent
     header={{
+      back: props.back,
       cancel: props.isAdding ? props.cancel : null,
       title: props.isAdding ? 'Story.Adding' : 'Story.Title',
-      rightButtons: props.isAdding
-        ? null
-        : [
-            {
-              key: 'profile',
-              icon: PROFILE,
-              action: props.toProfile,
-            },
-          ],
     }}
   >
     <TabNavOrChildren

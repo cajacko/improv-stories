@@ -21,19 +21,11 @@ class StoryComponent extends Component<Props, State> {
     super(props);
 
     this.lastStoryItemID = null;
-
-    if (!props.name || props.name === '') {
-      this.toProfile();
-    }
   }
 
   componentDidMount() {
     this.props.getStoryItems();
   }
-
-  toProfile = () => {
-    this.props.history.push('/profile');
-  };
 
   scrollToTop = () => {
     if (this.storyRef) {
@@ -138,6 +130,10 @@ class StoryComponent extends Component<Props, State> {
     return {};
   };
 
+  back = () => {
+    this.props.history.goBack();
+  };
+
   /**
    * Render the component
    */
@@ -152,12 +148,12 @@ class StoryComponent extends Component<Props, State> {
           {({ isRunning, cancelTimer, startTimer }) => (
             <Story
               {...this.getError(this.startTimer(startTimer))}
+              back={this.back}
               startTimer={this.startTimer(startTimer)}
               loading={loading}
               saving={saving}
               storyID={this.props.storyID}
               setRef={this.setRef}
-              toProfile={this.toProfile}
               scrollToTop={this.scrollToTop}
               scrollToBottom={this.scrollToBottom}
               reload={this.props.getStoryItems}
