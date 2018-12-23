@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: deploy
+      script: ./.scripts/deploy/api.sh
+    - # stage name not required, will continue to use `test`
+      script: ./.scripts/deploy/android.sh

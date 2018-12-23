@@ -1,25 +1,88 @@
 {
-  "name": "improv-stories-app",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "start": "exp start packages/app",
-    "lerna": "lerna publish",
-    "init": "exp init packages/app",
-    "test:lint": "eslint --ext .js --ext .jsx packages",
-    "test": "yarn test:lint"
-  },
-  "files": [
-    "lib/**/*"
-  ],
-  "devDependencies": {
-    "lerna": "^2.7.0"
-  },
+  "name": "improv-stories",
   "version": "0.1.0",
-  "main": "index.js",
-  "repository": "https://github.com/cajacko/improv-stories-app.git",
-  "author": "Charlie Jackson",
-  "license": "MIT"
+  "description": "An app to write improvised stories with friends.",
+  "scripts": {
+    "start": "node .scripts/template.js start",
+    "init": "node .scripts/template.js init",
+    "test": "node .scripts/template.js test",
+    "build": "node .scripts/template.js build",
+    "deploy": "node .scripts/template.js deploy",
+    "upgrade": "node .scripts/template.js upgrade"
+  },
+  "license": "MIT",
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.js",
+      "<rootDir>/features/**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules",
+      "<rootDir>/tmp"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/tmp"
+    ]
+  },
+  "peerDependencies": {
+    "apollo-server-express": "2.0.4",
+    "babel-cli": "6.26.0",
+    "color": "3.0.0",
+    "express": "4.16.3",
+    "firebase-admin": "~6.0.0",
+    "firebase-functions": "2.0.3",
+    "graphql": "0.13.2",
+    "graphql-request": "1.8.2",
+    "gulp": "3.9.1",
+    "gulp-babel": "7.0.1",
+    "immutable": "3.8.2",
+    "lodash": "4.17.10",
+    "moment": "2.22.2",
+    "native-base": "2.7.2",
+    "react": "16.6.3",
+    "react-native": "0.57.7",
+    "react-native-keyboard-spacer": "^0.4.1",
+    "react-native-splash-screen": "3.1.1",
+    "react-redux": "5.0.7",
+    "react-router-native": "4.3.0",
+    "redux": "4.0.0",
+    "redux-immutable": "4.0.0",
+    "redux-persist": "4.8.2",
+    "redux-persist-transform-immutable": "5.0.0",
+    "redux-thunk": "2.3.0",
+    "reselect": "3.0.1",
+    "styled-components": "3.3.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "8.2.2",
+    "babel-plugin-styled-components": "1.6.0",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-plugin-transform-react-jsx-source": "6.22.0",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-flow": "6.23.0",
+    "babel-preset-react": "6.24.1",
+    "eslint": "4.18.1",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-config-react-app": "2.1.0",
+    "eslint-import-resolver-babel-module": "4.0.0",
+    "eslint-loader": "1.9.0",
+    "eslint-plugin-cajacko": "1.0.0",
+    "eslint-plugin-flowtype": "2.46.1",
+    "eslint-plugin-import": "2.9.0",
+    "eslint-plugin-jest": "21.12.2",
+    "eslint-plugin-jsx-a11y": "6.0.3",
+    "eslint-plugin-react": "7.7.0",
+    "flow-bin": "0.81.0",
+    "husky": "0.14.3",
+    "jest": "23.6.0",
+    "jsdoc": "3.5.5"
+  },
+  "dependencies": {
+    "@cajacko/lib": "5.4.3",
+    "@cajacko/template": "1.5.3"
+  }
 }
