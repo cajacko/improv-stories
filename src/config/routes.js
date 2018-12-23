@@ -8,6 +8,10 @@ export const ENTRY = [
     component: Scenes.Profile,
   },
   {
+    path: '/story/:id',
     component: Scenes.Story,
+  },
+  {
+    component: Scenes.Stories,
   },
 ];

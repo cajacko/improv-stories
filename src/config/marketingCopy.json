@@ -8,6 +8,9 @@
       "TooShort": "Name must ${length} characters or longer"
     }
   },
+  "Stories": {
+    "Title": "Improv Stories"
+  },
   "Story": {
     "Title": "Improv Stories",
     "AddButton": "Add to story",
