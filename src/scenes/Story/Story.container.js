@@ -1,12 +1,11 @@
 // @flow
 
 import { connect } from '@cajacko/lib/lib/react-redux';
+import { compose } from 'redux';
+import withRouter from '@cajacko/lib/components/HOCs/withRouter';
 import { createSelector } from 'reselect';
 import Story from './Story.component';
 import { saveStoryItem, getStoryItems } from '../../store/stories/actions';
-import { ONLY_STORY_ID } from '../../config/general';
-
-const storyID = ONLY_STORY_ID;
 
 const lastStoryItemSelector = createSelector(
   (stories, id) => stories.getIn(['storiesByID', id, 'storyItems']),
@@ -26,7 +25,14 @@ const lastStoryItemSelector = createSelector(
 /**
  * Get the checklist title from the store
  */
-const mapStateToProps = ({ profile, stories }) => {
+const mapStateToProps = (
+  { profile, stories },
+  {
+    match: {
+      params: { storyID },
+    },
+  }
+) => {
   const lastStoryItemID = lastStoryItemSelector(stories, storyID);
   const name = profile.get('name');
 
@@ -47,13 +53,23 @@ const mapStateToProps = ({ profile, stories }) => {
 /**
  * Wrap the save story actions in redux dispatch and pass as props
  */
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (
+  dispatch,
+  {
+    match: {
+      params: { storyID },
+    },
+  }
+) => ({
   saveStoryItem: (text, lastStoryItemID, storyItemID) =>
     dispatch(saveStoryItem(storyID, text, lastStoryItemID, storyItemID)),
   getStoryItems: () => dispatch(getStoryItems(storyID)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+export default compose(
+  withRouter,
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
 )(Story);

@@ -1,7 +1,6 @@
 // @flow
 
 import React, { Component } from 'react';
-import withRouter from '@cajacko/lib/components/HOCs/withRouter';
 import Story from './Story.render';
 import * as Timer from '../../components/context/Story/Timer';
 import * as Input from '../../components/context/Story/Input';
@@ -170,4 +169,4 @@ class StoryComponent extends Component<Props, State> {
   }
 }
 
-export default withRouter(StoryComponent);
+export default StoryComponent;

@@ -8,7 +8,7 @@ export const ENTRY = [
     component: Scenes.Profile,
   },
   {
-    path: '/story/:id',
+    path: '/story/:storyID',
     component: Scenes.Story,
   },
   {
