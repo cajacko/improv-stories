@@ -64,7 +64,7 @@ const Story = props => (
     header={{
       back: props.back,
       cancel: props.isAdding ? props.cancel : null,
-      title: props.isAdding ? 'Story.Adding' : 'Story.Title',
+      title: props.isAdding ? 'Story.Adding' : { _textFromConst: props.title },
     }}
   >
     <TabNavOrChildren

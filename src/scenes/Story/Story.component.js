@@ -148,6 +148,7 @@ class StoryComponent extends Component<Props, State> {
           {({ isRunning, cancelTimer, startTimer }) => (
             <Story
               {...this.getError(this.startTimer(startTimer))}
+              title={this.props.title}
               back={this.back}
               startTimer={this.startTimer(startTimer)}
               loading={loading}

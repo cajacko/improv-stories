@@ -35,6 +35,7 @@ const mapStateToProps = ({ profile, stories }) => {
     stories.getIn(['storyItemsByID', lastStoryItemID, 'userName']) === name;
 
   return {
+    title: stories.getIn(['storiesByID', storyID, 'title']),
     name,
     storyID,
     storyState: stories.getIn(['storiesByID', storyID, 'state']).toJS(),
