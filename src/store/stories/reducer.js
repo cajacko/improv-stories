@@ -14,6 +14,7 @@ const initialState = Map({
   storiesByID: Map({
     [ONLY_STORY_ID]: Map({
       id: ONLY_STORY_ID,
+      title: 'Temp story',
       state: initState,
       storyItems: List(),
     }),

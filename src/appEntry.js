@@ -10,3 +10,7 @@ import reducers from './store/reducers';
 export const ROUTES = ENTRY;
 
 export const REDUCERS = reducers;
+
+// Only enable for dev
+export const LOG_STORE = false;
+export const PURGE_STORE = false;
