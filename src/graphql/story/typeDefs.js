@@ -10,8 +10,14 @@ export const types = `
     text: String!
   }
 
+  type StoryOverview {
+    id: StoryID!
+    title: String
+  }
+
   type Story {
     id: StoryID!
+    title: String
     storyItems: [StoryItem]
   }
 
@@ -19,12 +25,20 @@ export const types = `
     error: String
     storyItems: [StoryItem]!
   }
+
+  type SetStoryResponse {
+    id: StoryID
+  }
 `;
 
 export const query = `
-  getStoryItems(id: StoryID): [StoryItem]!
+  getStoryItems(id: StoryID!): [StoryItem]!
+
+  getStories: [StoryOverview]!
 `;
 
 export const mutation = `
-  setStoryItem(storyID: StoryID, storyItemID: StoryItemID, text: String, userName: String, lastStoryItemID: StoryItemID): SetStoryItemResponse
+  setStoryItem(storyID: StoryID!, storyItemID: StoryItemID!, text: String!, userName: String!, lastStoryItemID: StoryItemID!): SetStoryItemResponse
+
+  setStory(storyID: StoryID!, title: String!): SetStoryResponse
 `;

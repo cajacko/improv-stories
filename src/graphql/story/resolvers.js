@@ -55,82 +55,93 @@ const getStoryEntryError = (
 };
 
 /**
- * Create a blank story with the given id
+ * Get a specific story
  */
-const createNewStory = (db, storyID) =>
-  db.set(['storiesByID', storyID], {
-    id: storyID,
-    storyItems: [],
-    storyItemsByID: {},
+const getStory = (db, id) =>
+  db.get(['storiesByID', id]).then((story) => {
+    if (!story) return null;
+
+    return story;
   });
 
 export const Query = {
+  getStories: (args, db) =>
+    db.get(['storiesByID']).then((stories) => {
+      if (!stories) return [];
+
+      return Object.values(stories);
+    }),
   getStoryItems: ({ id }: { id: string }, db) =>
-    db
-      .get(['storiesByID', id])
-      .then((story) => {
-        if (story) return story;
+    db.get(['storiesByID', id]).then((story) => {
+      if (!story) throw new Error(`Could not get the story at ID: ${id}`);
 
-        // Here we are creating the story, in future we will throw here instead
-        return createNewStory(db, id);
-      })
-      .then((story) => {
-        if (!story.storyItems) return [];
+      if (!story.storyItems) return [];
 
-        return story.storyItems.map(storyItemID => story.storyItemsByID[storyItemID]);
-      }),
+      return story.storyItems.map(storyItemID => story.storyItemsByID[storyItemID]);
+    }),
 };
 
 export const Mutation = {
+  setStory: ({ storyID, title }, db) =>
+    getStory(db, storyID).then((story) => {
+      const newStory = story
+        ? Object.assign({}, story)
+        : {
+          id: storyID,
+          storyItems: [],
+          storyItemsByID: {},
+        };
+
+      return db
+        .set(['storiesByID', storyID], {
+          ...newStory,
+          title,
+        })
+        .then(() => getStory(db, storyID));
+    }),
   setStoryItem: (
     {
       storyID, storyItemID, text, userName, lastStoryItemID,
     },
     db
   ) =>
-    db
-      .get(['storiesByID', storyID])
-      .then((story) => {
-        if (story) return story;
+    db.get(['storiesByID', storyID]).then((story) => {
+      if (!story) throw new Error(`Could not get the story at ID: ${storyID}`);
 
-        // Here we are creating the story, in future we will throw here instead
-        return createNewStory(db, storyID);
-      })
-      .then((story) => {
-        const storyItem = {
-          id: storyItemID,
-          text,
-          userName,
-        };
+      const storyItem = {
+        id: storyItemID,
+        text,
+        userName,
+      };
 
-        const newStoryItems = story.storyItems || [];
-        const storyItemsByID = Object.assign({}, story.storyItemsByID || {});
+      const newStoryItems = story.storyItems || [];
+      const storyItemsByID = Object.assign({}, story.storyItemsByID || {});
 
-        const { error } = getStoryEntryError(
-          { storyItems: newStoryItems, storyItemsByID },
-          { userName, userLastStoryItemID: lastStoryItemID, id: storyItem.id }
-        );
+      const { error } = getStoryEntryError(
+        { storyItems: newStoryItems, storyItemsByID },
+        { userName, userLastStoryItemID: lastStoryItemID, id: storyItem.id }
+      );
 
-        if (error) {
-          return Query.getStoryItems({ id: storyID }, db).then(storyItems => ({
-            error,
-            storyItems,
-          }));
-        }
+      if (error) {
+        return Query.getStoryItems({ id: storyID }, db).then(storyItems => ({
+          error,
+          storyItems,
+        }));
+      }
 
-        newStoryItems.push(storyItem.id);
+      newStoryItems.push(storyItem.id);
 
-        storyItemsByID[storyItemID] = storyItem;
+      storyItemsByID[storyItemID] = storyItem;
 
-        return db
-          .update(['storiesByID', storyID], {
-            storyItems: newStoryItems,
-            storyItemsByID,
-          })
-          .then(() => Query.getStoryItems({ id: storyID }, db))
-          .then(storyItems => ({
-            error: null,
-            storyItems,
-          }));
-      }),
+      return db
+        .update(['storiesByID', storyID], {
+          storyItems: newStoryItems,
+          storyItemsByID,
+        })
+        .then(() => Query.getStoryItems({ id: storyID }, db))
+        .then(storyItems => ({
+          error: null,
+          storyItems,
+        }));
+    }),
 };

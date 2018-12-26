@@ -5,7 +5,7 @@
  */
 export const getStoryItems = (storyID: string) => ({
   query: `
-    query GetStoryItems($id: StoryID) {
+    query GetStoryItems($id: StoryID!) {
       getStoryItems(id: $id) {
         id
         text
@@ -33,7 +33,7 @@ export const setStoryItem = ({
   lastStoryItemID: string,
 }) => ({
   mutation: `
-    mutation SetStoryItem($storyID: StoryID, $storyItemID: StoryItemID, $text: String, $userName: String, $lastStoryItemID: StoryItemID) {
+    mutation SetStoryItem($storyID: StoryID!, $storyItemID: StoryItemID!, $text: String!, $userName: String!, $lastStoryItemID: StoryItemID!) {
       setStoryItem(storyID: $storyID, storyItemID: $storyItemID, text: $text, userName: $userName, lastStoryItemID: $lastStoryItemID) {
         error
         storyItems {
@@ -50,5 +50,28 @@ export const setStoryItem = ({
     text,
     userName,
     lastStoryItemID,
+  },
+});
+
+/**
+ * Save story details
+ */
+export const setStory = ({
+  storyID,
+  title,
+}: {
+  storyID: string,
+  title: string,
+}) => ({
+  mutation: `
+    mutation SetStory($storyID: StoryID!, $title: String!) {
+      setStory(storyID: $storyID, title: $title) {
+        id
+      }
+    }
+  `,
+  vars: {
+    storyID,
+    title,
   },
 });

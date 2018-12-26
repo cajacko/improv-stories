@@ -27,11 +27,18 @@ class ProfileComponent extends Component<Props, State> {
     if (!this.state.name) return 'Profile.Errors.NoName';
 
     const minLength = 3;
+    const maxLength = 20;
     const { length } = this.state.name;
 
-    if (length >= minLength) return;
+    if (length < minLength) {
+      return { key: 'Profile.Errors.TooShort', length: minLength };
+    }
 
-    return { key: 'Profile.Errors.TooShort', length: minLength };
+    if (length > maxLength) {
+      return { key: 'Profile.Errors.TooLong', length: maxLength };
+    }
+
+    return null;
   };
 
   save = () => {

@@ -5,7 +5,21 @@
     "Button": "Save",
     "Errors": {
       "NoName": "You must set a name",
-      "TooShort": "Name must ${length} characters or longer"
+      "TooShort": "Name must be ${length} characters or longer",
+      "TooLong": "Name must be ${length} characters or less"
+    }
+  },
+  "EditStory": {
+    "Title": {
+      "Edit": "Edit Story",
+      "Add": "Add Story"
+    },
+    "Label": "Story title",
+    "Button": "Save",
+    "Errors": {
+      "NoName": "You must set a title",
+      "TooShort": "Title must be ${length} characters or longer",
+      "TooLong": "Title must be ${length} characters or less"
     }
   },
   "Stories": {

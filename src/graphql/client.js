@@ -6,6 +6,7 @@ import * as story from './story/client';
 const client = {
   saveStoryItem: story.setStoryItem,
   getStoryItems: story.getStoryItems,
+  saveStory: story.setStory,
 };
 
 export default graphqlClient(
