@@ -1,25 +1,7 @@
 {
-  "name": "improv-stories-app",
+  "name": "improv-stories",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "start": "exp start packages/app",
-    "lerna": "lerna publish",
-    "init": "exp init packages/app",
-    "test:lint": "eslint --ext .js --ext .jsx packages",
-    "test": "yarn test:lint"
-  },
-  "files": [
-    "lib/**/*"
-  ],
   "devDependencies": {
-    "lerna": "^2.7.0"
-  },
-  "version": "0.1.0",
-  "main": "index.js",
-  "repository": "https://github.com/cajacko/improv-stories-app.git",
-  "author": "Charlie Jackson",
-  "license": "MIT"
+    "lerna": "^3.10.5"
+  }
 }
