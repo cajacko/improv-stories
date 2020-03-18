@@ -1,30 +1,11 @@
 import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
+import getFetchStatus from "../utils/getFetchStatus";
 
 interface ApiUser {
   userId: string;
   name: string;
   dateModified: number;
-}
-
-function getFetchStatus(query: any) {
-  let fetchStatus:
-    | { type: "INIT" }
-    | { type: "LOADING" }
-    | { type: "SUCCESS" }
-    | { type: "ERROR"; error: Error } = { type: "INIT" };
-
-  if (query.loading) {
-    fetchStatus = { type: "LOADING" };
-  } else if (query.error) {
-    fetchStatus = { type: "ERROR", error: query.error };
-  } else if (query.data) {
-    fetchStatus = { type: "SUCCESS" };
-  } else {
-    fetchStatus = { type: "INIT" };
-  }
-
-  return fetchStatus;
 }
 
 function useUser(userId: string) {
@@ -39,7 +20,8 @@ function useUser(userId: string) {
       }
     `,
     {
-      variables: { userId }
+      variables: { userId },
+      fetchPolicy: "cache-and-network"
     }
   );
 

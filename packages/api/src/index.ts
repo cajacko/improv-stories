@@ -35,7 +35,7 @@ const typeDefs = gql`
   }
 
   type Subscription {
-    storyUsersChanged: StoryUsers!
+    storyUsers(storyId: ID!): StoryUsers!
     user(userId: ID!): User!
   }
 
@@ -45,37 +45,37 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addStoryUser(userId: ID!, storyId: ID!): StoryUsers!
+    addStoryUser(storyId: ID!, userId: ID!): StoryUsers!
+    removeStoryUser(storyId: ID!, userId: ID!): StoryUsers!
     user(userId: ID!, name: String!): User!
   }
 `;
 
-const STORY_USERS_MODIFIED = "STORY_USERS_MODIFIED";
+const STORY_USERS = "STORY_USERS";
 const USER = "USER";
 
 const resolvers = {
   Subscription: {
-    // storyUsersChanged: {
-    //   subscribe: () => pubsub.asyncIterator([STORY_USERS_MODIFIED])
-    // },
+    storyUsers: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator([STORY_USERS]),
+        (payload, { storyId }) => {
+          return payload.storyUsers.storyId === storyId;
+        }
+      )
+    },
     user: {
       subscribe: withFilter(
         () => pubsub.asyncIterator([USER]),
         (payload, { userId }) => {
-          return payload.userModified.userId === userId;
+          return payload.user.userId === userId;
         }
       )
     }
   },
   Query: {
-    storyUsers: (_, { storyId }) => ({
-      dateModified: Date.now(),
-      storyId,
-      users: storyUsers[storyId]
-    }),
-    user: (_, { userId }) => {
-      return users[userId];
-    }
+    storyUsers: (_, { storyId }) => storyUsers[storyId],
+    user: (_, { userId }) => users[userId]
   },
   Mutation: {
     user: (_, { userId, name }) => {
@@ -86,24 +86,44 @@ const resolvers = {
       };
 
       pubsub.publish(USER, {
-        userModified: users[userId]
+        user: users[userId]
       });
 
       return users[userId];
     },
     addStoryUser: (_, { userId, storyId }) => {
-      if (!storyUsers[storyId])
-        storyUsers[storyId] = { storyId, dateModified: Date.now(), users: [] };
+      const dateModified = Date.now();
 
+      if (!storyUsers[storyId]) {
+        storyUsers[storyId] = { storyId, dateModified, users: [] };
+      }
+
+      storyUsers[storyId].dateModified = dateModified;
       storyUsers[storyId].users.push(userId);
 
-      pubsub.publish(STORY_USERS_MODIFIED, {
-        storyUsersChanged: storyUsers[storyId]
+      pubsub.publish(STORY_USERS, {
+        storyUsers: storyUsers[storyId]
       });
 
-      return {
-        success: true
-      };
+      return storyUsers[storyId];
+    },
+    removeStoryUser: (_, { userId, storyId }) => {
+      const dateModified = Date.now();
+
+      if (!storyUsers[storyId]) {
+        storyUsers[storyId] = { storyId, dateModified, users: [] };
+      }
+
+      storyUsers[storyId].dateModified = dateModified;
+      storyUsers[storyId].users = storyUsers[storyId].users.filter(
+        i => i !== userId
+      );
+
+      pubsub.publish(STORY_USERS, {
+        storyUsers: storyUsers[storyId]
+      });
+
+      return storyUsers[storyId];
     }
   }
 };
