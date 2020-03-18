@@ -4,9 +4,9 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "start": "npm run build && concurrently \"npm run build:watch\" \"nodemon dist/index.js\"",
+    "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node --log-error' src/index.ts",
     "run": "node dist/index.js",
-    "build:watch": "npm run build --watch",
+    "build:watch": "npm run build -- --watch --preserveWatchOutput",
     "build": "tsc"
   },
   "dependencies": {
@@ -15,7 +15,9 @@
   },
   "devDependencies": {
     "concurrently": "^5.1.0",
+    "kill-port": "^1.6.0",
     "nodemon": "^2.0.2",
+    "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   }
 }

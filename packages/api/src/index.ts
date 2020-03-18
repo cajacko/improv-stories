@@ -1,4 +1,6 @@
-const { ApolloServer, gql } = require("apollo-server");
+import { ApolloServer, gql } from "apollo-server";
+
+const kill = require("kill-port");
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -43,7 +45,16 @@ const resolvers = {
 // definition and your set of resolvers.
 const server = new ApolloServer({ typeDefs, resolvers });
 
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+const PORT = 4000;
+
+kill(PORT, "tcp")
+  .catch(() => {})
+  .then(() =>
+    server.listen({
+      host: "localhost",
+      port: PORT
+    })
+  )
+  .then(({ url }) => {
+    console.log(`🚀  Server ready at  ${url}`);
+  });
