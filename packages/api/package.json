@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "apollo-server": "^2.11.0",
-    "graphql": "^14.6.0"
+    "graphql": "^14.6.0",
+    "subscriptions-transport-ws": "^0.9.16"
   },
   "devDependencies": {
     "concurrently": "^5.1.0",

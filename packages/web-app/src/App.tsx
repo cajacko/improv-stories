@@ -1,6 +1,8 @@
 import React from "react";
 import cloneDeep from "lodash/cloneDeep";
 import { v4 as uuid } from "uuid";
+// import { useSubscription } from "@apollo/react-hooks";
+// import { gql } from "apollo-boost";
 import database from "./utils/database";
 import "./App.css";
 
@@ -45,8 +47,12 @@ function App() {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const [currentEntry, setCurrentEntry] = React.useState<Entry | null>(null);
   const [entries, setEntries] = React.useState<Entry[]>([]);
-  const [offlineEntries, setOfflineEntries] = React.useState<Entry[]>([]);
+  const [offlineEntries] = React.useState<Entry[]>([]);
   const [countDown, setCountDown] = React.useState(timeout);
+
+  // const data = useSubscription(gql(``));
+
+  // console.log("useSubscription", data);
 
   function focus() {
     if (!textAreaRef) return;

@@ -1,6 +1,8 @@
-import { ApolloServer, gql } from "apollo-server";
+import { ApolloServer, gql, PubSub } from "apollo-server";
 
 const kill = require("kill-port");
+
+const pubsub = new PubSub();
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -12,6 +14,10 @@ const typeDefs = gql`
   type Book {
     title: String
     author: String
+  }
+
+  type Subscription {
+    bookAdded: Book
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -33,9 +39,28 @@ const books = [
   }
 ];
 
+const BOOK_ADDED = "BOOK_ADDED";
+
+setInterval(() => {
+  console.log("publish");
+
+  pubsub.publish(BOOK_ADDED, {
+    bookAdded: {
+      title: "Hello",
+      author: "Oh my"
+    }
+  });
+}, 1000);
+
 // Resolvers define the technique for fetching the types defined in the
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
+  Subscription: {
+    bookAdded: {
+      // Additional event labels can be passed to asyncIterator creation
+      subscribe: () => pubsub.asyncIterator([BOOK_ADDED])
+    }
+  },
   Query: {
     books: () => books
   }
