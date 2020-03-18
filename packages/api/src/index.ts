@@ -1,74 +1,137 @@
-import { ApolloServer, gql, PubSub } from "apollo-server";
+import { ApolloServer, gql, PubSub, withFilter } from "apollo-server";
 
 const kill = require("kill-port");
 
+const userIdsBySocket = {};
+const socketByUserIds = {};
+
 const pubsub = new PubSub();
 
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// your data.
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+const users: {
+  [key: string]:
+    | undefined
+    | { userId: string; name: string; dateModified: number };
+} = {};
 
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
+const storyUsers: {
+  [key: string]:
+    | undefined
+    | { dateModified: number; users: string[]; storyId: string };
+} = {};
+
+const typeDefs = gql`
+  scalar Timestamp
+
+  type User {
+    dateModified: Timestamp!
+    userId: ID!
+    name: String!
+  }
+
+  type StoryUsers {
+    dateModified: Timestamp!
+    storyId: ID!
+    users: [String!]
   }
 
   type Subscription {
-    bookAdded: Book
+    storyUsersChanged: StoryUsers!
+    user(userId: ID!): User!
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    books: [Book]
+    storyUsers(storyId: ID!): StoryUsers!
+    user(userId: ID!): User
+  }
+
+  type Mutation {
+    addStoryUser(userId: ID!, storyId: ID!): StoryUsers!
+    user(userId: ID!, name: String!): User!
   }
 `;
 
-const books = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    author: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    author: "Michael Crichton"
-  }
-];
+const STORY_USERS_MODIFIED = "STORY_USERS_MODIFIED";
+const USER = "USER";
 
-const BOOK_ADDED = "BOOK_ADDED";
-
-setInterval(() => {
-  console.log("publish");
-
-  pubsub.publish(BOOK_ADDED, {
-    bookAdded: {
-      title: "Hello",
-      author: "Oh my"
-    }
-  });
-}, 1000);
-
-// Resolvers define the technique for fetching the types defined in the
-// schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Subscription: {
-    bookAdded: {
-      // Additional event labels can be passed to asyncIterator creation
-      subscribe: () => pubsub.asyncIterator([BOOK_ADDED])
+    // storyUsersChanged: {
+    //   subscribe: () => pubsub.asyncIterator([STORY_USERS_MODIFIED])
+    // },
+    user: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator([USER]),
+        (payload, { userId }) => {
+          return payload.userModified.userId === userId;
+        }
+      )
     }
   },
   Query: {
-    books: () => books
+    storyUsers: (_, { storyId }) => ({
+      dateModified: Date.now(),
+      storyId,
+      users: storyUsers[storyId]
+    }),
+    user: (_, { userId }) => {
+      return users[userId];
+    }
+  },
+  Mutation: {
+    user: (_, { userId, name }) => {
+      users[userId] = {
+        dateModified: Date.now(),
+        userId,
+        name
+      };
+
+      pubsub.publish(USER, {
+        userModified: users[userId]
+      });
+
+      return users[userId];
+    },
+    addStoryUser: (_, { userId, storyId }) => {
+      if (!storyUsers[storyId])
+        storyUsers[storyId] = { storyId, dateModified: Date.now(), users: [] };
+
+      storyUsers[storyId].users.push(userId);
+
+      pubsub.publish(STORY_USERS_MODIFIED, {
+        storyUsersChanged: storyUsers[storyId]
+      });
+
+      return {
+        success: true
+      };
+    }
   }
 };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers });
+function addConnection(userId, socket) {
+  userIdsBySocket[socket] = userId;
+  socketByUserIds[userId] = socket;
+}
+
+function removeConnection(socket) {
+  const userId = userIdsBySocket[socket];
+
+  delete userIdsBySocket[socket];
+  delete socketByUserIds[userId];
+}
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  subscriptions: {
+    onConnect: ({ userId }: { userId: string }, socket, context) => {
+      addConnection(userId, socket);
+    },
+    onDisconnect: socket => {
+      removeConnection(socket);
+    }
+  }
+});
 
 const PORT = 4000;
 
