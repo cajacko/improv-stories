@@ -1,5 +1,5 @@
 import { createReducer } from "typesafe-actions";
-import * as actions from "./actions";
+import actions from "../actions";
 import { CurrentUserState } from "./types";
 
 const defaultState: CurrentUserState = {
@@ -7,7 +7,7 @@ const defaultState: CurrentUserState = {
 };
 
 const reducer = createReducer<CurrentUserState>(defaultState).handleAction(
-  actions.setCurrentUserName,
+  actions.currentUser.setCurrentUserName,
   (state, { payload: { name } }) => ({
     ...state,
     name,

@@ -1,8 +1,10 @@
 import * as express from "express";
 import * as socket from "socket.io";
 import { ClientMessage } from "./sharedTypes";
-import { removeUser, addServerUser } from "./store/users";
-import handleClientMessage from "./handleClientMessage";
+import { removeUser, addServerUser, getUser } from "./store/users";
+import handleClientMessage, {
+  broadcastServerUsersToGroup,
+} from "./handleClientMessage";
 import logger from "./logger";
 
 // @ts-ignore
@@ -29,13 +31,20 @@ function onSocketConnect(sock: socket.Socket) {
 }
 
 function onSocketDisconnect(sock: socket.Socket) {
+  const user = getUser(sock.id);
   removeUser(sock.id);
+
+  if (!user) return;
+
+  broadcastServerUsersToGroup([user.broadcastGroupId]);
 }
 
 io.on("connection", (sock) => {
+  logger.log("CONNECTION");
   onSocketConnect(sock);
 
   sock.on("disconnect", () => {
+    logger.log("DISCONNECT");
     onSocketDisconnect(sock);
   });
 });

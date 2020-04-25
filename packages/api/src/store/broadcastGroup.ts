@@ -6,25 +6,6 @@ export function getBroadcastGroupUsers(broadcastGroupId: string) {
   return usersByBroadcastGroupId[broadcastGroupId] || null;
 }
 
-export function addUserToBroadcastGroup(
-  userId: string,
-  broadcastGroupId: string
-): boolean {
-  const user = getUser(userId);
-
-  if (!user) return false;
-
-  user.broadcastGroupId = broadcastGroupId;
-
-  const users = usersByBroadcastGroupId[broadcastGroupId] || [];
-
-  users.push(userId);
-
-  usersByBroadcastGroupId[broadcastGroupId] = users;
-
-  return true;
-}
-
 export function removeUserFromBroadcastGroup(userId: string): boolean {
   const user = getUser(userId);
 
@@ -45,6 +26,27 @@ export function removeUserFromBroadcastGroup(userId: string): boolean {
       }
     }
   }
+
+  return true;
+}
+
+export function addUserToBroadcastGroup(
+  userId: string,
+  broadcastGroupId: string
+): boolean {
+  const user = getUser(userId);
+
+  if (!user) return false;
+
+  removeUserFromBroadcastGroup(userId);
+
+  user.broadcastGroupId = broadcastGroupId;
+
+  const users = usersByBroadcastGroupId[broadcastGroupId] || [];
+
+  users.push(userId);
+
+  usersByBroadcastGroupId[broadcastGroupId] = users;
 
   return true;
 }

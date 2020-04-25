@@ -8,39 +8,50 @@ import {
 } from "./store/broadcastGroup";
 import logger from "./logger";
 
-function broadcastServerUsersToGroup(
-  broadcastGroupId: string | null = null
-): boolean {
-  if (!broadcastGroupId) return false;
+export function broadcastServerUsersToGroup(
+  broadcastGroupIds: Array<string | null> | null = null
+) {
+  if (!broadcastGroupIds) return;
 
-  let users = getBroadcastGroupUsers(broadcastGroupId) || [];
-  const transformedServerUsers: User[] = [];
+  let broadcastedTo: string[] = [];
 
-  users.forEach((userId) => {
-    const user = getUser(userId);
+  console.log("broadcastGroupIds", broadcastGroupIds);
 
-    if (!user) return;
+  broadcastGroupIds.forEach((broadcastGroupId) => {
+    if (!broadcastGroupId) return;
+    if (broadcastedTo.includes(broadcastGroupId)) return;
 
-    const transformedServerUser: User = {
-      id: user.id,
-      broadcastGroupId: user.broadcastGroupId,
-      details: user.details,
-    };
+    let users = getBroadcastGroupUsers(broadcastGroupId) || [];
+    const transformedServerUsers: User[] = [];
 
-    transformedServerUsers.push(transformedServerUser);
-  });
+    users.forEach((userId) => {
+      const user = getUser(userId);
 
-  return broadcastToGroup(broadcastGroupId, {
-    id: uuid(),
-    createdAt: new Date().toISOString(),
-    type: "BROADCAST_GROUP_USERS",
-    payload: { users: transformedServerUsers, broadcastGroupId },
+      if (!user) return;
+
+      const transformedServerUser: User = {
+        id: user.id,
+        broadcastGroupId: user.broadcastGroupId,
+        details: user.details,
+      };
+
+      transformedServerUsers.push(transformedServerUser);
+    });
+
+    broadcastToGroup(broadcastGroupId, {
+      id: uuid(),
+      createdAt: new Date().toISOString(),
+      type: "BROADCAST_GROUP_USERS",
+      payload: { users: transformedServerUsers, broadcastGroupId },
+    });
+
+    broadcastedTo.push(broadcastGroupId);
   });
 }
 
 function broadcastToGroup(
   broadcastGroupId: string | null = null,
-  payload: ServerMessage,
+  action: ServerMessage,
   ignoreServerUserIds: string[] = []
 ): boolean {
   if (!broadcastGroupId) return false;
@@ -49,7 +60,7 @@ function broadcastToGroup(
 
   if (!users) return false;
 
-  logger.log("BROADCAST_TO_GROUP", payload.type);
+  logger.log("BROADCAST_TO_GROUP", action.type);
 
   users.forEach((userId) => {
     if (ignoreServerUserIds.includes(userId)) return;
@@ -58,10 +69,8 @@ function broadcastToGroup(
 
     if (!user) return;
 
-    user.send(payload);
+    user.send(action);
   });
-
-  logger.log("BROADCAST_TO_GROUP", "done");
 
   return true;
 }
@@ -79,17 +88,21 @@ function handleClientMessage(
   const broadcastGroupId = user.broadcastGroupId;
 
   switch (action.type) {
-    case "ADD_USER_TO_BROADCAST_GROUP":
+    case "ADD_USER_TO_BROADCAST_GROUP": {
       addUserToBroadcastGroup(userId, action.payload.broadcastGroupId);
-      broadcastServerUsersToGroup(action.payload.broadcastGroupId);
+      broadcastServerUsersToGroup([
+        broadcastGroupId,
+        action.payload.broadcastGroupId,
+      ]);
       return true;
+    }
     case "REMOVE_USER_FROM_BROADCAST_GROUP":
       removeUserFromBroadcastGroup(userId);
-      broadcastServerUsersToGroup(broadcastGroupId);
+      broadcastServerUsersToGroup([broadcastGroupId]);
       return true;
     case "SET_USER_DETAILS":
       setUserDetails(userId, action.payload);
-      broadcastServerUsersToGroup(broadcastGroupId);
+      broadcastServerUsersToGroup([broadcastGroupId]);
       return true;
     case "BROADCAST_TO_GROUP":
       broadcastToGroup(broadcastGroupId, action.payload);

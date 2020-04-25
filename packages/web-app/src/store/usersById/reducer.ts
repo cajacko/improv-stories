@@ -1,15 +1,21 @@
 import { createReducer } from "typesafe-actions";
-import * as actions from "./actions";
+import actions from "../actions";
 import { UsersByIdState } from "./types";
 
 const defaultState: UsersByIdState = {};
 
 const reducer = createReducer<UsersByIdState>(defaultState).handleAction(
-  actions.setUsers,
+  actions.usersById.setUsers,
   (state, { payload }) => ({
     ...state,
-    ...payload.users.reduce<UsersByIdState>(
-      (acc, user) => ({ ...acc, [user.id]: user }),
+    ...payload.users.reduce(
+      (acc, user) => ({
+        ...acc,
+        [user.id]: {
+          id: user.id,
+          name: user.details.name || null,
+        },
+      }),
       {}
     ),
   })

@@ -4,12 +4,16 @@ import storage from "redux-persist/lib/storage";
 import logger from "redux-logger";
 import rootReducer, { rawReducersObj } from "./reducers";
 
-const blacklist: Array<keyof typeof rawReducersObj> = ["usersById"];
+type ReducerKey = keyof typeof rawReducersObj;
+
+const blacklist: ReducerKey[] | undefined = undefined;
+const whitelist: ReducerKey[] | undefined = ["currentUser"];
 
 const persistConfig = {
   key: "root",
   storage,
   blacklist,
+  whitelist,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
