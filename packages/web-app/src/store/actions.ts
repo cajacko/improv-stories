@@ -1,7 +1,7 @@
 import * as currentUser from "./currentUser/actions";
-import * as usersById from "./usersById/actions";
+import * as storiesById from "./storiesById/actions";
 
 export default {
   currentUser,
-  usersById,
+  storiesById,
 };

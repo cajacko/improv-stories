@@ -1,5 +1,11 @@
 export default {
   log: (type: string, payload?: any) => {
-    console.log(`@SERVER/${type}:`, payload);
+    const name = `@SERVER/${type}:`;
+
+    if (payload === undefined) {
+      console.log(name);
+    } else {
+      console.log(name, payload);
+    }
   },
 };

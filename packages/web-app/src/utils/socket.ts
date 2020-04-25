@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { ClientMessage, ServerMessage } from "../sharedTypes";
+import { ClientMessage, ServerMessage } from "../types";
 
 const socket = io("http://localhost:4000");
 

@@ -1,7 +1,9 @@
-import { ServerMessage, User } from "../sharedTypes";
-import { removeUserFromBroadcastGroup } from "./broadcastGroup";
+import { ServerMessage } from "../sharedTypes";
+import { removeUserFromBroadcastGroups } from "./broadcastGroup";
 
-export interface ServerUser extends User {
+export interface ServerUser {
+  id: string;
+  broadcastGroupIds: string[];
   send: (action: ServerMessage) => void;
 }
 
@@ -14,8 +16,7 @@ export function addServerUser(
   const user: ServerUser = {
     id: userId,
     send,
-    broadcastGroupId: null,
-    details: {},
+    broadcastGroupIds: [],
   };
 
   usersById[userId] = user;
@@ -28,22 +29,9 @@ export function getUser(userId: string) {
 }
 
 export function removeUser(userId: string): boolean {
-  removeUserFromBroadcastGroup(userId);
+  removeUserFromBroadcastGroups(userId, "ALL");
 
   delete usersById[userId];
-
-  return true;
-}
-
-export function setUserDetails(
-  userId: string,
-  details: ServerUser["details"]
-): boolean {
-  const user = getUser(userId);
-
-  if (!user) return false;
-
-  user.details = details;
 
   return true;
 }

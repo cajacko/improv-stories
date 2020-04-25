@@ -3,12 +3,12 @@ import * as socket from "socket.io";
 import { ClientMessage } from "./sharedTypes";
 import { removeUser, addServerUser, getUser } from "./store/users";
 import handleClientMessage, {
-  broadcastServerUsersToGroup,
+  broadcastUsersToGroup,
 } from "./handleClientMessage";
 import logger from "./logger";
 
-// @ts-ignore
 const { createServer } = require("http");
+const kill = require("kill-port");
 
 const PORT = 4000;
 
@@ -36,7 +36,7 @@ function onSocketDisconnect(sock: socket.Socket) {
 
   if (!user) return;
 
-  broadcastServerUsersToGroup([user.broadcastGroupId]);
+  broadcastUsersToGroup(user.broadcastGroupIds);
 }
 
 io.on("connection", (sock) => {
@@ -49,6 +49,10 @@ io.on("connection", (sock) => {
   });
 });
 
-http.listen(PORT, () => {
-  console.log(`listening on *:${PORT}`);
-});
+kill(PORT, "tcp")
+  .catch()
+  .then(() => {
+    http.listen(PORT, () => {
+      console.log(`listening on *:${PORT}`);
+    });
+  });

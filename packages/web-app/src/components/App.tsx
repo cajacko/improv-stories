@@ -2,6 +2,7 @@ import React from "react";
 import { Provider } from "react-redux";
 import { createGlobalStyle } from "styled-components";
 import { PersistGate } from "redux-persist/integration/react";
+import CssBaseline from "@material-ui/core/CssBaseline";
 import { v4 as uuid } from "uuid";
 import {
   BrowserRouter as Router,
@@ -19,6 +20,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+        <CssBaseline />
         <Global />
         <Router>
           <Switch>

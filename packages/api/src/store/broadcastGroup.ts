@@ -6,47 +6,55 @@ export function getBroadcastGroupUsers(broadcastGroupId: string) {
   return usersByBroadcastGroupId[broadcastGroupId] || null;
 }
 
-export function removeUserFromBroadcastGroup(userId: string): boolean {
+export function removeUserFromBroadcastGroups(
+  userId: string,
+  broadcastGroupIds: "ALL" | string[]
+) {
   const user = getUser(userId);
 
-  if (user) {
-    const broadcastGroupId = user.broadcastGroupId;
+  if (!user) return;
 
-    if (broadcastGroupId) {
-      let users = usersByBroadcastGroupId[broadcastGroupId];
+  const userBroadcastGroupIds = user.broadcastGroupIds;
 
-      if (users) {
-        users = users.filter((id) => id !== userId);
+  userBroadcastGroupIds.forEach((broadcastGroupId) => {
+    if (
+      broadcastGroupIds !== "ALL" &&
+      !userBroadcastGroupIds.includes(broadcastGroupId)
+    ) {
+      return;
+    }
 
-        if (users.length <= 0) {
-          delete usersByBroadcastGroupId[broadcastGroupId];
-        } else {
-          usersByBroadcastGroupId[broadcastGroupId] = users;
-        }
+    let users = usersByBroadcastGroupId[broadcastGroupId];
+
+    if (users) {
+      users = users.filter((id) => id !== userId);
+
+      if (users.length <= 0) {
+        delete usersByBroadcastGroupId[broadcastGroupId];
+      } else {
+        usersByBroadcastGroupId[broadcastGroupId] = users;
       }
     }
-  }
-
-  return true;
+  });
 }
 
-export function addUserToBroadcastGroup(
+export function addUserToBroadcastGroups(
   userId: string,
-  broadcastGroupId: string
-): boolean {
+  broadcastGroupIds: string[]
+) {
   const user = getUser(userId);
 
-  if (!user) return false;
+  if (!user) return;
 
-  removeUserFromBroadcastGroup(userId);
+  broadcastGroupIds.forEach((broadcastGroupId) => {
+    if (!user.broadcastGroupIds.includes(broadcastGroupId)) {
+      user.broadcastGroupIds.push(broadcastGroupId);
+    }
 
-  user.broadcastGroupId = broadcastGroupId;
+    const users = usersByBroadcastGroupId[broadcastGroupId] || [];
 
-  const users = usersByBroadcastGroupId[broadcastGroupId] || [];
+    users.push(userId);
 
-  users.push(userId);
-
-  usersByBroadcastGroupId[broadcastGroupId] = users;
-
-  return true;
+    usersByBroadcastGroupId[broadcastGroupId] = users;
+  });
 }

@@ -5,20 +5,20 @@ import { StoriesByIdState, Story } from "./types";
 const defaultState: StoriesByIdState = {};
 
 const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
-  actions.usersById.setUsers,
+  actions.storiesById.setStoryUsers,
   (state, { payload }) => {
     const newState = { ...state };
 
     const newUserIdsByStoryId: { [K: string]: undefined | string[] } = {};
 
-    payload.users.forEach((user) => {
-      const storyId = user.broadcastGroupId;
+    const storyId = payload.storyId;
 
+    payload.userIds.forEach((userId) => {
       if (!storyId) return;
 
       const userIds = newUserIdsByStoryId[storyId] || [];
 
-      userIds.push(user.id);
+      userIds.push(userId);
 
       newUserIdsByStoryId[storyId] = userIds;
     });
