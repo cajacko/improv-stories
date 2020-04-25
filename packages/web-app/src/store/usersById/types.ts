@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  name: string | null;
+  name: string;
 }
 
 export interface UsersByIdState {

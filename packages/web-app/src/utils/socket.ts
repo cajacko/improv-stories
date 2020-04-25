@@ -4,23 +4,33 @@ import { ClientMessage, ServerMessage } from "../types";
 const socket = io("http://localhost:4000");
 
 let isConnected = false;
+let socketId: string | null = null;
 
 type Listener = (message: ServerMessage) => void;
 type ConnectionListener = (isConnected: boolean) => void;
+type IdListener = (socketId: string | null) => void;
 
 const listeners: {
   [K: string]: undefined | { [K: string]: Listener | undefined };
 } = {};
 
+const idListeners: { [K: string]: IdListener | undefined } = {};
 const connectionListeners: { [K: string]: ConnectionListener | undefined } = {};
 
 function setIsConnected(value: boolean) {
   isConnected = value;
+  socketId = value ? socket.id : null;
 
   Object.values(connectionListeners).forEach((callback) => {
     if (!callback) return;
 
     callback(value);
+  });
+
+  Object.values(idListeners).forEach((callback) => {
+    if (!callback) return;
+
+    callback(socketId);
   });
 }
 
@@ -45,11 +55,18 @@ socket.on("message", function (message: ServerMessage) {
 });
 
 export function getSocketId() {
-  if (!isConnected) {
-    throw new Error("Could not get the socket id, socket disconnected");
-  }
+  return socketId;
+}
 
-  return socket.id;
+export function onSocketIdChange(callback: IdListener) {
+  // @ts-ignore
+  const key = callback as string;
+
+  idListeners[key] = callback;
+
+  return () => {
+    delete idListeners[key];
+  };
 }
 
 export function send(message: ClientMessage) {
