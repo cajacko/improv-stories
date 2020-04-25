@@ -1,0 +1,19 @@
+{
+  "name": "improv-stories",
+  "version": "0.1.0",
+  "main": "index.js",
+  "private": true,
+  "repository": "https://github.com/cajacko/improv-stories.git",
+  "author": "Charlie Jackson <charlie@charliejackson.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "concurrently \"yarn workspace api start\" \"yarn workspace web-app start\""
+  },
+  "workspaces": [
+    "packages/api",
+    "packages/web-app"
+  ],
+  "dependencies": {
+    "concurrently": "^5.2.0"
+  }
+}
