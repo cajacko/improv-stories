@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import { ServerMessage, User, ClientMessage } from "./sharedTypes";
 import { getUser, setUserDetails } from "./store/users";
 import {
@@ -5,6 +6,7 @@ import {
   addUserToBroadcastGroup,
   removeUserFromBroadcastGroup,
 } from "./store/broadcastGroup";
+import logger from "./logger";
 
 function broadcastServerUsersToGroup(
   broadcastGroupId: string | null = null
@@ -29,6 +31,8 @@ function broadcastServerUsersToGroup(
   });
 
   return broadcastToGroup(broadcastGroupId, {
+    id: uuid(),
+    createdAt: new Date().toISOString(),
     type: "BROADCAST_GROUP_USERS",
     payload: { users: transformedServerUsers, broadcastGroupId },
   });
@@ -45,6 +49,8 @@ function broadcastToGroup(
 
   if (!users) return false;
 
+  logger.log("BROADCAST_TO_GROUP", payload.type);
+
   users.forEach((userId) => {
     if (ignoreServerUserIds.includes(userId)) return;
 
@@ -54,6 +60,8 @@ function broadcastToGroup(
 
     user.send(payload);
   });
+
+  logger.log("BROADCAST_TO_GROUP", "done");
 
   return true;
 }

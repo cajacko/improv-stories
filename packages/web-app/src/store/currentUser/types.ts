@@ -1,8 +1,3 @@
-export interface User {
-  name: string;
-  userId: string;
+export interface CurrentUserState {
+  name: string | null;
 }
-
-export interface CurrentUser extends User {}
-
-export type CurrentUserState = null | CurrentUser;

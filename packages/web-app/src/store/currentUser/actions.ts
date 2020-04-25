@@ -1,6 +1,5 @@
 import { createAction } from "typesafe-actions";
 
-export const setCurrentUser = createAction("SET_CURRENT_USER")<{
+export const setCurrentUserName = createAction("SET_CURRENT_USER_NAME")<{
   name: string;
-  userId: string;
 }>();

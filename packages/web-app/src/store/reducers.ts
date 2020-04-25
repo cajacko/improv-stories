@@ -1,6 +1,10 @@
 import { combineReducers } from "redux";
 import currentUser from "./currentUser/reducer";
+import usersById from "./usersById/reducer";
 
-export default combineReducers({
-  currentUser
-});
+export const rawReducersObj = {
+  currentUser,
+  usersById,
+};
+
+export default combineReducers(rawReducersObj);
