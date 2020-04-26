@@ -4,9 +4,34 @@ import { StoriesByIdState, Story } from "./types";
 
 const defaultState: StoriesByIdState = {};
 
-const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
-  actions.storiesById.setStoryUsers,
-  (state, { payload }) => {
+const reducer = createReducer<StoriesByIdState>(defaultState)
+  .handleAction(actions.entriesById.setStoryEntries, (state, { payload }) => {
+    const story = state[payload.storyId];
+
+    const entries = payload.entries.map(({ id }) => id);
+
+    if (!story) {
+      return {
+        ...state,
+        [payload.storyId]: {
+          id: payload.storyId,
+          onlineUserIds: [],
+          entries,
+        },
+      };
+    }
+
+    const newStory = {
+      ...story,
+      entries,
+    };
+
+    return {
+      ...state,
+      [payload.storyId]: newStory,
+    };
+  })
+  .handleAction(actions.storiesById.setStoryUsers, (state, { payload }) => {
     const newState = { ...state };
 
     const newUserIdsByStoryId: { [K: string]: undefined | string[] } = {};
@@ -49,6 +74,7 @@ const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
         const newStory: Story = {
           id: storyId,
           onlineUserIds: newUserIds,
+          entries: [],
         };
 
         newState[storyId] = newStory;
@@ -76,7 +102,6 @@ const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
     });
 
     return hasChanged ? newState : state;
-  }
-);
+  });
 
 export default reducer;

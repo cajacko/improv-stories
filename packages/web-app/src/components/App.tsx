@@ -9,6 +9,7 @@ import {
   Switch,
   Route,
   Redirect,
+  RouteComponentProps,
 } from "react-router-dom";
 import { store, persistor } from "../store";
 import Story from "./Story";
@@ -24,9 +25,12 @@ function App() {
         <Global />
         <Router>
           <Switch>
-            <Route path="/story/:storyId">
-              <Story />
-            </Route>
+            <Route
+              path="/story/:storyId"
+              component={(props: RouteComponentProps<{ storyId: string }>) => (
+                <Story storyId={props.match.params.storyId} />
+              )}
+            ></Route>
             <Redirect to={`/story/${uuid()}`} />
           </Switch>
         </Router>
