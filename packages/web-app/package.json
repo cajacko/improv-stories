@@ -59,6 +59,7 @@
     "@types/redux-logger": "^3.0.7",
     "@types/socket.io-client": "^1.4.32",
     "@types/styled-components": "^5.0.1",
-    "@types/uuid": "^7.0.2"
+    "@types/uuid": "^7.0.2",
+    "jest": "24.9.0"
   }
 }

@@ -146,7 +146,7 @@ export function addUserToStory(
   if (!storeUser) return removeStoryUser(userId, storyId);
 
   story.connectedUsers[userId] = true;
-  storeUser.connectedStories[userId] = true;
+  storeUser.connectedStories[storyId] = true;
 
   if (isActive) {
     story.activeUsers[userId] = true;

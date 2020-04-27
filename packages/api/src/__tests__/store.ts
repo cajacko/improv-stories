@@ -121,10 +121,6 @@ describe("user1 connects", () => {
           expect(user2.sendMock.mock.calls[0][0]).toMatchSnapshot();
         });
 
-        it("Calls the store correctly", () => {
-          expect(getStore()).toMatchSnapshot();
-        });
-
         it("the user2 broadcast count is 1", () => {
           expect(user2.sendMock.mock.calls.length).toBe(1);
         });
@@ -137,6 +133,20 @@ describe("user1 connects", () => {
 
         it("the user1 broadcast count is 2", () => {
           expect(user1.sendMock.mock.calls.length).toBe(2);
+        });
+
+        describe("user1 disconnects", () => {
+          beforeEach(() => {
+            user1.disconnect();
+          });
+
+          it("Broadcasts the correct changes to user2", () => {
+            expect(user2.sendMock.mock.calls[1][0]).toMatchSnapshot();
+          });
+
+          it("the user2 broadcast count is 1", () => {
+            expect(user2.sendMock.mock.calls.length).toBe(2);
+          });
         });
       });
     });

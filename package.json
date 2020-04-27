@@ -7,7 +7,7 @@
   "author": "Charlie Jackson <charlie@charliejackson.com>",
   "license": "MIT",
   "scripts": {
-    "start": "concurrently \"yarn workspace api start\" \"yarn workspace web-app start\"",
+    "start": "concurrently \"yarn workspace api start:watch\" \"yarn workspace web-app start\"",
     "test": "yarn workspace api test:watch"
   },
   "workspaces": [

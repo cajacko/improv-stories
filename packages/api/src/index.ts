@@ -22,6 +22,6 @@ kill(PORT, "tcp")
   .catch()
   .then(() => {
     http.listen(PORT, () => {
-      console.log(`listening on *:${PORT}`);
+      logger.log(`listening on *:${PORT}`);
     });
   });
