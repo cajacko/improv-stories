@@ -4,6 +4,8 @@ import logger from "./logger";
 
 export function broadCastStoriesChanged(storyIds: string[]) {
   storyIds.forEach(broadCastStoryChanged);
+
+  return storyIds;
 }
 
 export function broadCastStoryChanged(storyId: string) {
@@ -25,6 +27,8 @@ export function broadCastStoryChanged(storyId: string) {
 
     storeUser.socket.send(message);
   });
+
+  return storyId;
 }
 
 export default broadCastStoriesChanged;

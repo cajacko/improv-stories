@@ -4910,7 +4910,14 @@ dotenv-expand@5.1.0:
   resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
 
-dotenv@8.2.0:
+dotenv-flow@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/dotenv-flow/-/dotenv-flow-3.1.0.tgz#2abcb4661cf2d0ca5b46d8ff5e95c1045ade9938"
+  integrity sha512-BMA8vfu2DbAx5x5G3C+tgb1hCbONggZTSpBE7B4yCPG5vziKX/lA3CzsjdGKlPvLxZgTbP1qb+KlWux8pYqsmA==
+  dependencies:
+    dotenv "^8.0.0"
+
+dotenv@8.2.0, dotenv@^8.0.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
   integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
@@ -5751,7 +5758,7 @@ find-up@^3.0.0:
   dependencies:
     locate-path "^3.0.0"
 
-firebase@^7.11.0:
+firebase@^7.11.0, firebase@^7.14.2:
   version "7.14.2"
   resolved "https://registry.yarnpkg.com/firebase/-/firebase-7.14.2.tgz#869013ce7ed1b44f1e85521d27863481f1358d6f"
   integrity sha512-B06h1sXe9ODcoHv0EjF4+CEcm2Gl+8eSL35iAYn8ZRi5Qzivlge312iSROLwGeIIO2QOA+2ap9D6/X52eLIAOg==

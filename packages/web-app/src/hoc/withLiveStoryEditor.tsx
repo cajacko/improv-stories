@@ -20,7 +20,7 @@ export interface InjectedLiveStoryEditorProps {
   ) => void;
   currentUserCanEdit: boolean;
   currentlyEditingUser: User | null;
-  countDownTimer: number;
+  countDownTimer: number | null;
 }
 
 interface InjectedHookProps {
@@ -35,7 +35,7 @@ interface InjectedHookProps {
 
 interface State {
   text: null | string;
-  countDownTimer: number;
+  countDownTimer: number | null;
   storyIsActive: boolean;
   listenerKey: string;
 }
@@ -64,15 +64,23 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 
     setTimer = () => {
       this.interval = setInterval(() => {
-        let newTime = this.state.countDownTimer - 1;
+        const { currentlyEditing } = this.props;
 
-        if (newTime < 0) {
-          newTime = timePerEntry;
-          this.onSave();
+        if (!currentlyEditing) {
+          if (this.state.countDownTimer) {
+            this.setState({ countDownTimer: null });
+          }
+
+          return;
         }
 
+        const { willFinishDate } = currentlyEditing;
+
+        const diff = new Date(willFinishDate).getTime() - new Date().getTime();
+        const seconds = Math.floor(diff / 1000);
+
         this.setState({
-          countDownTimer: newTime,
+          countDownTimer: seconds,
         });
       }, 1000);
     };
@@ -158,10 +166,6 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         props.currentlyEditingUser.id === props.currentUserId
       );
     };
-
-    componentDidUpdate() {
-      // const shouldChangeCurrentlyEditingUser = "";
-    }
 
     render() {
       const finalText = this.state.text || "";

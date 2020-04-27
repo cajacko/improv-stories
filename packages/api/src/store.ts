@@ -76,8 +76,12 @@ function createNewStory(
   return newStory;
 }
 
+export function getStoreStory(storyId: string) {
+  return storiesById[storyId];
+}
+
 function getStoryOrCreate(storyId: string): StoreStory {
-  return storiesById[storyId] || createNewStory(storyId);
+  return getStoreStory(storyId) || createNewStory(storyId);
 }
 
 function getUserStories(userId: string): StoreStory[] {
@@ -231,7 +235,7 @@ export function removeStoryUser(
   return storyHasChanged(storyId);
 }
 
-function finishActiveStorySession(storyId: string): ChangedStories {
+export function finishActiveStorySession(storyId: string): ChangedStories {
   const story = getStoryOrCreate(storyId);
 
   const activeSession = story.activeSession;
@@ -241,7 +245,7 @@ function finishActiveStorySession(storyId: string): ChangedStories {
   return storyHasChanged(storyId);
 }
 
-function startNewStorySession(
+export function startNewStorySession(
   session: StoreSession,
   storyId: string
 ): ChangedStories {
