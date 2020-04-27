@@ -5,6 +5,7 @@ import withLiveStoryEditor, {
 } from "../hoc/withLiveStoryEditor";
 import useStoryUsers from "../hooks/useStoryUsers";
 import useStoryHistory from "../hooks/useStoryHistory";
+import useSetUserDetails from "../hooks/useSetUserDetails";
 import ToolBar from "./ToolBar";
 
 interface OwnProps {
@@ -21,6 +22,7 @@ function Story({
   onTextChange,
   countDownTimer,
 }: Props) {
+  useSetUserDetails();
   // TODO: this needs to constantly request user names from onlineIds with no name
   // useGetUsers(storyId);
   useAddCurrentUserToStory(storyId);
@@ -45,8 +47,8 @@ function Story({
       </p>
       {users && (
         <ul>
-          {users.map(({ id }) => (
-            <li key={id}>{id}</li>
+          {users.map(({ id, name }) => (
+            <li key={id}>{name || "Anonymous"}</li>
           ))}
         </ul>
       )}
