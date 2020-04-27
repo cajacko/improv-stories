@@ -2,9 +2,12 @@ import { StateType, ActionType } from "typesafe-actions";
 import { Dispatch } from "redux";
 
 declare module "ReduxTypes" {
+  type Action = ActionType<typeof import("./actions").default>;
+
   export type Store = StateType<typeof import("./index").default>;
-  export type RootAction = ActionType<typeof import("./actions").default>;
+  export type RootAction = Action;
   export type RootState = StateType<typeof import("./reducers").default>;
+  export type Dispatch = Dispatch<Action>;
 }
 
 declare module "typesafe-actions" {

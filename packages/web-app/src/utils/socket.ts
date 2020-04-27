@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { ClientMessage, ServerMessage } from "../types";
+import { ClientMessage, ServerMessage } from "../sharedTypes";
 
 const socket = io("http://localhost:4000");
 
@@ -43,6 +43,8 @@ socket.on("disconnect", function () {
 });
 
 socket.on("message", function (message: ServerMessage) {
+  console.log("socket receive:", message);
+
   const typeListeners = listeners[message.type];
 
   if (!typeListeners) return;
@@ -58,10 +60,7 @@ export function getSocketId() {
   return socketId;
 }
 
-export function onSocketIdChange(callback: IdListener) {
-  // @ts-ignore
-  const key = callback as string;
-
+export function onSocketIdChange(key: string, callback: IdListener) {
   idListeners[key] = callback;
 
   return () => {
@@ -74,14 +73,16 @@ export function send(message: ClientMessage) {
     throw new Error("Could not send message, socket disconnected");
   }
 
+  console.log("socket send:", message);
   socket.send(message);
 }
 
-export function listen(type: ServerMessage["type"], callback: Listener) {
+export function listen(
+  type: ServerMessage["type"],
+  key: string,
+  callback: Listener
+) {
   let typeListeners = listeners[type] || {};
-
-  // @ts-ignore
-  const key = callback as string;
 
   typeListeners[key] = callback;
 
@@ -100,10 +101,7 @@ export function getIsConnected() {
   return isConnected;
 }
 
-export function onConnectionChange(callback: ConnectionListener) {
-  // @ts-ignore
-  const key = callback as string;
-
+export function onConnectionChange(key: string, callback: ConnectionListener) {
   connectionListeners[key] = callback;
 
   return () => {

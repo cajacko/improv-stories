@@ -39,7 +39,7 @@ function useStoryHistory(storyId: string): Entry[] {
 
     if (!story) return [];
 
-    return story.entries;
+    return story.entryIds;
   });
 
   const entries = useSelector((state) => {

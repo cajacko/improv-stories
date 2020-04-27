@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`user1 connects user1 added to story1 Broadcasts the correct changes to user1 1`] = `
+Object {
+  "createdAt": "2020-02-01T00:04:00.000Z",
+  "id": "1",
+  "payload": Object {
+    "activeSession": null,
+    "activeUsers": Array [],
+    "connectedUsers": Array [
+      Object {
+        "dateAdded": "2020-02-01T00:01:00.000Z",
+        "dateModified": "2020-02-01T00:01:00.000Z",
+        "id": "user1",
+        "name": null,
+        "version": 0,
+      },
+    ],
+    "dateCreated": "2020-02-01T00:02:00.000Z",
+    "dateModified": "2020-02-01T00:03:00.000Z",
+    "id": "story1",
+    "lastSession": null,
+    "version": 2,
+  },
+  "type": "STORY_CHANGED",
+}
+`;
+
+exports[`user1 connects user1 added to story1 user2 connects user2 added to story1 Broadcasts the correct changes to user2 1`] = `
+Object {
+  "createdAt": "2020-02-01T00:08:00.000Z",
+  "id": "3",
+  "payload": Object {
+    "activeSession": null,
+    "activeUsers": Array [],
+    "connectedUsers": Array [
+      Object {
+        "dateAdded": "2020-02-01T00:01:00.000Z",
+        "dateModified": "2020-02-01T00:01:00.000Z",
+        "id": "user1",
+        "name": null,
+        "version": 0,
+      },
+      Object {
+        "dateAdded": "2020-02-01T00:05:00.000Z",
+        "dateModified": "2020-02-01T00:05:00.000Z",
+        "id": "user2",
+        "name": null,
+        "version": 0,
+      },
+    ],
+    "dateCreated": "2020-02-01T00:02:00.000Z",
+    "dateModified": "2020-02-01T00:06:00.000Z",
+    "id": "story1",
+    "lastSession": null,
+    "version": 3,
+  },
+  "type": "STORY_CHANGED",
+}
+`;
+
+exports[`user1 connects user1 added to story1 user2 connects user2 added to story1 Calls the store correctly 1`] = `
+Object {
+  "storiesById": Object {
+    "story1": Object {
+      "activeSession": null,
+      "activeUsers": Object {},
+      "connectedUsers": Object {
+        "user1": true,
+        "user2": true,
+      },
+      "dateCreated": "2020-02-01T00:02:00.000Z",
+      "dateModified": "2020-02-01T00:06:00.000Z",
+      "id": "story1",
+      "lastSession": null,
+      "version": 3,
+    },
+  },
+  "usersById": Object {
+    "user1": Object {
+      "connectedStories": Object {
+        "user1": true,
+      },
+      "dateAdded": "2020-02-01T00:01:00.000Z",
+      "dateModified": "2020-02-01T00:01:00.000Z",
+      "id": "user1",
+      "name": null,
+      "socket": Object {
+        "id": "user1",
+        "on": [Function],
+        "send": [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "createdAt": "2020-02-01T00:04:00.000Z",
+                "id": "1",
+                "payload": Object {
+                  "activeSession": null,
+                  "activeUsers": Array [],
+                  "connectedUsers": Array [
+                    Object {
+                      "dateAdded": "2020-02-01T00:01:00.000Z",
+                      "dateModified": "2020-02-01T00:01:00.000Z",
+                      "id": "user1",
+                      "name": null,
+                      "version": 0,
+                    },
+                  ],
+                  "dateCreated": "2020-02-01T00:02:00.000Z",
+                  "dateModified": "2020-02-01T00:03:00.000Z",
+                  "id": "story1",
+                  "lastSession": null,
+                  "version": 2,
+                },
+                "type": "STORY_CHANGED",
+              },
+            ],
+            Array [
+              Object {
+                "createdAt": "2020-02-01T00:07:00.000Z",
+                "id": "2",
+                "payload": Object {
+                  "activeSession": null,
+                  "activeUsers": Array [],
+                  "connectedUsers": Array [
+                    Object {
+                      "dateAdded": "2020-02-01T00:01:00.000Z",
+                      "dateModified": "2020-02-01T00:01:00.000Z",
+                      "id": "user1",
+                      "name": null,
+                      "version": 0,
+                    },
+                    Object {
+                      "dateAdded": "2020-02-01T00:05:00.000Z",
+                      "dateModified": "2020-02-01T00:05:00.000Z",
+                      "id": "user2",
+                      "name": null,
+                      "version": 0,
+                    },
+                  ],
+                  "dateCreated": "2020-02-01T00:02:00.000Z",
+                  "dateModified": "2020-02-01T00:06:00.000Z",
+                  "id": "story1",
+                  "lastSession": null,
+                  "version": 3,
+                },
+                "type": "STORY_CHANGED",
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "version": 0,
+    },
+    "user2": Object {
+      "connectedStories": Object {
+        "user2": true,
+      },
+      "dateAdded": "2020-02-01T00:05:00.000Z",
+      "dateModified": "2020-02-01T00:05:00.000Z",
+      "id": "user2",
+      "name": null,
+      "socket": Object {
+        "id": "user2",
+        "on": [Function],
+        "send": [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "createdAt": "2020-02-01T00:08:00.000Z",
+                "id": "3",
+                "payload": Object {
+                  "activeSession": null,
+                  "activeUsers": Array [],
+                  "connectedUsers": Array [
+                    Object {
+                      "dateAdded": "2020-02-01T00:01:00.000Z",
+                      "dateModified": "2020-02-01T00:01:00.000Z",
+                      "id": "user1",
+                      "name": null,
+                      "version": 0,
+                    },
+                    Object {
+                      "dateAdded": "2020-02-01T00:05:00.000Z",
+                      "dateModified": "2020-02-01T00:05:00.000Z",
+                      "id": "user2",
+                      "name": null,
+                      "version": 0,
+                    },
+                  ],
+                  "dateCreated": "2020-02-01T00:02:00.000Z",
+                  "dateModified": "2020-02-01T00:06:00.000Z",
+                  "id": "story1",
+                  "lastSession": null,
+                  "version": 3,
+                },
+                "type": "STORY_CHANGED",
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "version": 0,
+    },
+  },
+}
+`;

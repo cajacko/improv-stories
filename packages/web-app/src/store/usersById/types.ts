@@ -1,7 +1,4 @@
-export interface User {
-  id: string;
-  name: string;
-}
+import { User } from "../../sharedTypes";
 
 export interface UsersByIdState {
   [K: string]: User | undefined;

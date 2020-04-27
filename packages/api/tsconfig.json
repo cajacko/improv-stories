@@ -7,7 +7,6 @@
     "rootDir": "src",
     "removeComments": true,
     "skipLibCheck": true,
-    "types": ["node"],
     "strict": true
   },
   "exclude": ["node_modules"],

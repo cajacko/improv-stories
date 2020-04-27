@@ -1,10 +1,15 @@
 import React from "react";
 import { v4 as uuid } from "uuid";
-import { User } from "../store/usersById/types";
+import { useSelector, useDispatch } from "react-redux";
+import { Dispatch } from "redux";
+import ReduxTypes from "ReduxTypes";
+import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
 import useCurrentUserId from "../hooks/useCurrentUserId";
+import useStoryUsers from "../hooks/useStoryUsers";
 import { useEntriesRef } from "../hooks/useStoryRef";
 import { Entry } from "../store/entriesById/types";
+import { CurrentlyEditing } from "../store/storiesById/types";
 
 const timePerEntry = 20;
 
@@ -22,11 +27,17 @@ interface InjectedHookProps {
   currentUserId: ReturnType<typeof useCurrentUserId>;
   entriesRef: ReturnType<typeof useEntriesRef>;
   storyId: string;
+  onlineUsers: User[];
+  currentlyEditing: CurrentlyEditing | null;
+  dispatch: Dispatch<ReduxTypes.Action>;
+  currentlyEditingUser: User | null;
 }
 
 interface State {
   text: null | string;
   countDownTimer: number;
+  storyIsActive: boolean;
+  listenerKey: string;
 }
 
 interface OwnProps {
@@ -35,16 +46,17 @@ interface OwnProps {
 
 type RemoveListener = () => void;
 
+type HocProps<P> = InjectedHookProps & { originalProps: P };
+
 function withLiveStoryEditor<P extends OwnProps = OwnProps>(
   Component: React.ComponentType<P & InjectedLiveStoryEditorProps>
 ): React.ComponentType<P> {
-  class LiveStoryEditorHoc extends React.Component<
-    InjectedHookProps & { originalProps: P },
-    State
-  > {
+  class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
     state: State = {
       text: null,
       countDownTimer: timePerEntry,
+      storyIsActive: false,
+      listenerKey: uuid(),
     };
 
     interval: null | number = null;
@@ -97,17 +109,10 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         send({
           id: uuid(),
           createdAt: new Date().toISOString(),
-          type: "BROADCAST_TO_GROUPS",
+          type: "ADD_STORY_ENTRY",
           payload: {
-            broadcastGroupIds: [this.props.storyId],
-            payload: {
-              id: uuid(),
-              createdAt: new Date().toISOString(),
-              type: "SET_STORY_CONTENT",
-              payload: {
-                content: newText,
-              },
-            },
+            entry: newText,
+            storyId: this.props.storyId,
           },
         });
       } catch {}
@@ -116,13 +121,18 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     componentDidMount() {
       this.setTimer();
 
-      this.removeTextListener = listen("SET_STORY_CONTENT", (message) => {
-        if (message.type !== "SET_STORY_CONTENT") return;
+      this.removeTextListener = listen(
+        "STORY_CHANGED",
+        this.state.listenerKey,
+        (message) => {
+          if (message.type !== "STORY_CHANGED") return;
+          if (!message.payload.activeSession) return;
 
-        this.setState({
-          text: message.payload.content,
-        });
-      });
+          this.setState({
+            text: message.payload.activeSession.finalEntry,
+          });
+        }
+      );
     }
 
     componentWillUnmount() {
@@ -135,22 +145,32 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       }
     }
 
-    render() {
-      const currentlyEditingUser: User | null = {
-        id: "wooo",
-        name: "Charlie",
+    static getDerivedStateFromProps(props: HocProps<P>): Partial<State> {
+      return {
+        storyIsActive: !!props.currentlyEditingUser,
       };
+    }
 
-      const currentUserCanEdit =
-        currentlyEditingUser.id === this.props.currentUserId;
+    getCurrentUserCanEdit = (props = this.props) => {
+      return (
+        this.state.storyIsActive &&
+        !!props.currentlyEditingUser &&
+        props.currentlyEditingUser.id === props.currentUserId
+      );
+    };
 
+    componentDidUpdate() {
+      // const shouldChangeCurrentlyEditingUser = "";
+    }
+
+    render() {
       const finalText = this.state.text || "";
 
       const newProps: InjectedLiveStoryEditorProps = {
         text: finalText,
         onTextChange: this.onTextChange,
-        currentUserCanEdit,
-        currentlyEditingUser,
+        currentUserCanEdit: this.getCurrentUserCanEdit(),
+        currentlyEditingUser: this.props.currentlyEditingUser,
         countDownTimer: this.state.countDownTimer,
       };
 
@@ -161,6 +181,25 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
   const LiveStoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
     const currentUserId = useCurrentUserId();
     const entriesRef = useEntriesRef(props.storyId);
+    const onlineUsers = useStoryUsers(props.storyId);
+
+    const currentlyEditing = useSelector((state) => {
+      const story = state.storiesById[props.storyId];
+
+      if (!story) return null;
+
+      return story.currentlyEditing;
+    });
+
+    const currentlyEditingUser = useSelector((state) => {
+      if (!currentlyEditing) return null;
+
+      const user = state.usersById[currentlyEditing.userId];
+
+      return user || null;
+    });
+
+    const dispatch = useDispatch();
 
     return (
       <LiveStoryEditorHoc
@@ -168,6 +207,10 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         currentUserId={currentUserId}
         entriesRef={entriesRef}
         storyId={props.storyId}
+        onlineUsers={onlineUsers}
+        currentlyEditing={currentlyEditing}
+        dispatch={dispatch}
+        currentlyEditingUser={currentlyEditingUser}
       />
     );
   };

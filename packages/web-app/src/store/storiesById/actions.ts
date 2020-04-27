@@ -1,6 +1,4 @@
 import { createAction } from "typesafe-actions";
+import { Story } from "../../sharedTypes";
 
-export const setStoryUsers = createAction("SET_STORY_USERS")<{
-  storyId: string;
-  userIds: string[];
-}>();
+export const setStory = createAction("SET_STORY")<Story>();

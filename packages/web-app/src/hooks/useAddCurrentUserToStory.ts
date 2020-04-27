@@ -7,38 +7,34 @@ interface AddedUserState {
 }
 
 function useAddCurrentUserToStory(storyId: string) {
+  // TODO: Instead check that our userId is in the connectedUsers for this story
   const [addedUserState, setAddedUserState] = React.useState<AddedUserState>(
     {}
   );
-  const [addInterval, setAddInterval] = React.useState<null | number>(null);
 
-  const addUserToBroadcastGroup = React.useCallback(() => {
+  React.useEffect(() => {
     if (addedUserState[storyId]) return;
 
-    try {
-      send({
-        id: uuid(),
-        createdAt: new Date().toISOString(),
-        type: "ADD_USER_TO_BROADCAST_GROUPS",
-        payload: {
-          broadcastGroupIds: [storyId],
-          removeFromBroadcastGroups: "ALL",
-        },
-      });
+    const interval = setInterval(() => {
+      try {
+        send({
+          id: uuid(),
+          createdAt: new Date().toISOString(),
+          type: "ADD_USER_TO_STORY",
+          payload: {
+            storyId: storyId,
+            isActive: true,
+          },
+        });
 
-      setAddedUserState({
-        [storyId]: true,
-      });
-    } catch {
-      setAddInterval(setTimeout(addUserToBroadcastGroup, 500));
-    }
+        clearInterval(interval);
 
-    return () => {
-      if (addInterval) clearTimeout(addInterval);
-    };
-  }, [storyId, setAddedUserState, addInterval, setAddInterval, addedUserState]);
-
-  React.useEffect(addUserToBroadcastGroup, [addUserToBroadcastGroup]);
+        setAddedUserState({
+          [storyId]: true,
+        });
+      } catch {}
+    }, 500);
+  }, [storyId, addedUserState, setAddedUserState]);
 }
 
 export default useAddCurrentUserToStory;

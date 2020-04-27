@@ -17,6 +17,8 @@ import "../store/socketActionDispatcher";
 
 const Global = createGlobalStyle``;
 
+// TODO: Disable the view if have no user id. Don't hide, just grey out.
+
 function App() {
   return (
     <Provider store={store}>
