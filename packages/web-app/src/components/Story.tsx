@@ -59,7 +59,7 @@ function Story({
       >
         {text}
       </textarea>
-      <p>Time Left: {countDownTimer}</p>
+      {countDownTimer !== null && <p>Time Left: {countDownTimer}</p>}
     </div>
   );
 }

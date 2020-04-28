@@ -3,13 +3,10 @@ import broadCastStoriesChanged from "./broadCastStoriesChanged";
 import { addUser, removeUser, getGetDate } from "./store";
 import { ClientMessage } from "./sharedTypes";
 import handleClientMessage from "./handleClientMessage";
-import logger from "./logger";
 
 function setupSockets(io: socket.Server) {
   function onClientMessage(userId: string) {
     return (message: ClientMessage) => {
-      logger.log("ON_CLIENT_MESSAGE", message.type);
-
       handleClientMessage(userId, message);
     };
   }
@@ -39,11 +36,9 @@ function setupSockets(io: socket.Server) {
   }
 
   io.on("connection", (sock) => {
-    logger.log("CONNECTION");
     onSocketConnect(sock);
 
     sock.on("disconnect", () => {
-      logger.log("DISCONNECT");
       onSocketDisconnect(sock);
     });
   });

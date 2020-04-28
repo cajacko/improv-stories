@@ -11,8 +11,6 @@ import { useEntriesRef } from "../hooks/useStoryRef";
 import { Entry } from "../store/entriesById/types";
 import { CurrentlyEditing } from "../store/storiesById/types";
 
-const timePerEntry = 20;
-
 export interface InjectedLiveStoryEditorProps {
   text: string;
   onTextChange: (
@@ -54,7 +52,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
   class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
     state: State = {
       text: null,
-      countDownTimer: timePerEntry,
+      countDownTimer: null,
       storyIsActive: false,
       listenerKey: uuid(),
     };
@@ -77,7 +75,10 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         const { willFinishDate } = currentlyEditing;
 
         const diff = new Date(willFinishDate).getTime() - new Date().getTime();
-        const seconds = Math.floor(diff / 1000);
+        let seconds: number | null = Math.floor(diff / 1000);
+        if (seconds < 0) seconds = null;
+
+        if (this.state.countDownTimer === seconds) return;
 
         this.setState({
           countDownTimer: seconds,
@@ -175,7 +176,8 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         onTextChange: this.onTextChange,
         currentUserCanEdit: this.getCurrentUserCanEdit(),
         currentlyEditingUser: this.props.currentlyEditingUser,
-        countDownTimer: this.state.countDownTimer,
+        countDownTimer:
+          this.props.currentlyEditing && this.state.countDownTimer,
       };
 
       return <Component {...this.props.originalProps} {...newProps} />;

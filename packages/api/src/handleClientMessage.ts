@@ -1,5 +1,4 @@
-import * as firebase from "firebase/app";
-import "firebase/database";
+import getDatabase from "./getDatabase";
 import broadCastStoriesChanged from "./broadCastStoriesChanged";
 import { ClientMessage } from "./sharedTypes";
 import {
@@ -15,20 +14,10 @@ import {
   getGetDate,
   getGetId,
 } from "./store";
-import logger from "./logger";
+import getRand from "./getRand";
 
-var config = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-};
-
-firebase.initializeApp(config);
-
-const database = firebase.database();
-
-const seconds = 20;
+// Want 1 more as we always round down the number in ui
+const seconds = 21;
 
 function switchOverMessage(
   userId: string,
@@ -68,75 +57,72 @@ function switchOverMessage(
 const storyTimeouts: { [K: string]: number | undefined } = {};
 
 function storyLoop(storyId: string) {
+  const clear = () => {
+    if (storyTimeouts[storyId]) clearTimeout(storyTimeouts[storyId]);
+  };
+
   const story = getStoreStory(storyId);
 
-  if (!story) return;
+  if (!story) {
+    clear();
+    return;
+  }
 
   const activeUsers = Object.keys(story.activeUsers);
+  const isActive = activeUsers.length >= 2 || !!story.activeSession;
 
-  const isActive = activeUsers.length >= 2;
+  if (isActive && !story.activeSession) {
+    const id = getGetId()();
+    const startDate = getGetDate()();
+    const endDate = new Date(startDate);
+    endDate.setSeconds(endDate.getSeconds() + seconds);
 
-  if (isActive) {
-    if (!story.activeSession) {
-      const id = getGetId()();
-      const startDate = getGetDate()();
-      const endDate = new Date(startDate);
-      endDate.setSeconds(endDate.getSeconds() + seconds);
+    const lastUserId = story.lastSession && story.lastSession.user;
 
-      const lastUserId = story.lastSession && story.lastSession.user;
+    const nextUserIds = activeUsers.filter((userId) => userId !== lastUserId);
 
-      const nextUserIds = activeUsers.filter((userId) => userId !== lastUserId);
+    const nextUserId = nextUserIds[Math.floor(getRand() * nextUserIds.length)];
 
-      const nextUserId =
-        nextUserIds[Math.floor(Math.random() * nextUserIds.length)];
+    startNewStorySession(
+      {
+        id,
+        dateModified: startDate,
+        dateStarted: startDate,
+        dateWillFinish: endDate.toISOString(),
+        entries: [],
+        finalEntry: "",
+        version: 0,
+        user: nextUserId,
+      },
+      storyId
+    );
 
-      startNewStorySession(
-        {
-          id,
-          dateModified: startDate,
-          dateStarted: startDate,
-          dateWillFinish: endDate.toISOString(),
-          entries: [],
-          finalEntry: "",
-          version: 0,
-          user: nextUserId,
-        },
-        storyId
-      );
+    broadCastStoriesChanged([storyId]);
 
+    storyTimeouts[storyId] = setTimeout(() => {
+      const story = getStoreStory(storyId);
+
+      if (story && story.activeSession && story.activeSession.entries.length) {
+        const ref = getDatabase().ref(`/storiesById/${storyId}/entries`);
+
+        const entry = {
+          id: story.activeSession.id,
+          dateFinished: story.activeSession.dateWillFinish,
+          dateStarted: story.activeSession.dateStarted,
+          finalText: story.activeSession.finalEntry,
+          parts: story.activeSession.entries,
+          userId: story.activeSession.user,
+        };
+
+        ref.push(entry);
+      }
+
+      finishActiveStorySession(storyId);
+      storyLoop(storyId);
       broadCastStoriesChanged([storyId]);
-
-      storyTimeouts[storyId] = setTimeout(() => {
-        const story = getStoreStory(storyId);
-
-        if (
-          story &&
-          story.activeSession &&
-          story.activeSession.entries.length
-        ) {
-          const ref = database.ref(`/storiesById/${storyId}/entries`);
-
-          const entry = {
-            id: story.activeSession.id,
-            dateFinished: story.activeSession.dateWillFinish,
-            dateStarted: story.activeSession.dateStarted,
-            finalText: story.activeSession.finalEntry,
-            parts: story.activeSession.entries,
-            userId: story.activeSession.user,
-          };
-
-          logger.log("SAVE_STORY");
-
-          ref.push(entry);
-        }
-
-        finishActiveStorySession(storyId);
-        storyLoop(storyId);
-        broadCastStoriesChanged([storyId]);
-      }, seconds * 1000);
-    }
-  } else {
-    if (storyTimeouts[storyId]) clearTimeout(storyTimeouts[storyId]);
+    }, seconds * 1000);
+  } else if (activeUsers.length <= 0) {
+    clear();
 
     if (story.activeSession) {
       finishActiveStorySession(storyId);

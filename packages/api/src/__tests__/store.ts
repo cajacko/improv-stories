@@ -5,6 +5,7 @@ import {
   __TESTS__setGetDate as setGetDate,
   __TESTS__setGetId as setGetId,
 } from "../store";
+import { __TESTS__setGetRand as setGetRand } from "../getRand";
 
 import setupSockets from "../setupSockets";
 
@@ -68,6 +69,15 @@ beforeEach(() => {
   setGetId(() => {
     id += 1;
     return `${id}`;
+  });
+
+  let rand = 1;
+
+  setGetRand(() => {
+    rand += 1;
+    if (rand >= 10) rand = 1;
+
+    return rand / 10;
   });
 });
 
@@ -144,8 +154,121 @@ describe("user1 connects", () => {
             expect(user2.sendMock.mock.calls[1][0]).toMatchSnapshot();
           });
 
-          it("the user2 broadcast count is 1", () => {
+          it("the user2 broadcast count is 2", () => {
             expect(user2.sendMock.mock.calls.length).toBe(2);
+          });
+        });
+
+        describe("user1 becomes active on story1", () => {
+          beforeEach(() => {
+            user1.sendClientMessage({
+              type: "ADD_ACTIVE_USER_TO_STORY",
+              payload: {
+                storyId: story1Id,
+              },
+            });
+          });
+
+          it("Broadcasts the correct changes to user2", () => {
+            expect(user2.sendMock.mock.calls[1][0]).toMatchSnapshot();
+          });
+
+          it("the user2 broadcast count is 2", () => {
+            expect(user2.sendMock.mock.calls.length).toBe(2);
+          });
+
+          it("Broadcasts the same changes to user1", () => {
+            expect(user1.sendMock.mock.calls[2][0].payload).toEqual(
+              user2.sendMock.mock.calls[1][0].payload
+            );
+          });
+
+          it("the user1 broadcast count is 3", () => {
+            expect(user1.sendMock.mock.calls.length).toBe(3);
+          });
+
+          describe("user2 becomes active on story1", () => {
+            beforeEach(() => {
+              user2.sendClientMessage({
+                type: "ADD_ACTIVE_USER_TO_STORY",
+                payload: {
+                  storyId: story1Id,
+                },
+              });
+            });
+
+            it("Broadcasts the correct changes to user2", () => {
+              expect(user2.sendMock.mock.calls[2][0]).toMatchSnapshot();
+              expect(user2.sendMock.mock.calls[3][0]).toMatchSnapshot();
+            });
+
+            it("the user2 broadcast count is 4", () => {
+              expect(user2.sendMock.mock.calls.length).toBe(4);
+            });
+
+            it("Broadcasts the same changes to user1", () => {
+              expect(user1.sendMock.mock.calls[3][0].payload).toEqual(
+                user2.sendMock.mock.calls[2][0].payload
+              );
+
+              expect(user1.sendMock.mock.calls[4][0].payload).toEqual(
+                user2.sendMock.mock.calls[3][0].payload
+              );
+            });
+
+            it("the user1 broadcast count is 5", () => {
+              expect(user1.sendMock.mock.calls.length).toBe(5);
+            });
+
+            it("user1 is the active user", () => {
+              expect(
+                user2.sendMock.mock.calls[3][0].payload.activeSession.user.id
+              ).toBe("user1");
+            });
+
+            describe("user1 disconnects", () => {
+              beforeEach(() => {
+                user1.disconnect();
+              });
+
+              it("Broadcasts the correct changes to user2", () => {
+                expect(user2.sendMock.mock.calls[4][0]).toMatchSnapshot();
+              });
+
+              it("the user2 broadcast count is 5", () => {
+                expect(user2.sendMock.mock.calls.length).toBe(5);
+              });
+
+              it("the active session is the same as before", () => {
+                expect(
+                  user2.sendMock.mock.calls[4][0].payload.activeSession.id
+                ).toEqual(
+                  user2.sendMock.mock.calls[3][0].payload.activeSession.id
+                );
+              });
+            });
+
+            describe("user2 disconnects", () => {
+              beforeEach(() => {
+                user2.disconnect();
+              });
+
+              it("Broadcasts the correct changes to user1", () => {
+                expect(user1.sendMock.mock.calls[5][0]).toMatchSnapshot();
+              });
+
+              it("the user1 broadcast count is 6", () => {
+                expect(user1.sendMock.mock.calls.length).toBe(6);
+              });
+
+              it("the active session is the same as before", () => {
+                expect(
+                  user1.sendMock.mock.calls[5][0].payload.activeSession
+                ).toEqual(
+                  user1.sendMock.mock.calls[4][0].payload.activeSession
+                );
+              });
+            });
           });
         });
       });

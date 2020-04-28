@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "concurrently \"yarn workspace api start:watch\" \"yarn workspace web-app start\"",
+    "start:build": "concurrently \"yarn workspace api build && yarn workspace api start\" \"yarn workspace web-app start\"",
     "test": "yarn workspace api test:watch"
   },
   "workspaces": [

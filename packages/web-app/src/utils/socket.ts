@@ -43,8 +43,6 @@ socket.on("disconnect", function () {
 });
 
 socket.on("message", function (message: ServerMessage) {
-  console.log("socket receive:", message);
-
   const typeListeners = listeners[message.type];
 
   if (!typeListeners) return;
@@ -73,7 +71,6 @@ export function send(message: ClientMessage) {
     throw new Error("Could not send message, socket disconnected");
   }
 
-  console.log("socket send:", message);
   socket.send(message);
 }
 

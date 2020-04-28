@@ -276,32 +276,30 @@ export function addStoryEntry(
   return storyHasChanged(storyId);
 }
 
-function userIdToUser(userId: string): User | null {
+function userIdToUser(userId: string): User {
   const storeUser = usersById[userId];
 
-  if (!storeUser) return null;
-
-  const user: User = {
-    id: storeUser.id,
-    name: storeUser.name,
-    dateAdded: storeUser.dateAdded,
-    dateModified: storeUser.dateModified,
-    version: storeUser.version,
-  };
+  const user: User = storeUser
+    ? {
+        id: storeUser.id,
+        name: storeUser.name,
+        dateAdded: storeUser.dateAdded,
+        dateModified: storeUser.dateModified,
+        version: storeUser.version,
+      }
+    : {
+        id: userId,
+        name: null,
+        dateAdded: getDate(),
+        dateModified: getDate(),
+        version: 0,
+      };
 
   return user;
 }
 
 function userIdsToUsers(userIds: string[]): User[] {
-  const users: User[] = [];
-
-  userIds.forEach((userId) => {
-    const user = userIdToUser(userId);
-
-    if (user) users.push(user);
-  });
-
-  return users;
+  return userIds.map(userIdToUser);
 }
 
 export function getStory(storyId: string): Story {
@@ -310,13 +308,9 @@ export function getStory(storyId: string): Story {
   function getSession(session: StoreSession | null): Session | null {
     if (!session) return null;
 
-    const user = userIdToUser(session.user);
-
-    if (!user) return null;
-
     return {
       ...session,
-      user,
+      user: userIdToUser(session.user),
     };
   }
 

@@ -9,7 +9,6 @@ function useCurrentUserId() {
   React.useEffect(
     () =>
       onSocketIdChange(listenerKey, (socketId) => {
-        console.log("setCurrentUserId", socketId);
         setCurrentUserId(socketId);
       }),
     [setCurrentUserId, listenerKey]
