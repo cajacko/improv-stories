@@ -26,10 +26,9 @@ const Global = createGlobalStyle`
     right: 0; 
     bottom: 0; 
     margin: 0;
+    overflow: hidden;
   }
 `;
-
-// TODO: Disable the view if have no user id. Don't hide, just grey out.
 
 function App() {
   return (

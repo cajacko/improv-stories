@@ -11,11 +11,10 @@ import { useEntriesRef } from "../hooks/useStoryRef";
 import { Entry } from "../store/entriesById/types";
 import { CurrentlyEditing } from "../store/storiesById/types";
 
+const keyEvent = "keydown";
+
 export interface InjectedLiveStoryEditorProps {
   text: string;
-  onTextChange: (
-    value: string | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => void;
   currentUserCanEdit: boolean;
   currentlyEditingUser: User | null;
   countDownTimer: number | null;
@@ -142,7 +141,32 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
           });
         }
       );
+
+      document.addEventListener(keyEvent, this.onKeyDown);
     }
+
+    onKeyDown: (event: KeyboardEvent) => void = (event) => {
+      if (!this.getCurrentUserCanEdit()) return;
+
+      const key = event.key;
+
+      let text = this.state.text || "";
+
+      switch (key) {
+        case "Backspace":
+          text = text.slice(0, -1);
+          break;
+        case "Enter":
+          text = `${text}\n`;
+          break;
+        default:
+          if (key.length > 1) return;
+          text = `${text}${key}`;
+          break;
+      }
+
+      this.onTextChange(text);
+    };
 
     componentWillUnmount() {
       if (this.interval) {
@@ -152,6 +176,8 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       if (this.removeTextListener) {
         this.removeTextListener();
       }
+
+      document.removeEventListener(keyEvent, this.onKeyDown);
     }
 
     static getDerivedStateFromProps(props: HocProps<P>): Partial<State> {
@@ -173,7 +199,6 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 
       const newProps: InjectedLiveStoryEditorProps = {
         text: finalText,
-        onTextChange: this.onTextChange,
         currentUserCanEdit: this.getCurrentUserCanEdit(),
         currentlyEditingUser: this.props.currentlyEditingUser,
         countDownTimer:

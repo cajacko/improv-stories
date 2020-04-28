@@ -8,6 +8,7 @@ const Container = styled.div`
   flex: 1;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 `;
 
 const Overlay = styled.div`
