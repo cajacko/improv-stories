@@ -15,6 +15,9 @@ import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 
 const useStyles = makeStyles((theme) => ({
+  appBar: {
+    position: "relative",
+  },
   root: {
     flexGrow: 1,
   },
@@ -117,7 +120,7 @@ function ToolBar({ storyId }: { storyId: string }) {
   ]);
 
   return (
-    <AppBar>
+    <AppBar className={classes.appBar}>
       <Toolbar>
         <IconButton
           edge="start"

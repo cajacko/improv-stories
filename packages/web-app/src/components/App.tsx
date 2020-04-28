@@ -14,6 +14,7 @@ import {
 import { store, persistor } from "../store";
 import Story from "./Story";
 import "../store/socketActionDispatcher";
+import LoadingOverlay from "./LoadingOverlay";
 
 const Global = createGlobalStyle`
   html, body, #root { 
@@ -37,15 +38,17 @@ function App() {
         <CssBaseline />
         <Global />
         <Router>
-          <Switch>
-            <Route
-              path="/story/:storyId"
-              component={(props: RouteComponentProps<{ storyId: string }>) => (
-                <Story storyId={props.match.params.storyId} />
-              )}
-            ></Route>
-            <Redirect to={`/story/${uuid()}`} />
-          </Switch>
+          <LoadingOverlay>
+            <Switch>
+              <Route
+                path="/story/:storyId"
+                component={(
+                  props: RouteComponentProps<{ storyId: string }>
+                ) => <Story storyId={props.match.params.storyId} />}
+              ></Route>
+              <Redirect to={`/story/${uuid()}`} />
+            </Switch>
+          </LoadingOverlay>
         </Router>
       </PersistGate>
     </Provider>
