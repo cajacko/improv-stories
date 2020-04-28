@@ -15,7 +15,18 @@ import { store, persistor } from "../store";
 import Story from "./Story";
 import "../store/socketActionDispatcher";
 
-const Global = createGlobalStyle``;
+const Global = createGlobalStyle`
+  html, body, #root { 
+    display: flex; 
+    flex-direction: column;
+    position: absolute; 
+    top: 0; 
+    left: 0;
+    right: 0; 
+    bottom: 0; 
+    margin: 0;
+  }
+`;
 
 // TODO: Disable the view if have no user id. Don't hide, just grey out.
 
