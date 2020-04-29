@@ -170,13 +170,13 @@ function Story({
 
   React.useLayoutEffect(focusOnTextArea, [focusOnTextArea]);
 
-  let editorName = null;
+  let statusText = "Waiting for more users to join...";
 
   if (currentUserCanEdit) {
-    editorName = "You are editing! Start typing.";
+    statusText = "You are editing! Start typing.";
   } else if (currentlyEditingUser) {
-    editorName = currentlyEditingUser.name || "Anonymous";
-    editorName = `${editorName} is editing`;
+    statusText = currentlyEditingUser.name || "Anonymous";
+    statusText = `${statusText} is editing`;
   }
 
   return (
@@ -218,24 +218,22 @@ function Story({
             </Content>
           </ContentContainer>
 
-          {editorName && (
-            <div className={classes.footer}>
-              <Typography className={classes.name}>{editorName}</Typography>
-              {countDownTimer !== null && (
-                <>
-                  <Typography className={classes.time}>
-                    {countDownTimer}
-                  </Typography>
-                  <LinearProgress
-                    className={classes.progress}
-                    variant="determinate"
-                    color={currentUserCanEdit ? "primary" : "secondary"}
-                    value={normalise(countDownTimer)}
-                  />
-                </>
-              )}
-            </div>
-          )}
+          <div className={classes.footer}>
+            <Typography className={classes.name}>{statusText}</Typography>
+            {countDownTimer !== null && (
+              <>
+                <Typography className={classes.time}>
+                  {countDownTimer}
+                </Typography>
+                <LinearProgress
+                  className={classes.progress}
+                  variant="determinate"
+                  color={currentUserCanEdit ? "primary" : "secondary"}
+                  value={normalise(countDownTimer)}
+                />
+              </>
+            )}
+          </div>
         </div>
         <ConnectedUsers
           storyId={storyId}
