@@ -33,7 +33,7 @@ const Global = createGlobalStyle`
 function App() {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate loading={<LoadingOverlay />} persistor={persistor}>
         <CssBaseline />
         <Global />
         <Router>

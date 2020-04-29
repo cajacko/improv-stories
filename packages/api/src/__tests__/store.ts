@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import { ClientMessage } from "../sharedTypes";
 import {
   __TESTS__reset as reset,
@@ -18,7 +19,14 @@ function connectUserAndGetFuncs(userId: string) {
   const sendMock = jest.fn();
 
   const sock: any = {
-    id: userId,
+    // NOTE: Keep this as we use to use this for the id, but now don't and want to ensure it doesn't
+    // ruin anything
+    id: uuid(),
+    request: {
+      _query: {
+        user_id: userId,
+      },
+    },
     on: (type: any, callback: any) => {
       if (type === "disconnect") {
         disconnect = callback;
@@ -156,6 +164,43 @@ describe("user1 connects", () => {
 
           it("the user2 broadcast count is 2", () => {
             expect(user2.sendMock.mock.calls.length).toBe(2);
+          });
+
+          describe("user1 connects", () => {
+            beforeEach(() => {
+              user1 = connectUserAndGetFuncs(user1Id);
+            });
+
+            describe("user1 added to story1", () => {
+              const story1Id = "story1";
+
+              beforeEach(() => {
+                user1.sendClientMessage({
+                  type: "ADD_USER_TO_STORY",
+                  payload: {
+                    storyId: story1Id,
+                  },
+                });
+              });
+
+              it("Broadcasts the correct changes to user1", () => {
+                expect(user1.sendMock.mock.calls[0][0]).toMatchSnapshot();
+              });
+
+              it("the user1 broadcast count is 1", () => {
+                expect(user1.sendMock.mock.calls.length).toBe(1);
+              });
+
+              it("Broadcasts the same changes to user2", () => {
+                expect(user1.sendMock.mock.calls[0][0].payload).toEqual(
+                  user2.sendMock.mock.calls[2][0].payload
+                );
+              });
+
+              it("the user2 broadcast count is 3", () => {
+                expect(user2.sendMock.mock.calls.length).toBe(3);
+              });
+            });
           });
         });
 

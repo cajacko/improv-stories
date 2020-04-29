@@ -2,7 +2,6 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 import actions from "../store/actions";
-import useCurrentUserId from "../hooks/useCurrentUserId";
 import { send } from "../utils/socket";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
@@ -76,9 +75,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ToolBar({ storyId }: { storyId: string }) {
-  const currentUserId = useCurrentUserId();
+function ToolBar() {
   const currentUser = useSelector((state) => state.currentUser);
+  const currentUserId = currentUser.id;
   const dispatch = useDispatch();
   const [value, setValue] = React.useState(currentUser.name);
   const { push } = useHistory();

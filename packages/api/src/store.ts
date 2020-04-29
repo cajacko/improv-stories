@@ -210,10 +210,7 @@ export function setUser(
 
   if (!storeUser) return [];
 
-  Object.keys(userDetails).forEach((key) => {
-    // @ts-ignore
-    storeUser[key] = userDetails[key];
-  });
+  storeUser.name = userDetails.name;
 
   return userHasChanged(userId);
 }

@@ -5,7 +5,6 @@ import { Dispatch } from "redux";
 import ReduxTypes from "ReduxTypes";
 import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
-import useCurrentUserId from "../hooks/useCurrentUserId";
 import useStoryUsers from "../hooks/useStoryUsers";
 import { useEntriesRef } from "../hooks/useStoryRef";
 import { Entry } from "../store/entriesById/types";
@@ -21,7 +20,7 @@ export interface InjectedLiveStoryEditorProps {
 }
 
 interface InjectedHookProps {
-  currentUserId: ReturnType<typeof useCurrentUserId>;
+  currentUserId: string;
   entriesRef: ReturnType<typeof useEntriesRef>;
   storyId: string;
   onlineUsers: User[];
@@ -210,7 +209,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
   }
 
   const LiveStoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
-    const currentUserId = useCurrentUserId();
+    const currentUserId = useSelector((state) => state.currentUser.id);
     const entriesRef = useEntriesRef(props.storyId);
     const onlineUsers = useStoryUsers(props.storyId);
 

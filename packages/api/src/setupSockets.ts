@@ -11,11 +11,11 @@ function setupSockets(io: socket.Server) {
     };
   }
 
-  function onSocketConnect(sock: socket.Socket) {
+  function onSocketConnect(sock: socket.Socket, userId: string) {
     const date = getGetDate()();
 
     const changedStoryIds = addUser({
-      id: sock.id,
+      id: userId,
       name: null,
       dateAdded: date,
       dateModified: date,
@@ -26,20 +26,37 @@ function setupSockets(io: socket.Server) {
 
     broadCastStoriesChanged(changedStoryIds);
 
-    sock.on("message", onClientMessage(sock.id));
+    sock.on("message", onClientMessage(userId));
   }
 
-  function onSocketDisconnect(sock: socket.Socket) {
-    const changedStoryIds = removeUser(sock.id);
+  function onSocketDisconnect(userId: string) {
+    const changedStoryIds = removeUser(userId);
 
     broadCastStoriesChanged(changedStoryIds);
   }
 
+  function getUserIdFromSocket(sock: socket.Socket) {
+    if (!sock) return null;
+    if (!sock.request) return null;
+    if (!sock.request._query) return null;
+    if (!sock.request._query.user_id) return null;
+
+    return sock.request._query.user_id;
+  }
+
   io.on("connection", (sock) => {
-    onSocketConnect(sock);
+    // The only place we grab the user id
+    const userId = getUserIdFromSocket(sock);
+
+    if (!userId) {
+      sock.disconnect(true);
+      return;
+    }
+
+    onSocketConnect(sock, userId);
 
     sock.on("disconnect", () => {
-      onSocketDisconnect(sock);
+      onSocketDisconnect(userId);
     });
   });
 }

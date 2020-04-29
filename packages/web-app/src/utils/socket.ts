@@ -1,74 +1,61 @@
 import io from "socket.io-client";
 import { ClientMessage, ServerMessage } from "../sharedTypes";
 
-const socket = io("http://localhost:4000");
-
+let socket: ReturnType<typeof io> | null = null;
 let isConnected = false;
-let socketId: string | null = null;
 
-type Listener = (message: ServerMessage) => void;
+type MessageListener = (message: ServerMessage) => void;
 type ConnectionListener = (isConnected: boolean) => void;
-type IdListener = (socketId: string | null) => void;
 
-const listeners: {
-  [K: string]: undefined | { [K: string]: Listener | undefined };
+const messageListeners: {
+  [K: string]: undefined | { [K: string]: MessageListener | undefined };
 } = {};
 
-const idListeners: { [K: string]: IdListener | undefined } = {};
 const connectionListeners: { [K: string]: ConnectionListener | undefined } = {};
 
 function setIsConnected(value: boolean) {
   isConnected = value;
-  socketId = value ? socket.id : null;
 
   Object.values(connectionListeners).forEach((callback) => {
     if (!callback) return;
 
     callback(value);
   });
-
-  Object.values(idListeners).forEach((callback) => {
-    if (!callback) return;
-
-    callback(socketId);
-  });
 }
 
-socket.on("connect", function () {
-  setIsConnected(true);
-});
+let hasInit = false;
 
-socket.on("disconnect", function () {
-  setIsConnected(false);
-});
+export function init(userId: string) {
+  if (hasInit) return;
 
-socket.on("message", function (message: ServerMessage) {
-  const typeListeners = listeners[message.type];
+  hasInit = true;
 
-  if (!typeListeners) return;
+  socket = io(`http://localhost:4000?user_id=${userId}`);
 
-  Object.values(typeListeners).forEach((callback) => {
-    if (!callback) return;
-
-    callback(message);
+  socket.on("connect", function () {
+    setIsConnected(true);
   });
-});
 
-export function getSocketId() {
-  return socketId;
-}
+  socket.on("disconnect", function () {
+    setIsConnected(false);
+  });
 
-export function onSocketIdChange(key: string, callback: IdListener) {
-  idListeners[key] = callback;
+  socket.on("message", function (message: ServerMessage) {
+    const typeListeners = messageListeners[message.type];
 
-  return () => {
-    delete idListeners[key];
-  };
+    if (!typeListeners) return;
+
+    Object.values(typeListeners).forEach((callback) => {
+      if (!callback) return;
+
+      callback(message);
+    });
+  });
 }
 
 export function send(message: ClientMessage) {
-  if (!isConnected) {
-    throw new Error("Could not send message, socket disconnected");
+  if (!isConnected || !socket) {
+    throw new Error("Could not send message, socket is not connected");
   }
 
   socket.send(message);
@@ -77,16 +64,16 @@ export function send(message: ClientMessage) {
 export function listen(
   type: ServerMessage["type"],
   key: string,
-  callback: Listener
+  callback: MessageListener
 ) {
-  let typeListeners = listeners[type] || {};
+  let typeListeners = messageListeners[type] || {};
 
   typeListeners[key] = callback;
 
-  listeners[type] = typeListeners;
+  messageListeners[type] = typeListeners;
 
   return () => {
-    let typeListeners = listeners[type];
+    let typeListeners = messageListeners[type];
 
     if (!typeListeners) return;
 

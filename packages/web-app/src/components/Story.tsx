@@ -151,7 +151,6 @@ function Story({
   const toggleIsOpen = React.useCallback(() => setIsOpen(!isOpen), [
     setIsOpen,
     isOpen,
-    ``,
   ]);
 
   let combinedEntries = entries.reduce(
@@ -182,7 +181,7 @@ function Story({
 
   return (
     <>
-      <ToolBar storyId={storyId} />
+      <ToolBar />
       <Container onClick={currentUserCanEdit ? focusOnTextArea : undefined}>
         <div
           className={clsx(classes.content, {

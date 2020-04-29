@@ -334,3 +334,36 @@ Object {
   "type": "STORY_CHANGED",
 }
 `;
+
+exports[`user1 connects user1 added to story1 user2 connects user2 added to story1 user1 disconnects user1 connects user1 added to story1 Broadcasts the correct changes to user1 1`] = `
+Object {
+  "createdAt": "2020-02-01T00:15:00.000Z",
+  "id": "6",
+  "payload": Object {
+    "activeSession": null,
+    "activeUsers": Array [],
+    "connectedUsers": Array [
+      Object {
+        "dateAdded": "2020-02-01T00:05:00.000Z",
+        "dateModified": "2020-02-01T00:05:00.000Z",
+        "id": "user2",
+        "name": null,
+        "version": 0,
+      },
+      Object {
+        "dateAdded": "2020-02-01T00:12:00.000Z",
+        "dateModified": "2020-02-01T00:12:00.000Z",
+        "id": "user1",
+        "name": null,
+        "version": 0,
+      },
+    ],
+    "dateCreated": "2020-02-01T00:02:00.000Z",
+    "dateModified": "2020-02-01T00:13:00.000Z",
+    "id": "story1",
+    "lastSession": null,
+    "version": 6,
+  },
+  "type": "STORY_CHANGED",
+}
+`;

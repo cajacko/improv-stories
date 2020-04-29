@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import useCurrentUserId from "../hooks/useCurrentUserId";
+import useIsConnected from "../hooks/useIsConnected";
 
 const Container = styled.div`
   display: flex;
@@ -25,12 +25,12 @@ const Overlay = styled.div`
   justify-content: center;
 `;
 
-function LoadingOverlay({ children }: { children: React.ReactChild }) {
-  const currentUserId = useCurrentUserId();
+function LoadingOverlay({ children }: { children?: React.ReactChild }) {
+  const isConnected = useIsConnected();
 
   return (
     <Container>
-      {!currentUserId && (
+      {!isConnected && (
         <Overlay>
           <CircularProgress />
         </Overlay>
