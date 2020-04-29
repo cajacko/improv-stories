@@ -142,7 +142,7 @@ function Story({
   useAddCurrentUserToStory(storyId);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const userCount = useStoryUsers(storyId).length;
-  const entries = useStoryHistory(storyId);
+  const sessions = useStoryHistory(storyId);
   const classes = useStyles(currentUserCanEdit);
 
   const [isOpen, setIsOpen] = React.useState(true);
@@ -153,14 +153,14 @@ function Story({
     isOpen,
   ]);
 
-  let combinedEntries = entries.reduce(
-    (acc, { finalText }) => `${acc}${finalText}`,
+  let combinedSessions = sessions.reduce(
+    (acc, { finalEntry }) => `${acc}${finalEntry}`,
     ""
   );
 
-  combinedEntries = `${combinedEntries}${text}`;
+  combinedSessions = `${combinedSessions}${text}`;
 
-  const paragraphs = combinedEntries.split("\n").filter((text) => text !== "");
+  const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
   const focusOnTextArea = React.useCallback(() => {
     if (textAreaRef.current && currentUserCanEdit) {

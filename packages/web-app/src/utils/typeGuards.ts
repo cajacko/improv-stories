@@ -53,6 +53,10 @@ export function isArrayOf<T>(valueCheck: TypeCheck): TypeCheck {
   };
 }
 
+export function isNumber(value: unknown): boolean {
+  return typeof value === "number";
+}
+
 export function isString(value: unknown): boolean {
   return typeof value === "string";
 }

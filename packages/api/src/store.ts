@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { v4 as uuid } from "uuid";
-import { User, Story, Session, UserDetails } from "./sharedTypes";
+import { User, Story, ServerSession, UserDetails } from "./sharedTypes";
 
 export type ChangedStories = string[];
 
@@ -77,7 +77,7 @@ function createNewStory(
 }
 
 export function getStoreStory(storyId: string) {
-  return storiesById[storyId];
+  return storiesById[storyId] || null;
 }
 
 function getStoryOrCreate(storyId: string): StoreStory {
@@ -255,22 +255,24 @@ export function startNewStorySession(
   return storyHasChanged(storyId);
 }
 
-export function addStoryEntry(
+export function setSessionText(
   userId: string,
   storyId: string,
   entry: string
-): ChangedStories {
+): StoreSession | null {
   const story = getStoryOrCreate(storyId);
 
-  if (!story.activeSession) return [];
-  if (userId !== story.activeSession.user) return [];
+  if (!story.activeSession) return null;
+  if (userId !== story.activeSession.user) return null;
 
   story.activeSession.entries.push(entry);
   story.activeSession.finalEntry = entry;
 
   story.activeSession = sessionHasChanged(story.activeSession);
 
-  return storyHasChanged(storyId);
+  storyHasChanged(storyId);
+
+  return story.activeSession;
 }
 
 function userIdToUser(userId: string): User {
@@ -299,17 +301,17 @@ function userIdsToUsers(userIds: string[]): User[] {
   return userIds.map(userIdToUser);
 }
 
+export function getSession(session: StoreSession | null): ServerSession | null {
+  if (!session) return null;
+
+  return {
+    ...session,
+    user: userIdToUser(session.user),
+  };
+}
+
 export function getStory(storyId: string): Story {
   const story = getStoryOrCreate(storyId);
-
-  function getSession(session: StoreSession | null): Session | null {
-    if (!session) return null;
-
-    return {
-      ...session,
-      user: userIdToUser(session.user),
-    };
-  }
 
   return {
     ...story,

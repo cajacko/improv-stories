@@ -7,9 +7,18 @@
   "author": "Charlie Jackson <charlie@charliejackson.com>",
   "license": "MIT",
   "scripts": {
-    "start": "concurrently \"yarn workspace api start:watch\" \"yarn workspace web-app start\"",
-    "start:build": "concurrently \"yarn workspace api build && yarn workspace api start\" \"yarn workspace web-app start\"",
-    "test": "yarn workspace api test:watch"
+    "start": "cd packages/api && npm start",
+    "dev": "concurrently \"yarn dev:api\" \"yarn dev:web-app\"",
+    "dev:api": "yarn workspace api start:watch",
+    "dev:web-app": "yarn workspace web-app start",
+    "dev:build": "concurrently \"yarn build:api && yarn workspace api start\" \"yarn workspace web-app start\"",
+    "build": "yarn build:api && yarn build:web-app",
+    "build:api": "yarn workspace api build",
+    "build:web-app": "yarn workspace web-app build",
+    "test": "yarn workspace api test:watch",
+    "deploy:api": "yarn build:api && gcloud app deploy",
+    "deploy:web": "yarn build:web-app && firebase deploy",
+    "types:api": "yarn workspace api types:watch"
   },
   "workspaces": [
     "packages/api",
@@ -17,5 +26,8 @@
   ],
   "dependencies": {
     "concurrently": "^5.2.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^8.2.0"
   }
 }

@@ -1,54 +1,53 @@
 import { createReducer } from "typesafe-actions";
 import actions from "../actions";
-import { StoriesByIdState } from "./types";
+import { StoriesByIdState, Story } from "./types";
 
 const defaultState: StoriesByIdState = {};
 
 const reducer = createReducer<StoriesByIdState>(defaultState)
   .handleAction(actions.storiesById.setStory, (state, { payload }) => {
-    const story = state[payload.id] || { id: payload.id, entryIds: [] };
+    const story = state[payload.id];
 
-    return {
-      ...state,
-      [payload.id]: {
-        ...story,
-        onlineUserIds: payload.activeUsers.map(({ id }) => id),
-        currentlyEditing: payload.activeSession
-          ? {
-              userId: payload.activeSession.user.id,
-              startedDate: payload.activeSession.dateStarted,
-              willFinishDate: payload.activeSession.dateWillFinish,
-            }
-          : null,
-      },
+    if (story && story.version >= payload.version) return state;
+
+    const newStory: Story = {
+      sessionIds: story ? story.sessionIds : [],
+      connectedUserIds: payload.connectedUsers.map(({ id }) => id),
+      activeUserIds: payload.activeUsers.map(({ id }) => id),
+      lastSessionId: payload.lastSession ? payload.lastSession.id : null,
+      activeSessionId: payload.activeSession ? payload.activeSession.id : null,
+      id: payload.id,
+      dateCreated: payload.dateCreated,
+      dateModified: payload.dateModified,
+      version: payload.version,
     };
+
+    const newState: StoriesByIdState = {
+      ...state,
+      [payload.id]: newStory,
+    };
+
+    return newState;
   })
-  .handleAction(actions.entriesById.setStoryEntries, (state, { payload }) => {
-    const story = state[payload.storyId];
+  .handleAction(
+    actions.sessionIdsByStoryId.setStorySessions,
+    (state, { payload }) => {
+      const story = state[payload.storyId];
 
-    const entryIds = payload.entries.map(({ id }) => id);
+      const sessionIds = payload.sessions.map(({ id }) => id);
 
-    if (!story) {
+      if (!story) return state;
+
+      const newStory: Story = {
+        ...story,
+        sessionIds,
+      };
+
       return {
         ...state,
-        [payload.storyId]: {
-          id: payload.storyId,
-          onlineUserIds: [],
-          entryIds,
-          currentlyEditing: null,
-        },
+        [payload.storyId]: newStory,
       };
     }
-
-    const newStory = {
-      ...story,
-      entryIds,
-    };
-
-    return {
-      ...state,
-      [payload.storyId]: newStory,
-    };
-  });
+  );
 
 export default reducer;

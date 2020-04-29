@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
 import { User } from "../sharedTypes";
+import selectors from "../store/selectors";
 
 function useStoryUsers(storyId: string) {
   const story = useSelector((state) => state.storiesById[storyId]);
@@ -9,11 +10,8 @@ function useStoryUsers(storyId: string) {
 
     const users: User[] = [];
 
-    story.onlineUserIds.forEach((userId) => {
-      const user = state.usersById[userId];
-
-      // TODO: If current user then get the details from current user instead
-      // Turn this into a selector so we always do this if we get a user
+    story.activeUserIds.forEach((userId) => {
+      const user = selectors.usersById.selectUserById(state, userId);
 
       if (!user) return;
 

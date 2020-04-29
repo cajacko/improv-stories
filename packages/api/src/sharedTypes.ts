@@ -9,9 +9,8 @@ export interface User extends UserDetails {
   version: number;
 }
 
-export interface Session {
+export interface BaseSession {
   id: string;
-  user: User;
   dateStarted: string;
   dateWillFinish: string;
   finalEntry: string;
@@ -20,12 +19,20 @@ export interface Session {
   version: number;
 }
 
+export interface ServerSession extends BaseSession {
+  user: User;
+}
+
+export interface DatabaseSession extends BaseSession {
+  userId: string;
+}
+
 export interface Story {
   id: string;
   connectedUsers: User[];
   activeUsers: User[];
-  lastSession: null | Session;
-  activeSession: null | Session;
+  lastSession: null | ServerSession;
+  activeSession: null | ServerSession;
   dateCreated: string;
   dateModified: string;
   version: number;
@@ -44,6 +51,8 @@ export type ClientMessage =
   | Message<"SET_USER_DETAILS", { userDetails: UserDetails }>
   | Message<"ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
   | Message<"REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
-  | Message<"ADD_STORY_ENTRY", { storyId: string; entry: string }>;
+  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>;
 
-export type ServerMessage = Message<"STORY_CHANGED", Story>;
+export type ServerMessage =
+  | Message<"STORY_CHANGED", Story>
+  | Message<"SESSION_CHANGED", ServerSession>;

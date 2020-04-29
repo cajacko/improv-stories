@@ -7,8 +7,7 @@ import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
 import useStoryUsers from "../hooks/useStoryUsers";
 import { useEntriesRef } from "../hooks/useStoryRef";
-import { Entry } from "../store/entriesById/types";
-import { CurrentlyEditing } from "../store/storiesById/types";
+import { Session } from "../store/sessionsById/types";
 
 const keyEvent = "keydown";
 
@@ -24,16 +23,17 @@ interface InjectedHookProps {
   entriesRef: ReturnType<typeof useEntriesRef>;
   storyId: string;
   onlineUsers: User[];
-  currentlyEditing: CurrentlyEditing | null;
+  activeSession: Session | null;
   dispatch: Dispatch<ReduxTypes.Action>;
   currentlyEditingUser: User | null;
 }
 
 interface State {
-  text: null | string;
+  editingText: null | string;
   countDownTimer: number | null;
   storyIsActive: boolean;
   listenerKey: string;
+  activeSession: Session | null;
 }
 
 interface OwnProps {
@@ -49,20 +49,35 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 ): React.ComponentType<P> {
   class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
     state: State = {
-      text: null,
+      editingText: null,
       countDownTimer: null,
       storyIsActive: false,
       listenerKey: uuid(),
+      activeSession: null,
     };
 
     interval: null | number = null;
     removeTextListener: null | RemoveListener = null;
 
+    constructor(props: HocProps<P>) {
+      super(props);
+
+      this.state.activeSession = props.activeSession;
+    }
+
+    resetEditingText = () => {
+      if (this.state.editingText) {
+        this.setState({ editingText: null });
+      }
+    };
+
     setTimer = () => {
       this.interval = setInterval(() => {
-        const { currentlyEditing } = this.props;
+        const { activeSession } = this.props;
 
-        if (!currentlyEditing) {
+        if (!activeSession) {
+          this.resetEditingText();
+
           if (this.state.countDownTimer) {
             this.setState({ countDownTimer: null });
           }
@@ -70,9 +85,13 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
           return;
         }
 
-        const { willFinishDate } = currentlyEditing;
+        if (activeSession.userId !== this.props.currentUserId) {
+          this.resetEditingText();
+        }
 
-        const diff = new Date(willFinishDate).getTime() - new Date().getTime();
+        const { dateWillFinish } = activeSession;
+
+        const diff = new Date(dateWillFinish).getTime() - new Date().getTime();
         let seconds: number | null = Math.floor(diff / 1000);
         if (seconds < 0) seconds = null;
 
@@ -84,41 +103,20 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       }, 1000);
     };
 
-    onSave = () => {
-      if (!this.props.entriesRef) return;
-      if (!this.state.text) return;
-      // TODO: Remove later, wouldn't want this condition
-      if (this.state.text === "") return;
-
-      const entry: Entry = {
-        id: uuid(),
-        dateFinished: new Date().toISOString(),
-        dateStarted: new Date().toISOString(),
-        finalText: this.state.text,
-        parts: [this.state.text],
-      };
-
-      this.props.entriesRef.push(entry);
-
-      this.onTextChange("");
-    };
-
     onTextChange = (
       value: string | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
     ) => {
       let newText = typeof value === "string" ? value : value.target.value;
 
-      this.setState({ text: newText });
+      this.setState({ editingText: newText });
 
       try {
-        if (!this.props.storyId) return;
-
         send({
           id: uuid(),
           createdAt: new Date().toISOString(),
-          type: "ADD_STORY_ENTRY",
+          type: "SET_SESSION_TEXT",
           payload: {
-            entry: newText,
+            text: newText,
             storyId: this.props.storyId,
           },
         });
@@ -129,14 +127,21 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       this.setTimer();
 
       this.removeTextListener = listen(
-        "STORY_CHANGED",
+        "SESSION_CHANGED",
         this.state.listenerKey,
         (message) => {
-          if (message.type !== "STORY_CHANGED") return;
-          if (!message.payload.activeSession) return;
+          if (message.type !== "SESSION_CHANGED") return;
+          if (!this.props.activeSession) return;
+          if (this.getCurrentUserCanEdit()) return;
+          if (this.props.activeSession.id !== message.payload.id) return;
+          if (message.payload.user.id === this.props.currentUserId) return;
 
           this.setState({
-            text: message.payload.activeSession.finalEntry,
+            editingText: null,
+            activeSession: {
+              ...message.payload,
+              userId: message.payload.user.id,
+            },
           });
         }
       );
@@ -149,7 +154,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 
       const key = event.key;
 
-      let text = this.state.text || "";
+      let text = this.state.editingText || "";
 
       switch (key) {
         case "Backspace":
@@ -194,14 +199,22 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     };
 
     render() {
-      const finalText = this.state.text || "";
+      let finalText: string | null;
+
+      const currentUserCanEdit = this.getCurrentUserCanEdit();
+
+      if (currentUserCanEdit) {
+        finalText = this.state.editingText;
+      } else {
+        finalText =
+          this.state.activeSession && this.state.activeSession.finalEntry;
+      }
 
       const newProps: InjectedLiveStoryEditorProps = {
-        text: finalText,
-        currentUserCanEdit: this.getCurrentUserCanEdit(),
+        text: finalText || "",
+        currentUserCanEdit,
         currentlyEditingUser: this.props.currentlyEditingUser,
-        countDownTimer:
-          this.props.currentlyEditing && this.state.countDownTimer,
+        countDownTimer: this.props.activeSession && this.state.countDownTimer,
       };
 
       return <Component {...this.props.originalProps} {...newProps} />;
@@ -213,18 +226,22 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     const entriesRef = useEntriesRef(props.storyId);
     const onlineUsers = useStoryUsers(props.storyId);
 
-    const currentlyEditing = useSelector((state) => {
+    const activeSession = useSelector((state) => {
       const story = state.storiesById[props.storyId];
 
       if (!story) return null;
 
-      return story.currentlyEditing;
+      const activeSessionId = story.activeSessionId;
+
+      if (!activeSessionId) return null;
+
+      return state.sessionsById[activeSessionId] || null;
     });
 
     const currentlyEditingUser = useSelector((state) => {
-      if (!currentlyEditing) return null;
+      if (!activeSession) return null;
 
-      const user = state.usersById[currentlyEditing.userId];
+      const user = state.usersById[activeSession.userId];
 
       return user || null;
     });
@@ -238,7 +255,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         entriesRef={entriesRef}
         storyId={props.storyId}
         onlineUsers={onlineUsers}
-        currentlyEditing={currentlyEditing}
+        activeSession={activeSession}
         dispatch={dispatch}
         currentlyEditingUser={currentlyEditingUser}
       />

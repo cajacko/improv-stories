@@ -60,20 +60,20 @@ function ConnectedUsers({
   const users = useStoryUsers(storyId);
   const classes = useStyles();
 
-  const currentlyEditing = useSelector((state) => {
+  const currentlyEditingUserId = useSelector((state) => {
     const story = state.storiesById[storyId];
 
     if (!story) return null;
 
-    return story.currentlyEditing;
-  });
+    const activeSessionId = story.activeSessionId;
 
-  const currentlyEditingUserId = useSelector((state) => {
-    if (!currentlyEditing) return null;
+    if (!activeSessionId) return null;
 
-    const user = state.usersById[currentlyEditing.userId];
+    const session = state.sessionsById[activeSessionId];
 
-    return user ? user.id : null;
+    if (!session) return null;
+
+    return session.userId;
   });
 
   return (

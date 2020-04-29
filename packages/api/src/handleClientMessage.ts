@@ -1,10 +1,10 @@
 import getDatabase from "./getDatabase";
-import broadCastStoriesChanged from "./broadCastStoriesChanged";
-import { ClientMessage } from "./sharedTypes";
+import { broadCastStoriesChanged, broadCastSessionChanged } from "./broadcast";
+import { ClientMessage, DatabaseSession } from "./sharedTypes";
 import {
   removeActiveUserFromStory,
   addActiveUserToStory,
-  addStoryEntry,
+  setSessionText,
   addUserToStory,
   removeStoryUser,
   setUser,
@@ -30,10 +30,18 @@ function switchOverMessage(
       return broadCastStoriesChanged(
         addActiveUserToStory(userId, action.payload.storyId)
       );
-    case "ADD_STORY_ENTRY":
-      return broadCastStoriesChanged(
-        addStoryEntry(userId, action.payload.storyId, action.payload.entry)
+    case "SET_SESSION_TEXT":
+      const session = setSessionText(
+        userId,
+        action.payload.storyId,
+        action.payload.text
       );
+
+      if (!session) return [];
+
+      broadCastSessionChanged(action.payload.storyId, session);
+
+      return [];
     case "ADD_USER_TO_STORY":
       return broadCastStoriesChanged(
         addUserToStory(userId, action.payload.storyId, action.payload.isActive)
@@ -105,16 +113,18 @@ function storyLoop(storyId: string) {
       if (story && story.activeSession && story.activeSession.entries.length) {
         const ref = getDatabase().ref(`/storiesById/${storyId}/entries`);
 
-        const entry = {
+        const session: DatabaseSession = {
           id: story.activeSession.id,
-          dateFinished: story.activeSession.dateWillFinish,
+          dateWillFinish: story.activeSession.dateWillFinish,
           dateStarted: story.activeSession.dateStarted,
-          finalText: story.activeSession.finalEntry,
-          parts: story.activeSession.entries,
+          dateModified: story.activeSession.dateModified,
+          finalEntry: story.activeSession.finalEntry,
+          entries: story.activeSession.entries,
           userId: story.activeSession.user,
+          version: story.activeSession.version,
         };
 
-        ref.push(entry);
+        ref.push(session);
       }
 
       finishActiveStorySession(storyId);

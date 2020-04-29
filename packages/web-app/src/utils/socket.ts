@@ -30,7 +30,7 @@ export function init(userId: string) {
 
   hasInit = true;
 
-  socket = io(`http://localhost:4000?user_id=${userId}`);
+  socket = io(`${process.env.REACT_APP_SOCKET_URL}?user_id=${userId}`);
 
   socket.on("connect", function () {
     setIsConnected(true);

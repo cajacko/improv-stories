@@ -1,14 +1,13 @@
-export interface CurrentlyEditing {
-  userId: string;
-  startedDate: string;
-  willFinishDate: string;
-}
-
 export interface Story {
+  sessionIds: string[];
+  connectedUserIds: string[];
+  activeUserIds: string[];
+  lastSessionId: null | string;
+  activeSessionId: null | string;
   id: string;
-  currentlyEditing: CurrentlyEditing | null;
-  onlineUserIds: string[];
-  entryIds: string[];
+  dateCreated: string;
+  dateModified: string;
+  version: number;
 }
 
 export interface StoriesByIdState {

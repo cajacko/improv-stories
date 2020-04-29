@@ -2,13 +2,15 @@ import { combineReducers } from "redux";
 import currentUser from "./currentUser/reducer";
 import usersById from "./usersById/reducer";
 import storiesById from "./storiesById/reducer";
-import entriesById from "./entriesById/reducer";
+import sessionsById from "./sessionsById/reducer";
+import sessionIdsByStoryId from "./sessionIdsByStoryId/reducer";
 
 export const rawReducersObj = {
   currentUser,
   usersById,
   storiesById,
-  entriesById,
+  sessionsById,
+  sessionIdsByStoryId,
 };
 
 export default combineReducers(rawReducersObj);

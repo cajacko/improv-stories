@@ -4,14 +4,17 @@ import { UsersByIdState } from "./types";
 
 const defaultState: UsersByIdState = {};
 
-const reducer = createReducer<UsersByIdState>(defaultState)
-  .handleAction(actions.storiesById.setStory, (state, { payload }) => {
+const reducer = createReducer<UsersByIdState>(defaultState).handleAction(
+  actions.storiesById.setStory,
+  (state, { payload }) => {
     const allUsers = [
       ...payload.connectedUsers,
       ...payload.activeUsers,
       ...(payload.lastSession ? [payload.lastSession.user] : []),
       ...(payload.activeSession ? [payload.activeSession.user] : []),
     ];
+
+    let changed = false;
 
     const newState = {
       ...state,
@@ -24,39 +27,13 @@ const reducer = createReducer<UsersByIdState>(defaultState)
         return;
       }
 
+      changed = true;
+
       newState[user.id] = user;
     });
 
-    return newState;
-  })
-  .handleAction(
-    actions.currentUser.setCurrentUserName,
-    (state, { payload }) => {
-      if (!payload.userId) return state;
-
-      const user = state[payload.userId];
-
-      if (!user) {
-        return {
-          ...state,
-          [payload.userId]: {
-            id: payload.userId,
-            name: payload.name,
-            dateAdded: payload.date,
-            dateModified: payload.date,
-            version: 0,
-          },
-        };
-      }
-
-      return {
-        ...state,
-        [payload.userId]: {
-          ...user,
-          name: payload.name,
-        },
-      };
-    }
-  );
+    return changed ? newState : state;
+  }
+);
 
 export default reducer;

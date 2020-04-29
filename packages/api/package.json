@@ -8,6 +8,7 @@
     "start": "node dist/index.js",
     "build:watch": "npm run build -- --watch --preserveWatchOutput",
     "build": "tsc",
+    "types:watch": "tsc --noEmit --watch",
     "test:watch": "jest --watch"
   },
   "dependencies": {

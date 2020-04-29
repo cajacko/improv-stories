@@ -4,7 +4,7 @@ import { Dispatch } from "redux";
 declare module "ReduxTypes" {
   type Action = ActionType<typeof import("./actions").default>;
 
-  export type Store = StateType<typeof import("./index").default>;
+  export type Store = StateType<typeof import("./index").store>;
   export type RootAction = Action;
   export type RootState = StateType<typeof import("./reducers").default>;
   export type Dispatch = Dispatch<Action>;

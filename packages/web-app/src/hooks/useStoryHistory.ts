@@ -9,51 +9,57 @@ import {
   isArrayOfStrings,
   isDateString,
   isKeyedObjectOf,
+  isNumber,
 } from "../utils/typeGuards";
-import { Entry } from "../store/entriesById/types";
+import { DatabaseSession } from "../sharedTypes";
+import { Session } from "../store/sessionsById/types";
 
-interface EntriesResponse {
-  [K: string]: Entry;
+interface SessionsResponse {
+  [K: string]: DatabaseSession;
 }
 
-const isEntry = isObjectOf<Entry>({
+const isSession = isObjectOf<Session>({
   id: (value) => isString(value.id),
   dateStarted: (value) => isDateString(value.id),
-  dateFinished: (value) => isDateString(value.id),
-  finalText: (value) => isString(value.id),
-  parts: (value) => isArrayOfStrings(value.parts),
+  dateWillFinish: (value) => isDateString(value.id),
+  dateModified: (value) => isDateString(value.dateModified),
+  finalEntry: (value) => isString(value.id),
+  entries: (value) => isArrayOfStrings(value.parts),
+  userId: (value) => isString(value.userId),
+  version: (value) => isNumber(value.version),
 });
 
-const isEntriesResponse = isKeyedObjectOf<Entry>(isEntry);
+const isSessionsResponse = isKeyedObjectOf<DatabaseSession>(isSession);
 
-function transformEntriesResponse(response: EntriesResponse): Entry[] {
+function transformSessionsResponse(response: SessionsResponse): Session[] {
   return Object.values(response).sort(
     (a, b) =>
-      new Date(a.dateFinished).getTime() - new Date(b.dateFinished).getTime()
+      new Date(a.dateWillFinish).getTime() -
+      new Date(b.dateWillFinish).getTime()
   );
 }
 
-function useStoryHistory(storyId: string): Entry[] {
-  const entryIds = useSelector((state) => {
+function useStoryHistory(storyId: string): Session[] {
+  const sessionIds = useSelector((state) => {
     const story = state.storiesById[storyId];
 
     if (!story) return [];
 
-    return story.entryIds;
+    return story.sessionIds;
   });
 
-  const entries = useSelector((state) => {
-    const entriesArr: Entry[] = [];
+  const sessions = useSelector((state) => {
+    const sessionsArr: Session[] = [];
 
-    entryIds.forEach((entryId) => {
-      const entry = state.entriesById[entryId];
+    sessionIds.forEach((sessionId: string) => {
+      const session = state.sessionsById[sessionId];
 
-      if (!entry) return;
+      if (!session) return;
 
-      entriesArr.push(entry);
+      sessionsArr.push(session);
     });
 
-    return entriesArr;
+    return sessionsArr;
   });
 
   const ref = useEntriesRef(storyId);
@@ -65,14 +71,14 @@ function useStoryHistory(storyId: string): Entry[] {
     function setEntriesFromSnapshot(snapshot: firebase.database.DataSnapshot) {
       var data = snapshot.val() as unknown;
 
-      if (!isEntriesResponse(data)) return;
+      if (!isSessionsResponse(data)) return;
 
-      const entriesResponse = data as EntriesResponse;
+      const sessionsResponse = data as SessionsResponse;
 
       dispatch(
-        actions.entriesById.setStoryEntries({
+        actions.sessionIdsByStoryId.setStorySessions({
           storyId,
-          entries: transformEntriesResponse(entriesResponse),
+          sessions: transformSessionsResponse(sessionsResponse),
         })
       );
     }
@@ -86,7 +92,7 @@ function useStoryHistory(storyId: string): Entry[] {
     };
   }, [storyId, ref, dispatch]);
 
-  return entries;
+  return sessions;
 }
 
 export default useStoryHistory;

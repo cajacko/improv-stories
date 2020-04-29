@@ -1,5 +1,5 @@
 import * as socket from "socket.io";
-import broadCastStoriesChanged from "./broadCastStoriesChanged";
+import { broadCastStoriesChanged } from "./broadcast";
 import { addUser, removeUser, getGetDate } from "./store";
 import { ClientMessage } from "./sharedTypes";
 import handleClientMessage from "./handleClientMessage";
