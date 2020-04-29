@@ -13,6 +13,7 @@ import {
 } from "../utils/typeGuards";
 import { DatabaseSession } from "../sharedTypes";
 import { Session } from "../store/sessionsById/types";
+import selectors from "../store/selectors";
 
 interface SessionsResponse {
   [K: string]: DatabaseSession;
@@ -40,28 +41,7 @@ function transformSessionsResponse(response: SessionsResponse): Session[] {
 }
 
 function useStoryHistory(storyId: string): Session[] {
-  const sessionIds = useSelector((state) => {
-    const story = state.storiesById[storyId];
-
-    if (!story) return [];
-
-    return story.sessionIds;
-  });
-
-  const sessions = useSelector((state) => {
-    const sessionsArr: Session[] = [];
-
-    sessionIds.forEach((sessionId: string) => {
-      const session = state.sessionsById[sessionId];
-
-      if (!session) return;
-
-      sessionsArr.push(session);
-    });
-
-    return sessionsArr;
-  });
-
+  const sessions = useSelector(selectors.misc.selectStorySessions(storyId));
   const ref = useEntriesRef(storyId);
   const dispatch = useDispatch();
 
@@ -92,7 +72,7 @@ function useStoryHistory(storyId: string): Session[] {
     };
   }, [storyId, ref, dispatch]);
 
-  return sessions;
+  return sessions || [];
 }
 
 export default useStoryHistory;

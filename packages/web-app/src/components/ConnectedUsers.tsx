@@ -1,5 +1,5 @@
 import React from "react";
-import useStoryUsers from "../hooks/useStoryUsers";
+import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
@@ -11,7 +11,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import PersonIcon from "@material-ui/icons/Person";
 import Badge from "@material-ui/core/Badge";
-import { useSelector } from "react-redux";
+import selectors from "../store/selectors";
 
 export const drawerWidth = 240;
 
@@ -57,24 +57,17 @@ function ConnectedUsers({
   isOpen: boolean;
   handleClose: () => void;
 }) {
-  const users = useStoryUsers(storyId);
+  const activeStoryUsers =
+    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || [];
+
+  const currentlyEditingUser = useSelector(
+    selectors.misc.selectActiveStorySessionUser(storyId)
+  );
+
+  const currentlyEditingUserId =
+    currentlyEditingUser && currentlyEditingUser.id;
+
   const classes = useStyles();
-
-  const currentlyEditingUserId = useSelector((state) => {
-    const story = state.storiesById[storyId];
-
-    if (!story) return null;
-
-    const activeSessionId = story.activeSessionId;
-
-    if (!activeSessionId) return null;
-
-    const session = state.sessionsById[activeSessionId];
-
-    if (!session) return null;
-
-    return session.userId;
-  });
 
   return (
     <Drawer
@@ -94,7 +87,7 @@ function ConnectedUsers({
       </div>
       <Divider />
       <List>
-        {users.map(({ name, id }) => (
+        {activeStoryUsers.map(({ name, id }) => (
           <ListItem button key={id} className={classes.listItem}>
             <ListItemIcon>
               <Badge

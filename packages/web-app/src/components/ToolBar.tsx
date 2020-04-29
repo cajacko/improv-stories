@@ -12,6 +12,7 @@ import AddIcon from "@material-ui/icons/FiberNew";
 import SaveIcon from "@material-ui/icons/Save";
 import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
+import selectors from "../store/selectors";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -76,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolBar() {
-  const currentUser = useSelector((state) => state.currentUser);
+  const currentUser = useSelector(selectors.currentUser.selectCurrentUser);
   const currentUserId = currentUser.id;
   const dispatch = useDispatch();
   const [value, setValue] = React.useState(currentUser.name);

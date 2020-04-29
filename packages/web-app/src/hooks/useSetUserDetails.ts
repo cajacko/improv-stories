@@ -1,10 +1,12 @@
 import React from "react";
 import { v4 as uuid } from "uuid";
 import { useSelector } from "react-redux";
+import { CurrentUserState } from "../store/currentUser/types";
 import { send } from "../utils/socket";
+import selectors from "../store/selectors";
 
-function useSetUserDetails() {
-  const userDetails = useSelector((state) => state.currentUser);
+function useSetUserDetails(): CurrentUserState {
+  const userDetails = useSelector(selectors.currentUser.selectCurrentUser);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -20,6 +22,8 @@ function useSetUserDetails() {
       } catch {}
     }, 500);
   }, [userDetails]);
+
+  return userDetails;
 }
 
 export default useSetUserDetails;

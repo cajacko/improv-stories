@@ -1,9 +1,9 @@
 import React from "react";
 import clsx from "clsx";
+import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import PeopleIcon from "@material-ui/icons/People";
 import IconButton from "@material-ui/core/IconButton";
-import useStoryUsers from "../hooks/useStoryUsers";
 import Badge from "@material-ui/core/Badge";
 import useAddCurrentUserToStory from "../hooks/useAddCurrentUserToStory";
 import withLiveStoryEditor, {
@@ -16,6 +16,7 @@ import styled from "styled-components";
 import ConnectedUsers, { drawerWidth } from "./ConnectedUsers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
+import selectors from "../store/selectors";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
@@ -141,7 +142,7 @@ function Story({
   // useGetUsers(storyId);
   useAddCurrentUserToStory(storyId);
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
-  const userCount = useStoryUsers(storyId).length;
+  const userCount = useSelector(selectors.misc.selectActiveStoryUsers).length;
   const sessions = useStoryHistory(storyId);
   const classes = useStyles(currentUserCanEdit);
 

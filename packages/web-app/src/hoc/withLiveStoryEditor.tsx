@@ -5,9 +5,9 @@ import { Dispatch } from "redux";
 import ReduxTypes from "ReduxTypes";
 import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
-import useStoryUsers from "../hooks/useStoryUsers";
 import { useEntriesRef } from "../hooks/useStoryRef";
 import { Session } from "../store/sessionsById/types";
+import selectors from "../store/selectors";
 
 const keyEvent = "keydown";
 
@@ -22,7 +22,7 @@ interface InjectedHookProps {
   currentUserId: string;
   entriesRef: ReturnType<typeof useEntriesRef>;
   storyId: string;
-  onlineUsers: User[];
+  activeStoryUsers: User[];
   activeSession: Session | null;
   dispatch: Dispatch<ReduxTypes.Action>;
   currentlyEditingUser: User | null;
@@ -224,27 +224,15 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
   const LiveStoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
     const currentUserId = useSelector((state) => state.currentUser.id);
     const entriesRef = useEntriesRef(props.storyId);
-    const onlineUsers = useStoryUsers(props.storyId);
-
-    const activeSession = useSelector((state) => {
-      const story = state.storiesById[props.storyId];
-
-      if (!story) return null;
-
-      const activeSessionId = story.activeSessionId;
-
-      if (!activeSessionId) return null;
-
-      return state.sessionsById[activeSessionId] || null;
-    });
-
-    const currentlyEditingUser = useSelector((state) => {
-      if (!activeSession) return null;
-
-      const user = state.usersById[activeSession.userId];
-
-      return user || null;
-    });
+    const activeStoryUsers = useSelector(
+      selectors.misc.selectActiveStoryUsers(props.storyId)
+    );
+    const activeSession = useSelector(
+      selectors.misc.selectActiveStorySession(props.storyId)
+    );
+    const currentlyEditingUser = useSelector(
+      selectors.misc.selectActiveStorySessionUser(props.storyId)
+    );
 
     const dispatch = useDispatch();
 
@@ -254,7 +242,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         currentUserId={currentUserId}
         entriesRef={entriesRef}
         storyId={props.storyId}
-        onlineUsers={onlineUsers}
+        activeStoryUsers={activeStoryUsers || []}
         activeSession={activeSession}
         dispatch={dispatch}
         currentlyEditingUser={currentlyEditingUser}

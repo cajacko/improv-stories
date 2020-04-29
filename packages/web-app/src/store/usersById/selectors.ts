@@ -1,27 +1,16 @@
 import ReduxTypes from "ReduxTypes";
-import { createSelector } from "reselect";
-import { User } from "./types";
-import { CurrentUserState } from "../currentUser/types";
 
-export const selectUserById = createSelector<
-  ReduxTypes.RootState,
-  ReduxTypes.RootState,
-  string,
-  string,
-  User | undefined,
-  CurrentUserState,
-  User | null
->(
-  (state, userId) => state.usersById[userId],
-  (state) => state.currentUser,
-  (user, currentUser) => {
-    if (!user) return null;
+export const selectUser = (userId: string) => (state: ReduxTypes.RootState) => {
+  const user = state.usersById[userId];
 
-    if (user.id !== currentUser.id) return user;
+  if (!user) return null;
 
-    return {
-      ...user,
-      ...currentUser,
-    };
-  }
-);
+  const currentUser = state.currentUser;
+
+  if (user.id !== currentUser.id) return user;
+
+  return {
+    ...user,
+    ...currentUser,
+  };
+};
