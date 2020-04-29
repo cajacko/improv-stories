@@ -1,0 +1,58 @@
+export interface UserDetails {
+  name: string | null;
+}
+
+export interface User extends UserDetails {
+  dateModified: string;
+  dateAdded: string;
+  id: string;
+  version: number;
+}
+
+export interface BaseSession {
+  id: string;
+  dateStarted: string;
+  dateWillFinish: string;
+  finalEntry: string;
+  entries: string[];
+  dateModified: string;
+  version: number;
+}
+
+export interface ServerSession extends BaseSession {
+  user: User;
+}
+
+export interface DatabaseSession extends BaseSession {
+  userId: string;
+}
+
+export interface Story {
+  id: string;
+  connectedUsers: User[];
+  activeUsers: User[];
+  lastSession: null | ServerSession;
+  activeSession: null | ServerSession;
+  dateCreated: string;
+  dateModified: string;
+  version: number;
+}
+
+export interface Message<T, P = undefined> {
+  id: string;
+  type: T;
+  payload: P;
+  createdAt: string;
+}
+
+export type ClientMessage =
+  | Message<"ADD_USER_TO_STORY", { storyId: string; isActive: boolean }>
+  | Message<"REMOVE_USER_FROM_STORY", { storyId: string }>
+  | Message<"SET_USER_DETAILS", { userDetails: UserDetails }>
+  | Message<"ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
+  | Message<"REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
+  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>;
+
+export type ServerMessage =
+  | Message<"STORY_CHANGED", Story>
+  | Message<"SESSION_CHANGED", ServerSession>;

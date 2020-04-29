@@ -1,25 +1,34 @@
 {
-  "name": "improv-stories-app",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "start": "exp start packages/app",
-    "lerna": "lerna publish",
-    "init": "exp init packages/app",
-    "test:lint": "eslint --ext .js --ext .jsx packages",
-    "test": "yarn test:lint"
-  },
-  "files": [
-    "lib/**/*"
-  ],
-  "devDependencies": {
-    "lerna": "^2.7.0"
-  },
+  "name": "improv-stories",
   "version": "0.1.0",
   "main": "index.js",
-  "repository": "https://github.com/cajacko/improv-stories-app.git",
-  "author": "Charlie Jackson",
-  "license": "MIT"
+  "private": true,
+  "repository": "https://github.com/cajacko/improv-stories.git",
+  "author": "Charlie Jackson <charlie@charliejackson.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "cd packages/api && npm start",
+    "dev": "concurrently \"yarn dev:api\" \"yarn dev:web-app\"",
+    "dev:api": "yarn workspace api start:watch",
+    "dev:web-app": "yarn workspace web-app start",
+    "dev:build": "concurrently \"yarn build:api && yarn workspace api start\" \"yarn workspace web-app start\"",
+    "build": "yarn build:api && yarn build:web-app",
+    "build:api": "yarn workspace api build",
+    "build:web-app": "yarn workspace web-app build",
+    "test": "yarn workspace api test:watch",
+    "deploy": "yarn deploy:web && yarn deploy:api",
+    "deploy:api": "yarn build:api && gcloud app deploy -q",
+    "deploy:web": "yarn build:web-app && firebase deploy",
+    "types:api": "yarn workspace api types:watch"
+  },
+  "workspaces": [
+    "packages/api",
+    "packages/web-app"
+  ],
+  "dependencies": {
+    "concurrently": "^5.2.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^8.2.0"
+  }
 }
