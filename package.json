@@ -16,7 +16,8 @@
     "build:api": "yarn workspace api build",
     "build:web-app": "yarn workspace web-app build",
     "test": "yarn workspace api test:watch",
-    "deploy:api": "yarn build:api && gcloud app deploy",
+    "deploy": "yarn deploy:web && yarn deploy:api",
+    "deploy:api": "yarn build:api && gcloud app deploy -q",
     "deploy:web": "yarn build:web-app && firebase deploy",
     "types:api": "yarn workspace api types:watch"
   },
