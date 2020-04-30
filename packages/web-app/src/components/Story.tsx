@@ -182,7 +182,9 @@ function Story({
 }: Props) {
   useSetUserDetails();
   useAddCurrentUserToStory(storyId);
-  const userCount = useSelector(selectors.misc.selectActiveStoryUsers).length;
+  const userCount = (
+    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
+  ).length;
   const isCurrentUserActive = useSelector(
     selectors.misc.selectIsCurrentUserActiveInStory(storyId)
   );

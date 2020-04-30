@@ -52,6 +52,53 @@ export const selectStorySessions = (storyId: string) => (
   return sessions;
 };
 
+export const selectNonActiveStoryUsers = (storyId: string) => (
+  state: ReduxTypes.RootState
+) => {
+  const story = selectStory(storyId)(state);
+
+  if (!story) return null;
+
+  const connectedUserIds = story.connectedUserIds;
+  const activeUserIds = story.activeUserIds;
+
+  const users: User[] = [];
+
+  connectedUserIds.forEach((userId) => {
+    if (activeUserIds.includes(userId)) return;
+
+    const user = selectUser(userId)(state);
+
+    if (!user) return;
+
+    users.push(user);
+  });
+
+  return users;
+};
+
+export const selectConnectedStoryUsers = (storyId: string) => (
+  state: ReduxTypes.RootState
+) => {
+  const story = selectStory(storyId)(state);
+
+  if (!story) return null;
+
+  const connectedUserIds = story.connectedUserIds;
+
+  const users: User[] = [];
+
+  connectedUserIds.forEach((userId) => {
+    const user = selectUser(userId)(state);
+
+    if (!user) return;
+
+    users.push(user);
+  });
+
+  return users;
+};
+
 export const selectActiveStoryUsers = (storyId: string) => (
   state: ReduxTypes.RootState
 ) => {

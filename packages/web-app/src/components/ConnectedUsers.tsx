@@ -60,14 +60,25 @@ function ConnectedUsers({
   const activeStoryUsers =
     useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || [];
 
+  const nonActiveStoryUsers =
+    useSelector(selectors.misc.selectNonActiveStoryUsers(storyId)) || [];
+
   const currentlyEditingUser = useSelector(
     selectors.misc.selectActiveStorySessionUser(storyId)
   );
+
+  const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
 
   const currentlyEditingUserId =
     currentlyEditingUser && currentlyEditingUser.id;
 
   const classes = useStyles();
+
+  const renderListItem = (text: string) => (
+    <ListItem button className={classes.listItem}>
+      <ListItemText primary={text} />
+    </ListItem>
+  );
 
   return (
     <Drawer
@@ -83,10 +94,12 @@ function ConnectedUsers({
         <IconButton onClick={handleClose}>
           <ChevronRightIcon />
         </IconButton>
-        <ListItemText primary="Active users" className={classes.headerText} />
+        <ListItemText primary="Editing Users" className={classes.headerText} />
       </div>
       <Divider />
+
       <List>
+        {!activeStoryUsers.length && renderListItem("No one is editing")}
         {activeStoryUsers.map(({ name, id }) => (
           <ListItem button key={id} className={classes.listItem}>
             <ListItemIcon>
@@ -97,7 +110,31 @@ function ConnectedUsers({
                 <PersonIcon />
               </Badge>
             </ListItemIcon>
-            <ListItemText primary={name || "Anonymous"} />
+            <ListItemText
+              primary={currentUserId === id ? "You" : name || "Anonymous"}
+            />
+          </ListItem>
+        ))}
+      </List>
+
+      <Divider />
+      {renderListItem("Observing users")}
+      <Divider />
+      <List>
+        {!nonActiveStoryUsers.length && renderListItem("No one is watching")}
+        {nonActiveStoryUsers.map(({ name, id }) => (
+          <ListItem button key={id} className={classes.listItem}>
+            <ListItemIcon>
+              <Badge
+                variant="dot"
+                color={currentlyEditingUserId === id ? "secondary" : undefined}
+              >
+                <PersonIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText
+              primary={currentUserId === id ? "You" : name || "Anonymous"}
+            />
           </ListItem>
         ))}
       </List>
