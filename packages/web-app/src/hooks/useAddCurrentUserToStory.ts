@@ -23,7 +23,7 @@ function useAddCurrentUserToStory(storyId: string) {
           type: "ADD_USER_TO_STORY",
           payload: {
             storyId: storyId,
-            isActive: true,
+            isActive: false,
           },
         });
 

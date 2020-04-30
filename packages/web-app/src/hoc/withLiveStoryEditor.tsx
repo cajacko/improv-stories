@@ -18,7 +18,7 @@ interface Generic<S = null, T = null, U = null, C = false, A = false> {
   secondsLeft: T;
   editingUser: U;
   canCurrentUserEdit: C;
-  isCurrentUserActive: A;
+  isCurrentUserEditing: A;
 }
 
 export type InjectedLiveStoryEditorProps =
@@ -66,7 +66,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         canCurrentUserEdit: false,
         editingSession: null,
         editingUser: null,
-        isCurrentUserActive: false,
+        isCurrentUserEditing: false,
       };
 
       this.state = {
@@ -92,8 +92,8 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       const diff = dateWillFinish - now;
       let secondsLeft: number | null = Math.floor(diff / 1000);
 
-      const isCurrentUserActive = activeSession.userId === props.currentUserId;
-      const canCurrentUserEdit = isCurrentUserActive && secondsLeft > 0;
+      const isCurrentUserEditing = activeSession.userId === props.currentUserId;
+      const canCurrentUserEdit = isCurrentUserEditing && secondsLeft > 0;
 
       let editingSession = activeSession;
 
@@ -109,7 +109,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         editingSession,
         editingUser: props.currentlyEditingUser,
         canCurrentUserEdit,
-        isCurrentUserActive,
+        isCurrentUserEditing,
       };
     };
 

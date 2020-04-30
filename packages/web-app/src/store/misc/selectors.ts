@@ -1,6 +1,7 @@
 import ReduxTypes from "ReduxTypes";
 import { Session } from "../sessionsById/types";
 import { User } from "../usersById/types";
+import { selectCurrentUser } from "../currentUser/selectors";
 import { selectStory } from "../storiesById/selectors";
 import { selectSession } from "../sessionsById/selectors";
 import { selectUser } from "../usersById/selectors";
@@ -71,4 +72,16 @@ export const selectActiveStoryUsers = (storyId: string) => (
   });
 
   return users;
+};
+
+export const selectIsCurrentUserActiveInStory = (storyId: string) => (
+  state: ReduxTypes.RootState
+) => {
+  const currentUserId = selectCurrentUser(state).id;
+
+  const users = selectActiveStoryUsers(storyId)(state);
+
+  if (!users) return false;
+
+  return users.some(({ id }) => id === currentUserId);
 };

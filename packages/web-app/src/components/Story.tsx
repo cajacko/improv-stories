@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { v4 as uuid } from "uuid";
 import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import PeopleIcon from "@material-ui/icons/People";
@@ -16,19 +17,45 @@ import styled from "styled-components";
 import ConnectedUsers, { drawerWidth } from "./ConnectedUsers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import AddIcon from "@material-ui/icons/Add";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import selectors from "../store/selectors";
+import { send } from "../utils/socket";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
+const actionBarHeight = 70;
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    peopleButton: {
+    activeButtonWrapper: {
+      position: "relative",
+    },
+    buttonProgress: {
       position: "absolute",
-      top: theme.spacing(2),
-      right: theme.spacing(2),
+      top: "50%",
+      left: "50%",
+      marginTop: -12,
+      marginLeft: -12,
+    },
+    actionBar: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: actionBarHeight,
+      padding: theme.spacing(2),
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    peopleButton: {
       border: "1px solid #e2e2e2",
       backgroundColor: "white",
     },
+    activeButton: {},
     content: {
       flexGrow: 1,
       display: "flex",
@@ -46,6 +73,9 @@ const useStyles = makeStyles((theme: Theme) =>
         duration: theme.transitions.duration.enteringScreen,
       }),
       marginRight: 0,
+    },
+    textContainer: {
+      paddingTop: actionBarHeight,
     },
     footer: {
       width: "100%",
@@ -130,23 +160,75 @@ interface OwnProps {
 
 type Props = OwnProps & InjectedLiveStoryEditorProps;
 
+interface GenericActiveButtonStatus<P, N> {
+  prevValue: P;
+  nextValue: N;
+}
+
+type ActiveButtonStatus =
+  | GenericActiveButtonStatus<true, false>
+  | GenericActiveButtonStatus<false, true>
+  | null;
+
+type ActiveButtonValue = "LOADING" | true | false;
+
 function Story({
   storyId,
   editingSession,
   editingUser,
   secondsLeft,
   canCurrentUserEdit,
-  isCurrentUserActive,
+  isCurrentUserEditing,
 }: Props) {
   useSetUserDetails();
-  // TODO: this needs to constantly request user names from onlineIds with no name
-  // useGetUsers(storyId);
   useAddCurrentUserToStory(storyId);
   const userCount = useSelector(selectors.misc.selectActiveStoryUsers).length;
+  const isCurrentUserActive = useSelector(
+    selectors.misc.selectIsCurrentUserActiveInStory(storyId)
+  );
   const sessions = useStoryHistory(storyId);
   const classes = useStyles(canCurrentUserEdit);
 
   const [isOpen, setIsOpen] = React.useState(true);
+  const [activeButtonStatus, setActiveButtonStatus] = React.useState<
+    ActiveButtonStatus
+  >(null);
+
+  let activeButtonState: ActiveButtonValue = isCurrentUserActive;
+
+  if (
+    activeButtonStatus &&
+    activeButtonStatus.nextValue !== isCurrentUserActive
+  ) {
+    activeButtonState = "LOADING";
+  }
+
+  const handleToggleStatus = React.useCallback(() => {
+    const newIsCurrentUserActive = !isCurrentUserActive;
+
+    send({
+      id: uuid(),
+      createdAt: new Date().toISOString(),
+      type: newIsCurrentUserActive
+        ? "ADD_ACTIVE_USER_TO_STORY"
+        : "REMOVE_ACTIVE_USER_FROM_STORY",
+      payload: {
+        storyId,
+      },
+    });
+
+    setActiveButtonStatus(
+      newIsCurrentUserActive
+        ? {
+            prevValue: false,
+            nextValue: true,
+          }
+        : {
+            prevValue: true,
+            nextValue: false,
+          }
+    );
+  }, [isCurrentUserActive, storyId]);
 
   const handleClose = React.useCallback(() => setIsOpen(false), [setIsOpen]);
   const toggleIsOpen = React.useCallback(() => setIsOpen(!isOpen), [
@@ -180,7 +262,7 @@ function Story({
 
   if (canCurrentUserEdit) {
     statusText = "You are editing! Start typing.";
-  } else if (isCurrentUserActive) {
+  } else if (isCurrentUserEditing) {
     statusText = "Updating...";
   } else if (editingSession) {
     statusText = (editingUser && editingUser.name) || "Anonymous";
@@ -200,31 +282,56 @@ function Story({
         >
           <ContentContainer>
             <Content>
-              <IconButton
-                onClick={toggleIsOpen}
-                className={classes.peopleButton}
-              >
-                <Badge
-                  badgeContent={userCount}
-                  color={userCount > 1 ? "primary" : "default"}
-                  max={9}
-                  showZero
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                >
-                  <PeopleIcon color={isOpen ? "primary" : "disabled"} />
-                </Badge>
-              </IconButton>
-              {paragraphs.map((text, i) => (
-                <p key={i}>
-                  {text}
-                  {paragraphs.length - 1 === i && canCurrentUserEdit && (
-                    <Cursor className={classes.cursor} />
+              <div className={classes.actionBar}>
+                <div className={classes.activeButtonWrapper}>
+                  <Button
+                    variant="contained"
+                    color={activeButtonState ? "default" : "secondary"}
+                    className={classes.activeButton}
+                    startIcon={activeButtonState === true && <ArrowBackIcon />}
+                    endIcon={activeButtonState === false && <AddIcon />}
+                    onClick={handleToggleStatus}
+                    disabled={activeButtonState === "LOADING"}
+                  >
+                    {activeButtonState === "LOADING" && "Updating..."}
+                    {activeButtonState === true && "Leave as Editor"}
+                    {activeButtonState === false && "Join as Editor"}
+                  </Button>
+                  {activeButtonState === "LOADING" && (
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
                   )}
-                </p>
-              ))}
+                </div>
+                <IconButton
+                  onClick={toggleIsOpen}
+                  className={classes.peopleButton}
+                >
+                  <Badge
+                    badgeContent={userCount}
+                    color={userCount > 1 ? "primary" : "default"}
+                    max={9}
+                    showZero
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                  >
+                    <PeopleIcon color={isOpen ? "primary" : "disabled"} />
+                  </Badge>
+                </IconButton>
+              </div>
+              <div className={classes.textContainer}>
+                {paragraphs.map((text, i) => (
+                  <p key={i}>
+                    {text}
+                    {paragraphs.length - 1 === i && canCurrentUserEdit && (
+                      <Cursor className={classes.cursor} />
+                    )}
+                  </p>
+                ))}
+              </div>
             </Content>
           </ContentContainer>
 
