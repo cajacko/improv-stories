@@ -9,6 +9,10 @@ import {
   getSession,
 } from "./store";
 
+const lastBroadCastedStoryVersionBySocketId: {
+  [K: string]: undefined | { [K: string]: number | undefined };
+} = {};
+
 export function broadCastStoryChanged(storyId: string) {
   const story = getStory(storyId);
 
@@ -16,6 +20,19 @@ export function broadCastStoryChanged(storyId: string) {
     const storeUser = getUser(user.id);
 
     if (!storeUser) return;
+
+    const socketId = storeUser.socket.id;
+
+    const lastBroadCastedStoryVersions =
+      lastBroadCastedStoryVersionBySocketId[socketId];
+
+    const lastBroadCastedVersion =
+      lastBroadCastedStoryVersions && lastBroadCastedStoryVersions[storyId];
+
+    const doesNewStoryHaveHigherVersion =
+      !lastBroadCastedVersion || story.version > lastBroadCastedVersion;
+
+    if (!doesNewStoryHaveHigherVersion) return;
 
     const message: ServerMessage = {
       id: getGetId()(),
@@ -34,6 +51,14 @@ export function broadCastStoriesChanged(storyIds: string[]) {
   storyIds.forEach(broadCastStoryChanged);
 
   return storyIds;
+}
+
+export function broadCastUserStories(userId: string) {
+  const user = getUser(userId);
+
+  if (!user) return;
+
+  return broadCastStoriesChanged(Object.keys(user.connectedStories));
 }
 
 export function broadCastSessionChanged(

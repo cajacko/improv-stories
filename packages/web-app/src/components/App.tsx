@@ -43,7 +43,12 @@ function App() {
                 path="/story/:storyId"
                 component={(
                   props: RouteComponentProps<{ storyId: string }>
-                ) => <Story storyId={props.match.params.storyId} />}
+                ) => (
+                  <>
+                    {console.log("App")}
+                    <Story storyId={props.match.params.storyId} />
+                  </>
+                )}
               ></Route>
               <Redirect to={`/story/${uuid()}`} />
             </Switch>

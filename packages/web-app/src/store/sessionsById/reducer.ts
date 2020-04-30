@@ -1,24 +1,9 @@
 import { createReducer } from "typesafe-actions";
 import actions from "../actions";
-import { ServerSession } from "../../sharedTypes";
+import convertServerSession from "../../utils/convertServerSession";
 import { SessionsByIdState, Session } from "./types";
 
 const defaultState: SessionsByIdState = {};
-
-function convertServerSession(session: ServerSession | null): Session | null {
-  if (!session) return null;
-
-  return {
-    userId: session.user.id,
-    id: session.id,
-    dateStarted: session.dateStarted,
-    dateWillFinish: session.dateWillFinish,
-    finalEntry: session.finalEntry,
-    entries: session.entries,
-    dateModified: session.dateModified,
-    version: session.version,
-  };
-}
 
 function addNewSessions(
   state: SessionsByIdState,

@@ -41,6 +41,9 @@ function transformSessionsResponse(response: SessionsResponse): Session[] {
 }
 
 function useStoryHistory(storyId: string): Session[] {
+  const story = useSelector(selectors.storiesById.selectStory(storyId));
+  const activeSessionId = story && story.activeSessionId;
+  const lastSessionId = story && story.lastSessionId;
   const sessions = useSelector(selectors.misc.selectStorySessions(storyId));
   const ref = useEntriesRef(storyId);
   const dispatch = useDispatch();
@@ -48,7 +51,7 @@ function useStoryHistory(storyId: string): Session[] {
   React.useEffect(() => {
     if (!ref) return;
 
-    function setEntriesFromSnapshot(snapshot: firebase.database.DataSnapshot) {
+    function setSessionsFromSnapshot(snapshot: firebase.database.DataSnapshot) {
       var data = snapshot.val() as unknown;
 
       if (!isSessionsResponse(data)) return;
@@ -59,18 +62,20 @@ function useStoryHistory(storyId: string): Session[] {
         actions.sessionIdsByStoryId.setStorySessions({
           storyId,
           sessions: transformSessionsResponse(sessionsResponse),
+          lastSessionId,
+          activeSessionId,
         })
       );
     }
 
     const eventType = "value";
 
-    ref.on(eventType, setEntriesFromSnapshot);
+    ref.on(eventType, setSessionsFromSnapshot);
 
     return () => {
-      ref.off(eventType, setEntriesFromSnapshot);
+      ref.off(eventType, setSessionsFromSnapshot);
     };
-  }, [storyId, ref, dispatch]);
+  }, [storyId, ref, dispatch, lastSessionId, activeSessionId]);
 
   return sessions || [];
 }

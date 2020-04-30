@@ -1,5 +1,4 @@
 export interface Story {
-  sessionIds: string[];
   connectedUserIds: string[];
   activeUserIds: string[];
   lastSessionId: null | string;

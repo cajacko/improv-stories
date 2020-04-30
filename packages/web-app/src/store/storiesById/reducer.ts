@@ -4,14 +4,14 @@ import { StoriesByIdState, Story } from "./types";
 
 const defaultState: StoriesByIdState = {};
 
-const reducer = createReducer<StoriesByIdState>(defaultState)
-  .handleAction(actions.storiesById.setStory, (state, { payload }) => {
+const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
+  actions.storiesById.setStory,
+  (state, { payload }) => {
     const story = state[payload.id];
 
     if (story && story.version >= payload.version) return state;
 
     const newStory: Story = {
-      sessionIds: story ? story.sessionIds : [],
       connectedUserIds: payload.connectedUsers.map(({ id }) => id),
       activeUserIds: payload.activeUsers.map(({ id }) => id),
       lastSessionId: payload.lastSession ? payload.lastSession.id : null,
@@ -28,26 +28,7 @@ const reducer = createReducer<StoriesByIdState>(defaultState)
     };
 
     return newState;
-  })
-  .handleAction(
-    actions.sessionIdsByStoryId.setStorySessions,
-    (state, { payload }) => {
-      const story = state[payload.storyId];
-
-      const sessionIds = payload.sessions.map(({ id }) => id);
-
-      if (!story) return state;
-
-      const newStory: Story = {
-        ...story,
-        sessionIds,
-      };
-
-      return {
-        ...state,
-        [payload.storyId]: newStory,
-      };
-    }
-  );
+  }
+);
 
 export default reducer;

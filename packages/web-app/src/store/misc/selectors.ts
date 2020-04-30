@@ -4,6 +4,7 @@ import { User } from "../usersById/types";
 import { selectStory } from "../storiesById/selectors";
 import { selectSession } from "../sessionsById/selectors";
 import { selectUser } from "../usersById/selectors";
+import { selectStorySessionIds } from "../sessionIdsByStoryId/selectors";
 
 export const selectActiveStorySession = (storyId: string) => (
   state: ReduxTypes.RootState
@@ -33,9 +34,13 @@ export const selectStorySessions = (storyId: string) => (
 
   if (!story) return null;
 
+  const sessionIds = selectStorySessionIds(storyId)(state);
+
+  if (!sessionIds) return null;
+
   const sessions: Session[] = [];
 
-  story.sessionIds.forEach((sessionId) => {
+  sessionIds.forEach((sessionId) => {
     const session = selectSession(sessionId)(state);
 
     if (!session) return;

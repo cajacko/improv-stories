@@ -1,5 +1,5 @@
 import * as socket from "socket.io";
-import { broadCastStoriesChanged } from "./broadcast";
+import { broadCastStoriesChanged, broadCastUserStories } from "./broadcast";
 import { addUser, removeUser, getGetDate } from "./store";
 import { ClientMessage } from "./sharedTypes";
 import handleClientMessage from "./handleClientMessage";
@@ -55,8 +55,13 @@ function setupSockets(io: socket.Server) {
 
     onSocketConnect(sock, userId);
 
+    const interval = setInterval(() => {
+      broadCastUserStories(userId);
+    }, 1000);
+
     sock.on("disconnect", () => {
       onSocketDisconnect(userId);
+      clearInterval(interval);
     });
   });
 }

@@ -128,23 +128,22 @@ interface OwnProps {
   storyId: string;
 }
 
-interface Props extends OwnProps, InjectedLiveStoryEditorProps {}
+type Props = OwnProps & InjectedLiveStoryEditorProps;
 
 function Story({
   storyId,
-  currentUserCanEdit,
-  currentlyEditingUser,
-  text,
-  countDownTimer,
+  editingSession,
+  editingUser,
+  secondsLeft,
+  canCurrentUserEdit,
 }: Props) {
   useSetUserDetails();
   // TODO: this needs to constantly request user names from onlineIds with no name
   // useGetUsers(storyId);
   useAddCurrentUserToStory(storyId);
-  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const userCount = useSelector(selectors.misc.selectActiveStoryUsers).length;
   const sessions = useStoryHistory(storyId);
-  const classes = useStyles(currentUserCanEdit);
+  const classes = useStyles(canCurrentUserEdit);
 
   const [isOpen, setIsOpen] = React.useState(true);
 
@@ -154,36 +153,32 @@ function Story({
     isOpen,
   ]);
 
-  let combinedSessions = sessions.reduce(
-    (acc, { finalEntry }) => `${acc}${finalEntry}`,
-    ""
-  );
+  const editing = editingSession && {
+    id: editingSession.id,
+    text: editingSession.finalEntry,
+  };
 
-  combinedSessions = `${combinedSessions}${text}`;
+  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
+    const entry = editing && editing.id === id ? editing.text : finalEntry;
+
+    return `${acc}${entry}`;
+  }, "");
 
   const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
-  const focusOnTextArea = React.useCallback(() => {
-    if (textAreaRef.current && currentUserCanEdit) {
-      textAreaRef.current.focus();
-    }
-  }, [textAreaRef, currentUserCanEdit]);
-
-  React.useLayoutEffect(focusOnTextArea, [focusOnTextArea]);
-
   let statusText = "Waiting for more users to join...";
 
-  if (currentUserCanEdit) {
+  if (canCurrentUserEdit) {
     statusText = "You are editing! Start typing.";
-  } else if (currentlyEditingUser) {
-    statusText = currentlyEditingUser.name || "Anonymous";
+  } else if (editingSession) {
+    statusText = (editingUser && editingUser.name) || "Anonymous";
     statusText = `${statusText} is editing`;
   }
 
   return (
     <>
       <ToolBar />
-      <Container onClick={currentUserCanEdit ? focusOnTextArea : undefined}>
+      <Container>
         <div
           className={clsx(classes.content, {
             [classes.contentShift]: isOpen,
@@ -221,16 +216,14 @@ function Story({
 
           <div className={classes.footer}>
             <Typography className={classes.name}>{statusText}</Typography>
-            {countDownTimer !== null && (
+            {secondsLeft !== null && (
               <>
-                <Typography className={classes.time}>
-                  {countDownTimer}
-                </Typography>
+                <Typography className={classes.time}>{secondsLeft}</Typography>
                 <LinearProgress
                   className={classes.progress}
                   variant="determinate"
-                  color={currentUserCanEdit ? "primary" : "secondary"}
-                  value={normalise(countDownTimer)}
+                  color={canCurrentUserEdit ? "primary" : "secondary"}
+                  value={normalise(secondsLeft)}
                 />
               </>
             )}
