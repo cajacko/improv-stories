@@ -17,6 +17,8 @@ import styled from "styled-components";
 import ConnectedUsers, { drawerWidth } from "./ConnectedUsers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -30,6 +32,9 @@ const actionBarHeight = 70;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    continueCard: {
+      maxWidth: 250,
+    },
     activeButtonWrapper: {
       position: "relative",
     },
@@ -135,6 +140,31 @@ const Content = styled.div`
   padding: 0 20px;
 `;
 
+const FocusButton = styled.button`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  border: 0;
+  background-color: #00000090;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const TextArea = styled.textarea`
+  position: absolute;
+  left: -9999999px;
+  width: 200px;
+  height: 200px;
+`;
+
 const Cursor = styled.span`
   margin-left: 2px;
   animation: flash linear 1s infinite;
@@ -179,6 +209,9 @@ function Story({
   secondsLeft,
   canCurrentUserEdit,
   isCurrentUserEditing,
+  textAreaProps,
+  isTextAreaFocussed,
+  focusOnTextArea,
 }: Props) {
   useSetUserDetails();
   useAddCurrentUserToStory(storyId);
@@ -324,6 +357,17 @@ function Story({
                   </Badge>
                 </IconButton>
               </div>
+              {!isTextAreaFocussed && canCurrentUserEdit && (
+                <FocusButton onClick={() => focusOnTextArea()}>
+                  <Card className={classes.continueCard}>
+                    <CardContent>
+                      <Typography variant="overline" color="error">
+                        It's your turn! Click here to continue the story
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </FocusButton>
+              )}
               <div className={classes.textContainer}>
                 {paragraphs.map((text, i) => (
                   <p key={i}>
@@ -333,6 +377,7 @@ function Story({
                     )}
                   </p>
                 ))}
+                <TextArea {...textAreaProps} />
               </div>
             </Content>
           </ContentContainer>

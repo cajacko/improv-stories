@@ -11,8 +11,6 @@ import selectors from "../store/selectors";
 import convertServerSession from "../utils/convertServerSession";
 import actions from "../store/actions";
 
-const keyEvent = "keydown";
-
 interface Generic<S = null, T = null, U = null, C = false, A = false> {
   editingSession: S;
   secondsLeft: T;
@@ -21,9 +19,21 @@ interface Generic<S = null, T = null, U = null, C = false, A = false> {
   isCurrentUserEditing: A;
 }
 
-export type InjectedLiveStoryEditorProps =
+export type EditorProps =
   | Generic<Session, number, User | null, boolean, boolean>
   | Generic;
+
+export type InjectedLiveStoryEditorProps = EditorProps & {
+  isTextAreaFocussed: boolean;
+  focusOnTextArea: () => void;
+  textAreaProps: {
+    ref: React.RefObject<HTMLTextAreaElement>;
+    onFocus: () => void;
+    onBlur: () => void;
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  };
+};
 
 interface InjectedHookProps {
   currentUserId: string;
@@ -33,11 +43,13 @@ interface InjectedHookProps {
   activeSession: Session | null;
   dispatch: Dispatch<ReduxTypes.Action>;
   currentlyEditingUser: User | null;
+  textAreaRef: React.RefObject<HTMLTextAreaElement>;
 }
 
 interface State {
   listenerKey: string;
-  injectedLiveStoryEditorProps: InjectedLiveStoryEditorProps;
+  injectedLiveStoryEditorProps: EditorProps;
+  isTextAreaFocussed: boolean;
 }
 
 interface OwnProps {
@@ -53,7 +65,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 ): React.ComponentType<P> {
   class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
     activeSession: Session | null;
-    nullProps: InjectedLiveStoryEditorProps;
+    nullProps: EditorProps;
     interval: null | number = null;
     removeTextListener: null | RemoveListener = null;
 
@@ -70,6 +82,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       };
 
       this.state = {
+        isTextAreaFocussed: false,
         injectedLiveStoryEditorProps: this.getInjectedLiveStoryEditorProps(
           null,
           props
@@ -81,7 +94,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     getInjectedLiveStoryEditorProps = (
       text: string | null,
       props = this.props
-    ): InjectedLiveStoryEditorProps => {
+    ): EditorProps => {
       if (!props.activeSession) return this.nullProps;
       let activeSession = this.activeSession || props.activeSession;
       if (activeSession.id !== props.activeSession.id)
@@ -129,7 +142,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     setInjectedLiveStoryEditorPropsIfChanged = (
       props = this.props,
       state = this.state,
-      newInjectedLiveStoryEditorProps?: InjectedLiveStoryEditorProps
+      newInjectedLiveStoryEditorProps?: EditorProps
     ) => {
       const newProps =
         newInjectedLiveStoryEditorProps ||
@@ -193,8 +206,6 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
           this.setInjectedLiveStoryEditorPropsIfChanged();
         }
       );
-
-      document.addEventListener(keyEvent, this.onKeyDown);
     }
 
     componentWillReceiveProps(newProps: HocProps<P>) {
@@ -222,28 +233,23 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       }
     }
 
-    onKeyDown: (event: KeyboardEvent) => void = (event) => {
-      if (!this.state.injectedLiveStoryEditorProps.canCurrentUserEdit) return;
+    componentDidUpdate(prevProps: HocProps<P>) {
+      const {
+        editingSession,
+        canCurrentUserEdit,
+      } = this.state.injectedLiveStoryEditorProps;
 
-      const key = event.key;
-
-      let text = this.getActiveSessionFinalEntry() || "";
-
-      switch (key) {
-        case "Backspace":
-          text = text.slice(0, -1);
-          break;
-        case "Enter":
-          text = `${text}\n`;
-          break;
-        default:
-          if (key.length > 1) return;
-          text = `${text}${key}`;
-          break;
+      if (!editingSession) return;
+      if (!canCurrentUserEdit) return;
+      if (
+        prevProps.activeSession &&
+        prevProps.activeSession.userId === this.props.currentUserId
+      ) {
+        return;
       }
 
-      this.onTextChange(text);
-    };
+      this.focusOnTextArea();
+    }
 
     componentWillUnmount() {
       if (this.interval) {
@@ -253,18 +259,46 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       if (this.removeTextListener) {
         this.removeTextListener();
       }
-
-      document.removeEventListener(keyEvent, this.onKeyDown);
     }
+
+    focusOnTextArea = (props = this.props) => {
+      if (props.textAreaRef.current) {
+        console.log("focus on the textarea");
+        props.textAreaRef.current.focus();
+      }
+    };
+
+    onTextAreaFocus = () => {
+      this.setState({ isTextAreaFocussed: true });
+    };
+
+    onTextAreaBlur = () => {
+      this.setState({ isTextAreaFocussed: false });
+    };
 
     render() {
       const props = this.getInjectedLiveStoryEditorPropsWithText();
 
-      return <Component {...this.props.originalProps} {...props} />;
+      return (
+        <Component
+          {...this.props.originalProps}
+          isTextAreaFocussed={this.state.isTextAreaFocussed}
+          focusOnTextArea={this.focusOnTextArea}
+          textAreaProps={{
+            ref: this.props.textAreaRef,
+            value: props.editingSession ? props.editingSession.finalEntry : "",
+            onChange: this.onTextChange,
+            onFocus: this.onTextAreaFocus,
+            onBlur: this.onTextAreaBlur,
+          }}
+          {...props}
+        />
+      );
     }
   }
 
   const LiveStoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
+    const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
     const currentUserId = useSelector((state) => state.currentUser.id);
     const entriesRef = useEntriesRef(props.storyId);
     const activeStoryUsers = useSelector(
@@ -281,6 +315,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
 
     return (
       <LiveStoryEditorHoc
+        textAreaRef={textAreaRef}
         originalProps={props}
         currentUserId={currentUserId}
         entriesRef={entriesRef}
