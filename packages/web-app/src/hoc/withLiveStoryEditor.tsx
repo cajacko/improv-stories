@@ -195,16 +195,27 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     }
 
     componentWillReceiveProps(newProps: HocProps<P>) {
-      this.setInjectedLiveStoryEditorPropsIfChanged(newProps);
-
-      if (!this.activeSession) return;
-
-      if (
+      const isNewSession =
+        !this.activeSession ||
         !newProps.activeSession ||
-        newProps.activeSession.id !== this.activeSession.id
-      ) {
-        newProps.dispatch(actions.sessionsById.setSession(this.activeSession));
+        newProps.activeSession.id !== this.activeSession.id;
+
+      if (isNewSession) {
+        if (this.activeSession) {
+          newProps.dispatch(
+            actions.sessionsById.setSession(this.activeSession)
+          );
+        }
+
         this.activeSession = newProps.activeSession;
+
+        this.setInjectedLiveStoryEditorPropsIfChanged(
+          undefined,
+          undefined,
+          this.getInjectedLiveStoryEditorProps("", newProps)
+        );
+      } else {
+        this.setInjectedLiveStoryEditorPropsIfChanged(newProps);
       }
     }
 
