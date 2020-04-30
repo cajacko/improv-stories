@@ -204,7 +204,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         newProps.activeSession.id !== this.activeSession.id
       ) {
         newProps.dispatch(actions.sessionsById.setSession(this.activeSession));
-        this.activeSession = null;
+        this.activeSession = newProps.activeSession;
       }
     }
 
@@ -244,12 +244,9 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     }
 
     render() {
-      return (
-        <Component
-          {...this.props.originalProps}
-          {...this.getInjectedLiveStoryEditorPropsWithText()}
-        />
-      );
+      const props = this.getInjectedLiveStoryEditorPropsWithText();
+
+      return <Component {...this.props.originalProps} {...props} />;
     }
   }
 

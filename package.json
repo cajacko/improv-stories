@@ -7,7 +7,7 @@
   "author": "Charlie Jackson <charlie@charliejackson.com>",
   "license": "MIT",
   "scripts": {
-    "start": "cd packages/api && npm start",
+    "start": "cd packages/api && yarn start",
     "dev": "concurrently \"yarn dev:api\" \"yarn dev:web-app\"",
     "dev:api": "yarn workspace api start:watch",
     "dev:web-app": "yarn workspace web-app start",
@@ -16,10 +16,11 @@
     "build:api": "yarn workspace api build",
     "build:web-app": "yarn workspace web-app build",
     "test": "yarn workspace api test:watch",
-    "deploy": "yarn deploy:web && yarn deploy:api",
-    "deploy:api": "yarn build:api && gcloud app deploy -q",
-    "deploy:web": "yarn build:web-app && firebase deploy",
+    "deploy": "firebase deploy && yarn build:web-app && yarn build:api && gcloud app deploy -q",
     "types:api": "yarn workspace api types:watch"
+  },
+  "engines": {
+    "node": ">10.0.0"
   },
   "workspaces": [
     "packages/api",

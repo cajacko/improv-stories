@@ -16,6 +16,17 @@
 # Node.js dependencies:
 node_modules/
 
-packages/web-app/
+
+packages/web-app/node_modules/
+packages/web-app/src/
+
 packages/api/node_modules/
 packages/api/src/
+
+# .env
+# .env.local
+# .env.development.local
+# .env.test.local
+# .env.production.local
+.firebase
+.log

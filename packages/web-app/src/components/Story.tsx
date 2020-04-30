@@ -78,7 +78,7 @@ const useStyles = makeStyles((theme: Theme) =>
       left: 0,
     },
     cursor: {
-      color: theme.palette.secondary.main,
+      borderRight: `1px solid ${theme.palette.secondary.main}`,
     },
   })
 );
@@ -158,11 +158,20 @@ function Story({
     text: editingSession.finalEntry,
   };
 
-  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
-    const entry = editing && editing.id === id ? editing.text : finalEntry;
+  let didAddEditingSession = false;
 
-    return `${acc}${entry}`;
+  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
+    if (editing && editing.id === id) {
+      didAddEditingSession = true;
+      return `${acc}${editing.text}`;
+    }
+
+    return `${acc}${finalEntry}`;
   }, "");
+
+  if (!didAddEditingSession && editing) {
+    combinedSessions = `${combinedSessions}${editing.text}`;
+  }
 
   const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
@@ -174,6 +183,8 @@ function Story({
     statusText = (editingUser && editingUser.name) || "Anonymous";
     statusText = `${statusText} is editing`;
   }
+
+  let seconds = secondsLeft !== null && secondsLeft < 0 ? 0 : secondsLeft;
 
   return (
     <>
@@ -206,8 +217,8 @@ function Story({
               {paragraphs.map((text, i) => (
                 <p key={i}>
                   {text}
-                  {paragraphs.length - 1 === i && (
-                    <Cursor className={classes.cursor}>|</Cursor>
+                  {paragraphs.length - 1 === i && canCurrentUserEdit && (
+                    <Cursor className={classes.cursor} />
                   )}
                 </p>
               ))}
@@ -216,14 +227,14 @@ function Story({
 
           <div className={classes.footer}>
             <Typography className={classes.name}>{statusText}</Typography>
-            {secondsLeft !== null && (
+            {seconds !== null && (
               <>
-                <Typography className={classes.time}>{secondsLeft}</Typography>
+                <Typography className={classes.time}>{seconds}</Typography>
                 <LinearProgress
                   className={classes.progress}
                   variant="determinate"
                   color={canCurrentUserEdit ? "primary" : "secondary"}
-                  value={normalise(secondsLeft)}
+                  value={normalise(seconds)}
                 />
               </>
             )}

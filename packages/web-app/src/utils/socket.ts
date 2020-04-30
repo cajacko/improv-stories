@@ -13,13 +13,17 @@ const messageListeners: {
 
 const connectionListeners: { [K: string]: ConnectionListener | undefined } = {};
 
-function setIsConnected(value: boolean) {
-  isConnected = value;
+function setIsConnected() {
+  const newIsConnected = !!socket && socket.connected;
+
+  if (isConnected === newIsConnected) return;
+
+  isConnected = newIsConnected;
 
   Object.values(connectionListeners).forEach((callback) => {
     if (!callback) return;
 
-    callback(value);
+    callback(isConnected);
   });
 }
 
@@ -30,17 +34,21 @@ export function init(userId: string) {
 
   hasInit = true;
 
-  socket = io(`${process.env.REACT_APP_SOCKET_URL}?user_id=${userId}`);
-
-  socket.on("connect", function () {
-    setIsConnected(true);
+  socket = io(`${process.env.REACT_APP_SOCKET_URL}?user_id=${userId}`, {
+    transports: ["websocket"],
   });
 
-  socket.on("disconnect", function () {
-    setIsConnected(false);
-  });
+  socket.on("connect", setIsConnected);
+  socket.on("disconnect", setIsConnected);
+  socket.on("reconnect_error", setIsConnected);
+  socket.on("reconnect_failed", setIsConnected);
+  socket.on("error", setIsConnected);
+  socket.on("connect_error", setIsConnected);
+  socket.on("reconnect", setIsConnected);
 
   socket.on("message", function (message: ServerMessage) {
+    setIsConnected();
+
     const typeListeners = messageListeners[message.type];
 
     if (!typeListeners) return;
