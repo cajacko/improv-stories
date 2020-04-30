@@ -13,15 +13,16 @@ import actions from "../store/actions";
 
 const keyEvent = "keydown";
 
-interface Generic<S = null, T = null, U = null, C = false> {
+interface Generic<S = null, T = null, U = null, C = false, A = false> {
   editingSession: S;
   secondsLeft: T;
   editingUser: U;
   canCurrentUserEdit: C;
+  isCurrentUserActive: A;
 }
 
 export type InjectedLiveStoryEditorProps =
-  | Generic<Session, number, User | null, boolean>
+  | Generic<Session, number, User | null, boolean, boolean>
   | Generic;
 
 interface InjectedHookProps {
@@ -65,6 +66,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         canCurrentUserEdit: false,
         editingSession: null,
         editingUser: null,
+        isCurrentUserActive: false,
       };
 
       this.state = {
@@ -90,8 +92,8 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       const diff = dateWillFinish - now;
       let secondsLeft: number | null = Math.floor(diff / 1000);
 
-      const canCurrentUserEdit =
-        activeSession.userId === props.currentUserId && secondsLeft > 0;
+      const isCurrentUserActive = activeSession.userId === props.currentUserId;
+      const canCurrentUserEdit = isCurrentUserActive && secondsLeft > 0;
 
       let editingSession = activeSession;
 
@@ -107,6 +109,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         editingSession,
         editingUser: props.currentlyEditingUser,
         canCurrentUserEdit,
+        isCurrentUserActive,
       };
     };
 

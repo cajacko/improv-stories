@@ -136,6 +136,7 @@ function Story({
   editingUser,
   secondsLeft,
   canCurrentUserEdit,
+  isCurrentUserActive,
 }: Props) {
   useSetUserDetails();
   // TODO: this needs to constantly request user names from onlineIds with no name
@@ -179,6 +180,8 @@ function Story({
 
   if (canCurrentUserEdit) {
     statusText = "You are editing! Start typing.";
+  } else if (isCurrentUserActive) {
+    statusText = "Updating...";
   } else if (editingSession) {
     statusText = (editingUser && editingUser.name) || "Anonymous";
     statusText = `${statusText} is editing`;
