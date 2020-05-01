@@ -1,7 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
@@ -13,8 +12,6 @@ import PersonIcon from "@material-ui/icons/Person";
 import Badge from "@material-ui/core/Badge";
 import selectors from "../store/selectors";
 
-export const drawerWidth = 240;
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     listItem: {
@@ -23,15 +20,6 @@ const useStyles = makeStyles((theme: Theme) =>
         backgroundColor: "inherit",
       },
       textAlign: "right",
-    },
-    drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-    drawerPaper: {
-      width: drawerWidth,
-      position: "relative",
-      zIndex: 1,
     },
     drawerHeader: {
       display: "flex",
@@ -50,12 +38,10 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function ConnectedUsers({
   storyId,
-  isOpen,
   handleClose,
 }: {
   storyId: string;
-  isOpen: boolean;
-  handleClose: () => void;
+  handleClose?: () => void;
 }) {
   const activeStoryUsers =
     useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || [];
@@ -81,19 +67,13 @@ function ConnectedUsers({
   );
 
   return (
-    <Drawer
-      className={classes.drawer}
-      variant="persistent"
-      anchor="right"
-      open={isOpen}
-      classes={{
-        paper: classes.drawerPaper,
-      }}
-    >
+    <>
       <div className={classes.drawerHeader}>
-        <IconButton onClick={handleClose}>
-          <ChevronRightIcon />
-        </IconButton>
+        {!!handleClose && (
+          <IconButton onClick={handleClose}>
+            <ChevronRightIcon />
+          </IconButton>
+        )}
         <ListItemText primary="Editing Users" className={classes.headerText} />
       </div>
       <Divider />
@@ -138,7 +118,7 @@ function ConnectedUsers({
           </ListItem>
         ))}
       </List>
-    </Drawer>
+    </>
   );
 }
 
