@@ -2,6 +2,7 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import useStoryHistory from "../../hooks/useStoryHistory";
 import { InjectedLiveStoryEditorProps } from "../../hoc/withLiveStoryEditor";
+import { Session } from "../../store/sessionsById/types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface Props {
   storyId: string;
-  editingSession: InjectedLiveStoryEditorProps["editingSession"];
+  editingSession: Session | null;
   textAreaProps: InjectedLiveStoryEditorProps["textAreaProps"];
   canCurrentUserEdit: boolean;
 }
