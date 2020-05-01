@@ -1,11 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { v4 as uuid } from "uuid";
-import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import PeopleIcon from "@material-ui/icons/People";
-import IconButton from "@material-ui/core/IconButton";
-import Badge from "@material-ui/core/Badge";
 import useAddCurrentUserToStory from "../../hooks/useAddCurrentUserToStory";
 import withLiveStoryEditor, {
   InjectedLiveStoryEditorProps,
@@ -19,48 +14,21 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
-import AddIcon from "@material-ui/icons/Add";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import selectors from "../../store/selectors";
-import { send } from "../../utils/socket";
+import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
-
-const actionBarHeight = 70;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     continueCard: {
       maxWidth: 250,
     },
-    activeButtonWrapper: {
-      position: "relative",
-    },
-    buttonProgress: {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      marginTop: -12,
-      marginLeft: -12,
-    },
     actionBar: {
       position: "absolute",
       top: 0,
       left: 0,
       right: 0,
-      height: actionBarHeight,
-      padding: theme.spacing(2),
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
     },
-    peopleButton: {
-      border: "1px solid #e2e2e2",
-      backgroundColor: "white",
-    },
-    activeButton: {},
     content: {
       flexGrow: 1,
       display: "flex",
@@ -208,62 +176,16 @@ function Story({
   editingUser,
   secondsLeft,
   canCurrentUserEdit,
-  isCurrentUserEditing,
   textAreaProps,
   isTextAreaFocussed,
   focusOnTextArea,
 }: Props) {
   useSetUserDetails();
   useAddCurrentUserToStory(storyId);
-  const userCount = (
-    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
-  ).length;
-  const isCurrentUserActive = useSelector(
-    selectors.misc.selectIsCurrentUserActiveInStory(storyId)
-  );
   const sessions = useStoryHistory(storyId);
   const classes = useStyles(canCurrentUserEdit);
 
   const [isOpen, setIsOpen] = React.useState(true);
-  const [activeButtonStatus, setActiveButtonStatus] = React.useState<
-    ActiveButtonStatus
-  >(null);
-
-  let activeButtonState: ActiveButtonValue = isCurrentUserActive;
-
-  if (
-    activeButtonStatus &&
-    activeButtonStatus.nextValue !== isCurrentUserActive
-  ) {
-    activeButtonState = "LOADING";
-  }
-
-  const handleToggleStatus = React.useCallback(() => {
-    const newIsCurrentUserActive = !isCurrentUserActive;
-
-    send({
-      id: uuid(),
-      createdAt: new Date().toISOString(),
-      type: newIsCurrentUserActive
-        ? "ADD_ACTIVE_USER_TO_STORY"
-        : "REMOVE_ACTIVE_USER_FROM_STORY",
-      payload: {
-        storyId,
-      },
-    });
-
-    setActiveButtonStatus(
-      newIsCurrentUserActive
-        ? {
-            prevValue: false,
-            nextValue: true,
-          }
-        : {
-            prevValue: true,
-            nextValue: false,
-          }
-    );
-  }, [isCurrentUserActive, storyId]);
 
   const handleClose = React.useCallback(() => setIsOpen(false), [setIsOpen]);
   const toggleIsOpen = React.useCallback(() => setIsOpen(!isOpen), [
@@ -322,44 +244,12 @@ function Story({
           <ContentContainer>
             <Content>
               <div className={classes.actionBar}>
-                <div className={classes.activeButtonWrapper}>
-                  <Button
-                    variant="contained"
-                    color={activeButtonState ? "default" : "secondary"}
-                    className={classes.activeButton}
-                    startIcon={activeButtonState === true && <ArrowBackIcon />}
-                    endIcon={activeButtonState === false && <AddIcon />}
-                    onClick={handleToggleStatus}
-                    disabled={activeButtonState === "LOADING"}
-                  >
-                    {activeButtonState === "LOADING" && "Updating..."}
-                    {activeButtonState === true && "Leave as Editor"}
-                    {activeButtonState === false && "Join as Editor"}
-                  </Button>
-                  {activeButtonState === "LOADING" && (
-                    <CircularProgress
-                      size={24}
-                      className={classes.buttonProgress}
-                    />
-                  )}
-                </div>
-                <IconButton
-                  onClick={toggleIsOpen}
-                  className={classes.peopleButton}
-                >
-                  <Badge
-                    badgeContent={userCount}
-                    color={userCount > 1 ? "primary" : "default"}
-                    max={9}
-                    showZero
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "right",
-                    }}
-                  >
-                    <PeopleIcon color={isOpen ? "primary" : "disabled"} />
-                  </Badge>
-                </IconButton>
+                <StoryActionBar
+                  storyId={storyId}
+                  canCurrentUserEdit={canCurrentUserEdit}
+                  isUsersDrawerOpen={isOpen}
+                  toggleIsUsersDrawerOpen={toggleIsOpen}
+                />
               </div>
               {!isTextAreaFocussed && canCurrentUserEdit && (
                 <FocusButton onClick={() => focusOnTextArea()}>
