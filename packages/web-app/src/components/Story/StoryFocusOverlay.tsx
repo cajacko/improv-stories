@@ -3,6 +3,7 @@ import { makeStyles, createStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import getZIndex from "../../utils/getZIndex";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -25,6 +26,7 @@ const useStyles = makeStyles(() =>
       alignItems: "center",
       justifyContent: "center",
       padding: 20,
+      zIndex: getZIndex("STORY_FOCUS_OVERLAY"),
     },
   })
 );

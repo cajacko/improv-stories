@@ -12,6 +12,7 @@ import StoryFocusOverlay from "./StoryFocusOverlay";
 import StoryContent from "./StoryContent";
 import StoryStatus from "./StoryStatus";
 import StoryLayout from "./StoryLayout";
+import getZIndex from "../../utils/getZIndex";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -20,9 +21,12 @@ const useStyles = makeStyles(() =>
       top: 0,
       left: 0,
       right: 0,
+      zIndex: getZIndex("STORY_ACTION_BAR"),
     },
     textContainer: {
       paddingTop: actionBarHeight,
+      paddingBottom: "100vh",
+      position: "relative",
     },
     contentContainer: {
       display: "flex",
@@ -52,9 +56,13 @@ function Story({
   editingUser,
   secondsLeft,
   canCurrentUserEdit,
-  textAreaProps,
   isTextAreaFocussed,
   focusOnTextArea,
+  textAreaRef,
+  textAreaValue,
+  onTextAreaBlur,
+  onTextAreaFocus,
+  onTextAreaChange,
 }: Props) {
   useSetUserDetails();
   useAddCurrentUserToStory(storyId);
@@ -68,6 +76,7 @@ function Story({
     <>
       <ToolBar />
       <StoryLayout
+        canCurrentUserEdit={canCurrentUserEdit}
         renderMainContent={React.useCallback(
           ({ isOpen, toggleIsOpen }) => (
             <>
@@ -87,7 +96,11 @@ function Story({
                     <StoryContent
                       storyId={storyId}
                       editingSession={editingSession}
-                      textAreaProps={textAreaProps}
+                      textAreaRef={textAreaRef}
+                      textAreaValue={textAreaValue}
+                      onTextAreaBlur={onTextAreaBlur}
+                      onTextAreaFocus={onTextAreaFocus}
+                      onTextAreaChange={onTextAreaChange}
                       canCurrentUserEdit={canCurrentUserEdit}
                     />
                   </div>
@@ -97,7 +110,7 @@ function Story({
                 isEditingSessionActive={!!editingSession}
                 secondsLeft={secondsLeft}
                 canCurrentUserEdit={canCurrentUserEdit}
-                editingUserName={editingUser && editingUser.name}
+                editingUser={editingUser}
               />
             </>
           ),
@@ -107,7 +120,11 @@ function Story({
             isTextAreaFocussed,
             canCurrentUserEdit,
             editingSession,
-            textAreaProps,
+            textAreaRef,
+            textAreaValue,
+            onTextAreaBlur,
+            onTextAreaFocus,
+            onTextAreaChange,
             secondsLeft,
             editingUser,
             onFocusOverlayClick,

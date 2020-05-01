@@ -26,13 +26,11 @@ export type EditorProps =
 export type InjectedLiveStoryEditorProps = EditorProps & {
   isTextAreaFocussed: boolean;
   focusOnTextArea: () => void;
-  textAreaProps: {
-    ref: React.RefObject<HTMLTextAreaElement>;
-    onFocus: () => void;
-    onBlur: () => void;
-    value: string;
-    onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  };
+  textAreaRef: React.RefObject<HTMLTextAreaElement>;
+  onTextAreaFocus: () => void;
+  onTextAreaBlur: () => void;
+  textAreaValue: string;
+  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 };
 
 interface InjectedHookProps {
@@ -106,7 +104,10 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       let secondsLeft: number | null = Math.floor(diff / 1000);
 
       const isCurrentUserEditing = activeSession.userId === props.currentUserId;
-      const canCurrentUserEdit = isCurrentUserEditing && secondsLeft > 0;
+      const canCurrentUserEdit =
+        isCurrentUserEditing &&
+        secondsLeft > 0 &&
+        props.activeStoryUsers.some(({ id }) => id === props.currentUserId);
 
       let editingSession = activeSession;
 
@@ -208,6 +209,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       );
     }
 
+    // Store this.session outside the component, like a store
     componentWillReceiveProps(newProps: HocProps<P>) {
       const isNewSession =
         !this.activeSession ||
@@ -239,8 +241,11 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         canCurrentUserEdit,
       } = this.state.injectedLiveStoryEditorProps;
 
-      if (!editingSession) return;
-      if (!canCurrentUserEdit) return;
+      if (!editingSession || !canCurrentUserEdit) {
+        this.blueTextArea();
+        return;
+      }
+
       if (
         prevProps.activeSession &&
         prevProps.activeSession.userId === this.props.currentUserId
@@ -261,9 +266,14 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       }
     }
 
+    blueTextArea = (props = this.props) => {
+      if (props.textAreaRef.current) {
+        props.textAreaRef.current.blur();
+      }
+    };
+
     focusOnTextArea = (props = this.props) => {
       if (props.textAreaRef.current) {
-        console.log("focus on the textarea");
         props.textAreaRef.current.focus();
       }
     };
@@ -284,13 +294,13 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
           {...this.props.originalProps}
           isTextAreaFocussed={this.state.isTextAreaFocussed}
           focusOnTextArea={this.focusOnTextArea}
-          textAreaProps={{
-            ref: this.props.textAreaRef,
-            value: props.editingSession ? props.editingSession.finalEntry : "",
-            onChange: this.onTextChange,
-            onFocus: this.onTextAreaFocus,
-            onBlur: this.onTextAreaBlur,
-          }}
+          textAreaRef={this.props.textAreaRef}
+          textAreaValue={
+            props.editingSession ? props.editingSession.finalEntry : ""
+          }
+          onTextAreaChange={this.onTextChange}
+          onTextAreaFocus={this.onTextAreaFocus}
+          onTextAreaBlur={this.onTextAreaBlur}
           {...props}
         />
       );

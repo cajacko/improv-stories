@@ -12,6 +12,7 @@ import AddIcon from "@material-ui/icons/FiberNew";
 import SaveIcon from "@material-ui/icons/Save";
 import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
+import getZIndex from "../utils/getZIndex";
 import selectors from "../store/selectors";
 
 const useStyles = makeStyles((theme) => ({
@@ -54,12 +55,12 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     top: 0,
     right: 0,
-    zIndex: 2,
+    zIndex: getZIndex("TOOLBAR_SEARCH"),
   },
   inputRoot: {
     color: "inherit",
     position: "relative",
-    zIndex: 1,
+    zIndex: getZIndex("TOOLBAR_INPUT"),
   },
   inputInput: {
     padding: theme.spacing(1, 0, 1, 1),

@@ -1,7 +1,6 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import useStoryHistory from "../../hooks/useStoryHistory";
-import { InjectedLiveStoryEditorProps } from "../../hoc/withLiveStoryEditor";
 import { Session } from "../../store/sessionsById/types";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -21,15 +20,17 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     cursor: {
-      borderRight: `1px solid ${theme.palette.secondary.main}`,
+      borderRight: (canCurrentUserEdit) =>
+        canCurrentUserEdit ? `1px solid ${theme.palette.secondary.main}` : 0,
       marginLeft: 2,
       animation: "flash linear 1s infinite",
+      position: "relative",
     },
     textArea: {
       position: "absolute",
       left: -9999999,
       width: 200,
-      height: 200,
+      height: 0,
     },
   })
 );
@@ -37,18 +38,26 @@ const useStyles = makeStyles((theme: Theme) =>
 interface Props {
   storyId: string;
   editingSession: Session | null;
-  textAreaProps: InjectedLiveStoryEditorProps["textAreaProps"];
   canCurrentUserEdit: boolean;
+  textAreaRef: React.RefObject<HTMLTextAreaElement>;
+  onTextAreaFocus: () => void;
+  onTextAreaBlur: () => void;
+  textAreaValue: string;
+  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 function StoryContent({
   storyId,
   editingSession,
   canCurrentUserEdit,
-  textAreaProps,
+  textAreaRef,
+  textAreaValue,
+  onTextAreaBlur,
+  onTextAreaFocus,
+  onTextAreaChange,
 }: Props) {
   const sessions = useStoryHistory(storyId);
-  const classes = useStyles();
+  const classes = useStyles(canCurrentUserEdit);
 
   const editing = editingSession && {
     id: editingSession.id,
@@ -72,17 +81,28 @@ function StoryContent({
 
   const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
+  const cursor = (
+    <span className={classes.cursor}>
+      <textarea
+        className={classes.textArea}
+        ref={textAreaRef}
+        value={textAreaValue}
+        onBlur={onTextAreaBlur}
+        onFocus={onTextAreaFocus}
+        onChange={onTextAreaChange}
+      />
+    </span>
+  );
+
   return (
     <>
+      {!paragraphs.length && <p>{cursor}</p>}
       {paragraphs.map((text, i) => (
         <p key={i}>
           {text}
-          {paragraphs.length - 1 === i && canCurrentUserEdit && (
-            <span className={classes.cursor} />
-          )}
+          {paragraphs.length - 1 === i && canCurrentUserEdit && cursor}
         </p>
       ))}
-      <textarea className={classes.textArea} {...textAreaProps} />
     </>
   );
 }

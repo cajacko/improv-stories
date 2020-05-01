@@ -45,13 +45,11 @@ function App() {
               <Switch>
                 <Route
                   path="/story/:storyId"
-                  component={(
-                    props: RouteComponentProps<{ storyId: string }>
-                  ) => (
-                    <>
-                      {console.log("App")}
+                  component={React.useCallback(
+                    (props: RouteComponentProps<{ storyId: string }>) => (
                       <Story storyId={props.match.params.storyId} />
-                    </>
+                    ),
+                    []
                   )}
                 ></Route>
                 <Redirect to={`/story/${uuid()}`} />

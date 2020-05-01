@@ -3,6 +3,8 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import { User } from "../../store/usersById/types";
+import { useSelector } from "react-redux";
+import selectors from "../../store/selectors";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
@@ -45,16 +47,17 @@ interface Props {
   isEditingSessionActive: boolean;
   secondsLeft: number | null;
   canCurrentUserEdit: boolean;
-  editingUserName: string | null;
+  editingUser: User | null;
 }
 
 function StoryStatus({
   isEditingSessionActive,
-  editingUserName,
+  editingUser,
   secondsLeft,
   canCurrentUserEdit,
 }: Props) {
   const classes = useStyles(canCurrentUserEdit);
+  const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
 
   let statusText = "Waiting for more users to join...";
 
@@ -63,8 +66,15 @@ function StoryStatus({
       if (canCurrentUserEdit) {
         statusText = "You are editing! Start typing.";
       } else {
-        statusText = editingUserName || "Anonymous";
-        statusText = `${statusText} is editing`;
+        if (editingUser) {
+          if (currentUserId === editingUser.id) {
+            statusText = `Join the story to finish editing`;
+          } else {
+            statusText = `${editingUser.name || "Anonymous"} is editing`;
+          }
+        } else {
+          statusText = `Anonymous is editing`;
+        }
       }
     } else {
       statusText = "Updating...";

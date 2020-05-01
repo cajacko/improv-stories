@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import useIsConnected from "../hooks/useIsConnected";
+import getZIndex from "../utils/getZIndex";
 
 const Container = styled.div`
   display: flex;
@@ -17,7 +18,7 @@ const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999999;
+  z-index: ${getZIndex("LOADING_OVERLAY")};
   background-color: black;
   opacity: 0.5;
   display: flex;

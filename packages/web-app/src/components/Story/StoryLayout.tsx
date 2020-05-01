@@ -3,15 +3,11 @@ import clsx from "clsx";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import getZIndex from "../../utils/getZIndex";
 
 export const drawerWidth = 240;
 
-const getDrawerOnTopBreakPoint = (theme: Theme) => {
-  const breakPoint = theme.breakpoints.up("md");
-  console.log(breakPoint);
-
-  return breakPoint;
-};
+const getDrawerOnTopBreakPoint = (theme: Theme) => theme.breakpoints.up("md");
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -31,6 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
       }),
       marginRight: -drawerWidth,
       position: "relative",
+      overflow: "hidden",
     },
     contentShift: {
       [getDrawerOnTopBreakPoint(theme)]: {
@@ -48,7 +45,7 @@ const useStyles = makeStyles((theme: Theme) =>
     drawerPaper: {
       width: drawerWidth,
       position: "relative",
-      zIndex: 1,
+      zIndex: getZIndex("STORY_DRAWER"),
     },
   })
 );
@@ -65,17 +62,22 @@ type RenderFunction = (props: RenderProps) => JSX.Element;
 interface Props {
   renderMainContent: RenderFunction | JSX.Element;
   renderDrawerContent: RenderFunction | JSX.Element;
+  canCurrentUserEdit: boolean;
 }
 
-function StoryLayout({ renderMainContent, renderDrawerContent }: Props) {
-  const doesMatchBreakpoint = useMediaQuery(getDrawerOnTopBreakPoint, {
+function StoryLayout({
+  renderMainContent,
+  renderDrawerContent,
+  canCurrentUserEdit,
+}: Props) {
+  const isWideScreen = useMediaQuery(getDrawerOnTopBreakPoint, {
+    // Ensures the query runs on load
     noSsr: true,
   });
+
   const classes = useStyles();
 
-  console.log("doesMatchBreakpoint", doesMatchBreakpoint);
-
-  const [isOpen, setIsOpen] = React.useState(doesMatchBreakpoint);
+  const [isOpen, setIsOpen] = React.useState(isWideScreen);
 
   const handleClose = React.useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleOpen = React.useCallback(() => setIsOpen(true), [setIsOpen]);
@@ -83,6 +85,12 @@ function StoryLayout({ renderMainContent, renderDrawerContent }: Props) {
     setIsOpen,
     isOpen,
   ]);
+
+  React.useEffect(() => {
+    if (!isWideScreen && isOpen && canCurrentUserEdit) {
+      handleClose();
+    }
+  }, [isWideScreen, isOpen, canCurrentUserEdit, handleClose]);
 
   const renderProps: RenderProps = {
     isOpen,
@@ -97,6 +105,7 @@ function StoryLayout({ renderMainContent, renderDrawerContent }: Props) {
         className={clsx(classes.content, {
           [classes.contentShift]: isOpen,
         })}
+        onClick={!isWideScreen && isOpen ? handleClose : undefined}
       >
         {typeof renderMainContent === "function"
           ? renderMainContent(renderProps)

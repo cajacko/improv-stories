@@ -45,6 +45,7 @@ interface Props {
   storyId: string;
   isUsersDrawerOpen: boolean;
   toggleIsUsersDrawerOpen: () => void;
+  disableButtons?: boolean;
 }
 
 interface GenericActiveButtonStatus<P, N> {
@@ -63,6 +64,7 @@ function StoryActionBar({
   storyId,
   isUsersDrawerOpen,
   toggleIsUsersDrawerOpen,
+  disableButtons,
 }: Props) {
   const userCount = (
     useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
@@ -122,7 +124,7 @@ function StoryActionBar({
           startIcon={activeButtonState === true && <ArrowBackIcon />}
           endIcon={activeButtonState === false && <AddIcon />}
           onClick={handleToggleStatus}
-          disabled={activeButtonState === "LOADING"}
+          disabled={disableButtons || activeButtonState === "LOADING"}
         >
           {activeButtonState === "LOADING" && "Updating..."}
           {activeButtonState === true && "Leave as Editor"}
@@ -135,6 +137,7 @@ function StoryActionBar({
       <IconButton
         onClick={toggleIsUsersDrawerOpen}
         className={classes.peopleButton}
+        disabled={disableButtons}
       >
         <Badge
           badgeContent={userCount}
