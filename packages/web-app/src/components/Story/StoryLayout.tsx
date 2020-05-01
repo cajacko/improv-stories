@@ -2,11 +2,25 @@ import React from "react";
 import clsx from "clsx";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 export const drawerWidth = 240;
 
+const getDrawerOnTopBreakPoint = (theme: Theme) => {
+  const breakPoint = theme.breakpoints.up("md");
+  console.log(breakPoint);
+
+  return breakPoint;
+};
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    container: {
+      display: "flex",
+      flex: 1,
+      flexDirection: "row",
+      overflow: "hidden",
+    },
     content: {
       flexGrow: 1,
       display: "flex",
@@ -19,11 +33,13 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "relative",
     },
     contentShift: {
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginRight: 0,
+      [getDrawerOnTopBreakPoint(theme)]: {
+        transition: theme.transitions.create("margin", {
+          easing: theme.transitions.easing.easeOut,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginRight: 0,
+      },
     },
     drawer: {
       width: drawerWidth,
@@ -33,12 +49,6 @@ const useStyles = makeStyles((theme: Theme) =>
       width: drawerWidth,
       position: "relative",
       zIndex: 1,
-    },
-    container: {
-      display: "flex",
-      flex: 1,
-      flexDirection: "row",
-      overflow: "hidden",
     },
   })
 );
@@ -58,9 +68,14 @@ interface Props {
 }
 
 function StoryLayout({ renderMainContent, renderDrawerContent }: Props) {
+  const doesMatchBreakpoint = useMediaQuery(getDrawerOnTopBreakPoint, {
+    noSsr: true,
+  });
   const classes = useStyles();
 
-  const [isOpen, setIsOpen] = React.useState(true);
+  console.log("doesMatchBreakpoint", doesMatchBreakpoint);
+
+  const [isOpen, setIsOpen] = React.useState(doesMatchBreakpoint);
 
   const handleClose = React.useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleOpen = React.useCallback(() => setIsOpen(true), [setIsOpen]);

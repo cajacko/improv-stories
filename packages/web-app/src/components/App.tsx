@@ -2,6 +2,7 @@ import React from "react";
 import { Provider } from "react-redux";
 import { createGlobalStyle } from "styled-components";
 import { PersistGate } from "redux-persist/integration/react";
+import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { v4 as uuid } from "uuid";
 import {
@@ -30,32 +31,36 @@ const Global = createGlobalStyle`
   }
 `;
 
+const theme = createMuiTheme();
+
 function App() {
   return (
-    <Provider store={store}>
-      <PersistGate loading={<LoadingOverlay />} persistor={persistor}>
-        <CssBaseline />
-        <Global />
-        <Router>
-          <LoadingOverlay>
-            <Switch>
-              <Route
-                path="/story/:storyId"
-                component={(
-                  props: RouteComponentProps<{ storyId: string }>
-                ) => (
-                  <>
-                    {console.log("App")}
-                    <Story storyId={props.match.params.storyId} />
-                  </>
-                )}
-              ></Route>
-              <Redirect to={`/story/${uuid()}`} />
-            </Switch>
-          </LoadingOverlay>
-        </Router>
-      </PersistGate>
-    </Provider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Global />
+      <Provider store={store}>
+        <PersistGate loading={<LoadingOverlay />} persistor={persistor}>
+          <Router>
+            <LoadingOverlay>
+              <Switch>
+                <Route
+                  path="/story/:storyId"
+                  component={(
+                    props: RouteComponentProps<{ storyId: string }>
+                  ) => (
+                    <>
+                      {console.log("App")}
+                      <Story storyId={props.match.params.storyId} />
+                    </>
+                  )}
+                ></Route>
+                <Redirect to={`/story/${uuid()}`} />
+              </Switch>
+            </LoadingOverlay>
+          </Router>
+        </PersistGate>
+      </Provider>
+    </ThemeProvider>
   );
 }
 
