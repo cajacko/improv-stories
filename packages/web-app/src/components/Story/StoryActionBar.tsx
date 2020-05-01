@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface Props {
   storyId: string;
-  canCurrentUserEdit: boolean;
   isUsersDrawerOpen: boolean;
   toggleIsUsersDrawerOpen: () => void;
 }
@@ -60,9 +59,8 @@ type ActiveButtonStatus =
 
 type ActiveButtonValue = "LOADING" | true | false;
 
-function Story({
+function StoryActionBar({
   storyId,
-  canCurrentUserEdit,
   isUsersDrawerOpen,
   toggleIsUsersDrawerOpen,
 }: Props) {
@@ -72,7 +70,7 @@ function Story({
   const isCurrentUserActive = useSelector(
     selectors.misc.selectIsCurrentUserActiveInStory(storyId)
   );
-  const classes = useStyles(canCurrentUserEdit);
+  const classes = useStyles();
 
   const [activeButtonStatus, setActiveButtonStatus] = React.useState<
     ActiveButtonStatus
@@ -155,4 +153,4 @@ function Story({
   );
 }
 
-export default React.memo(Story);
+export default React.memo(StoryActionBar);

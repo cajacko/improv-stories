@@ -12,17 +12,13 @@ import styled from "styled-components";
 import ConnectedUsers, { drawerWidth } from "../ConnectedUsers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
+import StoryFocusOverlay from "./StoryFocusOverlay";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    continueCard: {
-      maxWidth: 250,
-    },
     actionBar: {
       position: "absolute",
       top: 0,
@@ -106,24 +102,6 @@ const Content = styled.div`
   width: 100%;
   margin: 20px;
   padding: 0 20px;
-`;
-
-const FocusButton = styled.button`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 100%;
-  width: 100%;
-  border: 0;
-  background-color: #00000090;
-  appearance: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
 `;
 
 const TextArea = styled.textarea`
@@ -232,6 +210,10 @@ function Story({
 
   let seconds = secondsLeft !== null && secondsLeft < 0 ? 0 : secondsLeft;
 
+  const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
+    focusOnTextArea,
+  ]);
+
   return (
     <>
       <ToolBar />
@@ -246,21 +228,12 @@ function Story({
               <div className={classes.actionBar}>
                 <StoryActionBar
                   storyId={storyId}
-                  canCurrentUserEdit={canCurrentUserEdit}
                   isUsersDrawerOpen={isOpen}
                   toggleIsUsersDrawerOpen={toggleIsOpen}
                 />
               </div>
               {!isTextAreaFocussed && canCurrentUserEdit && (
-                <FocusButton onClick={() => focusOnTextArea()}>
-                  <Card className={classes.continueCard}>
-                    <CardContent>
-                      <Typography variant="overline" color="error">
-                        It's your turn! Click here to continue the story
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </FocusButton>
+                <StoryFocusOverlay onClick={onFocusOverlayClick} />
               )}
               <div className={classes.textContainer}>
                 {paragraphs.map((text, i) => (
