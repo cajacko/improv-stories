@@ -6,15 +6,15 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import PeopleIcon from "@material-ui/icons/People";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
-import useAddCurrentUserToStory from "../hooks/useAddCurrentUserToStory";
+import useAddCurrentUserToStory from "../../hooks/useAddCurrentUserToStory";
 import withLiveStoryEditor, {
   InjectedLiveStoryEditorProps,
-} from "../hoc/withLiveStoryEditor";
-import useStoryHistory from "../hooks/useStoryHistory";
-import useSetUserDetails from "../hooks/useSetUserDetails";
-import ToolBar from "./ToolBar";
+} from "../../hoc/withLiveStoryEditor";
+import useStoryHistory from "../../hooks/useStoryHistory";
+import useSetUserDetails from "../../hooks/useSetUserDetails";
+import ToolBar from "../ToolBar";
 import styled from "styled-components";
-import ConnectedUsers, { drawerWidth } from "./ConnectedUsers";
+import ConnectedUsers, { drawerWidth } from "../ConnectedUsers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
@@ -23,8 +23,8 @@ import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import selectors from "../store/selectors";
-import { send } from "../utils/socket";
+import selectors from "../../store/selectors";
+import { send } from "../../utils/socket";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
@@ -295,13 +295,17 @@ function Story({
 
   let statusText = "Waiting for more users to join...";
 
-  if (canCurrentUserEdit) {
-    statusText = "You are editing! Start typing.";
-  } else if (isCurrentUserEditing) {
-    statusText = "Updating...";
-  } else if (editingSession) {
-    statusText = (editingUser && editingUser.name) || "Anonymous";
-    statusText = `${statusText} is editing`;
+  if (editingSession) {
+    if (secondsLeft && secondsLeft >= 0) {
+      if (canCurrentUserEdit) {
+        statusText = "You are editing! Start typing.";
+      } else {
+        statusText = (editingUser && editingUser.name) || "Anonymous";
+        statusText = `${statusText} is editing`;
+      }
+    } else {
+      statusText = "Updating...";
+    }
   }
 
   let seconds = secondsLeft !== null && secondsLeft < 0 ? 0 : secondsLeft;
