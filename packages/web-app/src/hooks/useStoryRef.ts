@@ -1,6 +1,6 @@
 import React from "react";
 import * as firebase from "firebase/app";
-import database from "../utils/database";
+import getStoryRef from "../utils/getStoryRef";
 
 function useStoryRef(storyId: string, additionalPath: string = "") {
   const [ref, setRef] = React.useState<firebase.database.Reference | null>(
@@ -8,7 +8,7 @@ function useStoryRef(storyId: string, additionalPath: string = "") {
   );
 
   React.useEffect(() => {
-    setRef(database.ref(`/storiesById/${storyId}${additionalPath}`));
+    setRef(getStoryRef(storyId, additionalPath));
   }, [storyId, additionalPath]);
 
   return ref;
