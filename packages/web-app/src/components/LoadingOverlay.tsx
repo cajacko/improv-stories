@@ -40,4 +40,4 @@ function LoadingOverlay({ children }: { children?: React.ReactChild }) {
   );
 }
 
-export default LoadingOverlay;
+export default React.memo(LoadingOverlay);

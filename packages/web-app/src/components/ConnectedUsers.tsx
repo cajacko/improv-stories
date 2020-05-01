@@ -122,4 +122,4 @@ function ConnectedUsers({
   );
 }
 
-export default ConnectedUsers;
+export default React.memo(ConnectedUsers);

@@ -155,4 +155,4 @@ function ToolBar() {
   );
 }
 
-export default ToolBar;
+export default React.memo(ToolBar);
