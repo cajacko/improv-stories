@@ -5,7 +5,6 @@ import useAddCurrentUserToStory from "../../hooks/useAddCurrentUserToStory";
 import withLiveStoryEditor, {
   InjectedLiveStoryEditorProps,
 } from "../../hoc/withLiveStoryEditor";
-import useStoryHistory from "../../hooks/useStoryHistory";
 import useSetUserDetails from "../../hooks/useSetUserDetails";
 import ToolBar from "../ToolBar";
 import styled from "styled-components";
@@ -14,6 +13,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
 import StoryFocusOverlay from "./StoryFocusOverlay";
+import StoryContent from "./StoryContent";
 
 const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
 
@@ -76,9 +76,6 @@ const useStyles = makeStyles((theme: Theme) =>
       right: 0,
       left: 0,
     },
-    cursor: {
-      borderRight: `1px solid ${theme.palette.secondary.main}`,
-    },
   })
 );
 
@@ -102,32 +99,6 @@ const Content = styled.div`
   width: 100%;
   margin: 20px;
   padding: 0 20px;
-`;
-
-const TextArea = styled.textarea`
-  position: absolute;
-  left: -9999999px;
-  width: 200px;
-  height: 200px;
-`;
-
-const Cursor = styled.span`
-  margin-left: 2px;
-  animation: flash linear 1s infinite;
-  @keyframes flash {
-    0% {
-      opacity: 1;
-    }
-    25% {
-      opacity: 0;
-    }
-    75% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
 `;
 
 interface OwnProps {
@@ -160,7 +131,6 @@ function Story({
 }: Props) {
   useSetUserDetails();
   useAddCurrentUserToStory(storyId);
-  const sessions = useStoryHistory(storyId);
   const classes = useStyles(canCurrentUserEdit);
 
   const [isOpen, setIsOpen] = React.useState(true);
@@ -170,28 +140,6 @@ function Story({
     setIsOpen,
     isOpen,
   ]);
-
-  const editing = editingSession && {
-    id: editingSession.id,
-    text: editingSession.finalEntry,
-  };
-
-  let didAddEditingSession = false;
-
-  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
-    if (editing && editing.id === id) {
-      didAddEditingSession = true;
-      return `${acc}${editing.text}`;
-    }
-
-    return `${acc}${finalEntry}`;
-  }, "");
-
-  if (!didAddEditingSession && editing) {
-    combinedSessions = `${combinedSessions}${editing.text}`;
-  }
-
-  const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
   let statusText = "Waiting for more users to join...";
 
@@ -236,15 +184,12 @@ function Story({
                 <StoryFocusOverlay onClick={onFocusOverlayClick} />
               )}
               <div className={classes.textContainer}>
-                {paragraphs.map((text, i) => (
-                  <p key={i}>
-                    {text}
-                    {paragraphs.length - 1 === i && canCurrentUserEdit && (
-                      <Cursor className={classes.cursor} />
-                    )}
-                  </p>
-                ))}
-                <TextArea {...textAreaProps} />
+                <StoryContent
+                  storyId={storyId}
+                  editingSession={editingSession}
+                  textAreaProps={textAreaProps}
+                  canCurrentUserEdit={canCurrentUserEdit}
+                />
               </div>
             </Content>
           </ContentContainer>
