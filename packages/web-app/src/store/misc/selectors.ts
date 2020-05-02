@@ -52,6 +52,31 @@ export const selectStorySessions = (storyId: string) => (
   return sessions;
 };
 
+export const selectAllStoryParagraphs = (
+  storyId: string,
+  editingSessionId: string | null,
+  editingSessionFinalEntry: string | null
+) => (state: ReduxTypes.RootState): string[] => {
+  const sessions = selectStorySessions(storyId)(state) || [];
+
+  let didAddEditingSession = false;
+
+  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
+    if (editingSessionFinalEntry && editingSessionId === id) {
+      didAddEditingSession = true;
+      return `${acc}${editingSessionFinalEntry}`;
+    }
+
+    return `${acc}${finalEntry}`;
+  }, "");
+
+  if (!didAddEditingSession && editingSessionFinalEntry && editingSessionId) {
+    combinedSessions = `${combinedSessions}${editingSessionFinalEntry}`;
+  }
+
+  return combinedSessions.split("\n").filter((text) => text !== "");
+};
+
 export const selectNonActiveStoryUsers = (storyId: string) => (
   state: ReduxTypes.RootState
 ) => {

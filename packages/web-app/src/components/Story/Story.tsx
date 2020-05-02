@@ -80,6 +80,14 @@ function Story({
   const fetchStatus = useSelector(
     selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
   );
+  const hasSessions =
+    useSelector(
+      selectors.misc.selectAllStoryParagraphs(
+        storyId,
+        editingSession && editingSession.id,
+        editingSession && editingSession.finalEntry
+      )
+    ).length > 0;
 
   const [hasScrolled, setHasScrolled] = React.useState(false);
 
@@ -93,6 +101,7 @@ function Story({
       if (hasScrolled) return;
       if (fetchStatus !== "FETCHED_NOW_LISTENING") return;
       if (!contentContainerRef.current) return;
+      if (!hasSessions) return;
 
       const scrollTop =
         contentContainerRef.current.scrollHeight -
@@ -103,7 +112,20 @@ function Story({
 
       setHasScrolled(true);
     }, 500);
-  }, [fetchStatus, hasScrolled, setHasScrolled]);
+  }, [fetchStatus, hasScrolled, setHasScrolled, editingSession, hasSessions]);
+
+  // If the fetch status is null it means we are still fetching the stories
+  let shouldShowLoading: boolean;
+
+  // If we have finished fetching and there's no stories then don't show the loading
+  if (fetchStatus !== null && !hasSessions) {
+    shouldShowLoading = false;
+    // If we have finished fetching and have sessions, then wait until scrolled
+  } else if (fetchStatus !== null && hasScrolled) {
+    shouldShowLoading = false;
+  } else {
+    shouldShowLoading = true;
+  }
 
   return (
     <>
@@ -113,10 +135,9 @@ function Story({
         renderMainContent={React.useCallback(
           ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
             <>
-              {(fetchStatus === null || !hasScrolled) &&
-                !canCurrentUserEdit && (
-                  <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />
-                )}
+              {shouldShowLoading && (
+                <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />
+              )}
               <div
                 className={classes.contentContainer}
                 ref={contentContainerRef}
@@ -146,13 +167,17 @@ function Story({
                   <div className={classes.textContainer}>
                     <StoryContent
                       storyId={storyId}
-                      editingSession={editingSession}
+                      editingSessionFinalEntry={
+                        editingSession && editingSession.finalEntry
+                      }
+                      editingSessionId={editingSession && editingSession.id}
                       textAreaRef={textAreaRef}
                       textAreaValue={textAreaValue}
                       onTextAreaBlur={onTextAreaBlur}
                       onTextAreaFocus={onTextAreaFocus}
                       onTextAreaChange={onTextAreaChange}
                       canCurrentUserEdit={canCurrentUserEdit}
+                      isTextInvisible={shouldShowLoading}
                     />
                   </div>
                 </div>
@@ -179,8 +204,7 @@ function Story({
             secondsLeft,
             editingUser,
             onFocusOverlayClick,
-            fetchStatus,
-            hasScrolled,
+            shouldShowLoading,
           ]
         )}
         renderDrawerContent={React.useCallback(

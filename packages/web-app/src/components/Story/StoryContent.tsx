@@ -1,10 +1,15 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import { Session } from "../../store/sessionsById/types";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
+import tutorialText from "../../config/tutorialText";
 
-const useStyles = makeStyles((theme: Theme) =>
+interface StyleProps {
+  showCursor: boolean;
+  isTextInvisible: boolean;
+}
+
+const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
   createStyles({
     "@keyframes flash": {
       "0%": {
@@ -21,8 +26,8 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     cursor: {
-      borderRight: (canCurrentUserEdit) =>
-        canCurrentUserEdit ? `1px solid ${theme.palette.secondary.main}` : 0,
+      borderRight: ({ showCursor }) =>
+        showCursor ? `1px solid ${theme.palette.secondary.main}` : 0,
       marginLeft: 2,
       animation: "flash linear 1s infinite",
     },
@@ -35,71 +40,87 @@ const useStyles = makeStyles((theme: Theme) =>
       width: 200,
       height: 0,
     },
+    tutorialText: {
+      color: "grey",
+    },
+    paragraph: {
+      opacity: ({ isTextInvisible }) => (isTextInvisible ? 0 : 1),
+    },
   })
 );
 
 interface Props {
   storyId: string;
-  editingSession: Session | null;
+  editingSessionId: string | null;
+  editingSessionFinalEntry: string | null;
   canCurrentUserEdit: boolean;
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
   onTextAreaFocus: () => void;
   onTextAreaBlur: () => void;
   textAreaValue: string;
   onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  isTextInvisible?: boolean;
 }
 
 function StoryContent({
   storyId,
-  editingSession,
+  editingSessionId,
+  editingSessionFinalEntry,
   canCurrentUserEdit,
   textAreaRef,
   textAreaValue,
   onTextAreaBlur,
   onTextAreaFocus,
   onTextAreaChange,
+  isTextInvisible,
 }: Props) {
-  const sessions =
-    useSelector(selectors.misc.selectStorySessions(storyId)) || [];
-  const classes = useStyles(canCurrentUserEdit);
+  const fetchStatus = useSelector(
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
+  );
 
-  const editing = editingSession && {
-    id: editingSession.id,
-    text: editingSession.finalEntry,
-  };
+  const paragraphs = useSelector(
+    selectors.misc.selectAllStoryParagraphs(
+      storyId,
+      editingSessionId,
+      editingSessionFinalEntry
+    )
+  );
 
-  let didAddEditingSession = false;
+  const classes = useStyles({
+    showCursor: canCurrentUserEdit,
+    isTextInvisible: !!isTextInvisible,
+  });
 
-  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
-    if (editing && editing.id === id) {
-      didAddEditingSession = true;
-      return `${acc}${editing.text}`;
-    }
+  let showType: "TUTORIAL" | "CONTENT" | "NONE";
 
-    return `${acc}${finalEntry}`;
-  }, "");
-
-  if (!didAddEditingSession && editing) {
-    combinedSessions = `${combinedSessions}${editing.text}`;
+  if (fetchStatus === null) {
+    showType = "NONE";
+  } else if (!paragraphs.length || fetchStatus !== "FETCHED_NOW_LISTENING") {
+    showType = "TUTORIAL";
+  } else {
+    showType = "CONTENT";
   }
-
-  const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
   return (
     <>
-      {!paragraphs.length && (
-        <p>
-          <span className={classes.cursor} />
-        </p>
-      )}
-      {paragraphs.map((text, i) => (
-        <p key={i}>
-          {text}
-          {paragraphs.length - 1 === i && canCurrentUserEdit && (
-            <span className={classes.cursor} />
-          )}
-        </p>
-      ))}
+      {showType === "TUTORIAL" &&
+        tutorialText.map((text, i) => (
+          <p key={i} className={classes.paragraph}>
+            {0 === i && canCurrentUserEdit && (
+              <span className={classes.cursor} />
+            )}
+            <span className={classes.tutorialText}>{text}</span>
+          </p>
+        ))}
+      {showType === "CONTENT" &&
+        paragraphs.map((text, i) => (
+          <p key={i} className={classes.paragraph}>
+            {text}
+            {paragraphs.length - 1 === i && canCurrentUserEdit && (
+              <span className={classes.cursor} />
+            )}
+          </p>
+        ))}
       {/* Textarea must always be statically rendered and never unmount */}
       <span className={classes.textAreaContainer}>
         <textarea
