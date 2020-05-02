@@ -130,6 +130,8 @@ function StoryContent({
           onBlur={onTextAreaBlur}
           onFocus={onTextAreaFocus}
           onChange={onTextAreaChange}
+          autoCorrect="off"
+          autoCapitalize="none"
         />
       </span>
     </>
