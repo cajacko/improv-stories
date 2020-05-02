@@ -101,6 +101,14 @@ function StoryContent({
     showType = "CONTENT";
   }
 
+  const lastParagraph = paragraphs[paragraphs.length - 1] as string | undefined;
+
+  // TODO: Need a way of identifying a new paragraph, also need this for the cursor.
+  const autoCapitalize =
+    !lastParagraph ||
+    lastParagraph.trim() === "" ||
+    lastParagraph.trim().endsWith(".");
+
   return (
     <>
       {showType === "TUTORIAL" &&
@@ -131,7 +139,7 @@ function StoryContent({
           onFocus={onTextAreaFocus}
           onChange={onTextAreaChange}
           autoCorrect="off"
-          autoCapitalize="none"
+          autoCapitalize={autoCapitalize ? undefined : "none"}
         />
       </span>
     </>
