@@ -54,7 +54,8 @@ export interface RenderProps {
   isOpen: boolean;
   handleClose: () => void;
   handleOpen: () => void;
-  toggleIsOpen: (isOpen: boolean) => void;
+  toggleIsOpen: () => void;
+  isWideScreen: boolean;
 }
 
 type RenderFunction = (props: RenderProps) => JSX.Element;
@@ -97,6 +98,7 @@ function StoryLayout({
     handleClose,
     handleOpen,
     toggleIsOpen,
+    isWideScreen,
   };
 
   return (

@@ -11,8 +11,9 @@ import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
 import StoryFocusOverlay from "./StoryFocusOverlay";
 import StoryContent from "./StoryContent";
 import StoryStatus from "./StoryStatus";
-import StoryLayout from "./StoryLayout";
+import StoryLayout, { RenderProps } from "./StoryLayout";
 import getZIndex from "../../utils/getZIndex";
+import StoryProgressBar from "./StoryProgressBar";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -40,6 +41,13 @@ const useStyles = makeStyles(() =>
       width: "100%",
       margin: 20,
       padding: "0 20px",
+    },
+    storyProgressBar: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: getZIndex("STORY_PROGRESS_BAR_HEADER"),
     },
   })
 );
@@ -78,11 +86,22 @@ function Story({
       <StoryLayout
         canCurrentUserEdit={canCurrentUserEdit}
         renderMainContent={React.useCallback(
-          ({ isOpen, toggleIsOpen }) => (
+          ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
             <>
               <div className={classes.contentContainer}>
                 <div className={classes.content}>
                   <div className={classes.actionBar}>
+                    {!isWideScreen &&
+                      secondsLeft !== null &&
+                      isTextAreaFocussed && (
+                        <div className={classes.storyProgressBar}>
+                          <StoryProgressBar
+                            value={secondsLeft}
+                            color="secondary"
+                          />
+                        </div>
+                      )}
+
                     <StoryActionBar
                       storyId={storyId}
                       isUsersDrawerOpen={isOpen}

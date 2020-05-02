@@ -1,12 +1,10 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import { User } from "../../store/usersById/types";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
-
-const normalise = (value: number) => 100 - ((value - 0) * 100) / (20 - 0);
+import StoryProgressBar from "./StoryProgressBar";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -89,12 +87,12 @@ function StoryStatus({
       {seconds !== null && (
         <>
           <Typography className={classes.time}>{seconds}</Typography>
-          <LinearProgress
-            className={classes.progress}
-            variant="determinate"
-            color={canCurrentUserEdit ? "primary" : "secondary"}
-            value={normalise(seconds)}
-          />
+          <div className={classes.progress}>
+            <StoryProgressBar
+              value={seconds}
+              color={canCurrentUserEdit ? "primary" : "secondary"}
+            />
+          </div>
         </>
       )}
     </div>
