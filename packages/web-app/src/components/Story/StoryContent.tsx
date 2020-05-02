@@ -24,6 +24,8 @@ const useStyles = makeStyles((theme: Theme) =>
         canCurrentUserEdit ? `1px solid ${theme.palette.secondary.main}` : 0,
       marginLeft: 2,
       animation: "flash linear 1s infinite",
+    },
+    textAreaContainer: {
       position: "relative",
     },
     textArea: {
@@ -81,28 +83,32 @@ function StoryContent({
 
   const paragraphs = combinedSessions.split("\n").filter((text) => text !== "");
 
-  const cursor = (
-    <span className={classes.cursor}>
-      <textarea
-        className={classes.textArea}
-        ref={textAreaRef}
-        value={textAreaValue}
-        onBlur={onTextAreaBlur}
-        onFocus={onTextAreaFocus}
-        onChange={onTextAreaChange}
-      />
-    </span>
-  );
-
   return (
     <>
-      {!paragraphs.length && <p>{cursor}</p>}
+      {!paragraphs.length && (
+        <p>
+          <span className={classes.cursor} />
+        </p>
+      )}
       {paragraphs.map((text, i) => (
         <p key={i}>
           {text}
-          {paragraphs.length - 1 === i && canCurrentUserEdit && cursor}
+          {paragraphs.length - 1 === i && canCurrentUserEdit && (
+            <span className={classes.cursor} />
+          )}
         </p>
       ))}
+      {/* Textarea must always be statically rendered and never unmount */}
+      <span className={classes.textAreaContainer}>
+        <textarea
+          className={classes.textArea}
+          ref={textAreaRef}
+          value={textAreaValue}
+          onBlur={onTextAreaBlur}
+          onFocus={onTextAreaFocus}
+          onChange={onTextAreaChange}
+        />
+      </span>
     </>
   );
 }
