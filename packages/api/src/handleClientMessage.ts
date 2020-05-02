@@ -17,7 +17,7 @@ import {
 import getRand from "./getRand";
 
 // Want 1 more as we always round down the number in ui
-const seconds = 21;
+const seconds = 40 + 1;
 
 function switchOverMessage(
   userId: string,
