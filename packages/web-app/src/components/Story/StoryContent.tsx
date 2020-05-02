@@ -28,7 +28,7 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
     cursor: {
       borderRight: ({ showCursor }) =>
         showCursor ? `1px solid ${theme.palette.secondary.main}` : 0,
-      marginLeft: 2,
+      marginLeft: 0,
       animation: "flash linear 1s infinite",
     },
     textAreaContainer: {
@@ -114,9 +114,7 @@ function StoryContent({
       {showType === "TUTORIAL" &&
         tutorialText.map((text, i) => (
           <p key={i} className={classes.paragraph}>
-            {0 === i && canCurrentUserEdit && (
-              <span className={classes.cursor} />
-            )}
+            {0 === i && <span className={classes.cursor} />}
             <span className={classes.tutorialText}>{text}</span>
           </p>
         ))}
@@ -124,9 +122,7 @@ function StoryContent({
         paragraphs.map((text, i) => (
           <p key={i} className={classes.paragraph}>
             {text}
-            {paragraphs.length - 1 === i && canCurrentUserEdit && (
-              <span className={classes.cursor} />
-            )}
+            {paragraphs.length - 1 === i && <span className={classes.cursor} />}
           </p>
         ))}
       {/* Textarea must always be statically rendered and never unmount */}
