@@ -99,12 +99,6 @@ function Story({
         window.innerHeight -
         window.innerHeight / 2;
 
-      console.log("scroll", {
-        scrollTop,
-        scrollHeight: contentContainerRef.current.scrollHeight,
-        outerHeight: window.outerHeight,
-      });
-
       contentContainerRef.current.scrollTop = scrollTop;
 
       setHasScrolled(true);
