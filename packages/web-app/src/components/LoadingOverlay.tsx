@@ -1,24 +1,16 @@
 import React from "react";
 import styled from "styled-components";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import useIsConnected from "../hooks/useIsConnected";
-import getZIndex from "../utils/getZIndex";
+import getZIndex, { ZIndex } from "../utils/getZIndex";
+import AppLoading from "../context/AppLoading";
 
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-`;
-
-const Overlay = styled.div`
+const Overlay = styled.div<{ zIndex: ZIndex }>`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: ${getZIndex("LOADING_OVERLAY")};
+  z-index: ${({ zIndex }) => getZIndex(zIndex)};
   background-color: black;
   opacity: 0.5;
   display: flex;
@@ -26,18 +18,27 @@ const Overlay = styled.div`
   justify-content: center;
 `;
 
-function LoadingOverlay({ children }: { children?: React.ReactChild }) {
-  const isConnected = useIsConnected();
+function LoadingOverlay({
+  children,
+  zIndex,
+  shouldRenderIfAppIsLoading,
+}: {
+  children?: React.ReactChild;
+  zIndex: ZIndex;
+  shouldRenderIfAppIsLoading?: boolean;
+}) {
+  const isAppLoading = React.useContext(AppLoading);
+  const shouldShowLoading = !isAppLoading || shouldRenderIfAppIsLoading;
 
   return (
-    <Container>
-      {!isConnected && (
-        <Overlay>
+    <>
+      {shouldShowLoading && (
+        <Overlay zIndex={zIndex}>
           <CircularProgress />
         </Overlay>
       )}
       {children}
-    </Container>
+    </>
   );
 }
 

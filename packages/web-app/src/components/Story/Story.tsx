@@ -1,10 +1,9 @@
 import React from "react";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
-import useAddCurrentUserToStory from "../../hooks/useAddCurrentUserToStory";
+import { useSelector } from "react-redux";
 import withLiveStoryEditor, {
   InjectedLiveStoryEditorProps,
 } from "../../hoc/withLiveStoryEditor";
-import useSetUserDetails from "../../hooks/useSetUserDetails";
 import ToolBar from "../ToolBar";
 import ConnectedUsers from "../ConnectedUsers";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
@@ -14,6 +13,9 @@ import StoryStatus from "./StoryStatus";
 import StoryLayout, { RenderProps } from "./StoryLayout";
 import getZIndex from "../../utils/getZIndex";
 import StoryProgressBar from "./StoryProgressBar";
+import useStorySetup from "./useStorySetup";
+import selectors from "../../store/selectors";
+import LoadingOverlay from "../LoadingOverlay";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -72,13 +74,42 @@ function Story({
   onTextAreaFocus,
   onTextAreaChange,
 }: Props) {
-  useSetUserDetails();
-  useAddCurrentUserToStory(storyId);
   const classes = useStyles();
+  const contentContainerRef = React.useRef<HTMLDivElement>(null);
+  useStorySetup(storyId);
+  const fetchStatus = useSelector(
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
+  );
+
+  const [hasScrolled, setHasScrolled] = React.useState(false);
 
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
     focusOnTextArea,
   ]);
+
+  React.useEffect(() => {
+    // The timeout gives the scroll div time to reset it's height with the content
+    setTimeout(() => {
+      if (hasScrolled) return;
+      if (fetchStatus !== "FETCHED_NOW_LISTENING") return;
+      if (!contentContainerRef.current) return;
+
+      const scrollTop =
+        contentContainerRef.current.scrollHeight -
+        window.innerHeight -
+        window.innerHeight / 2;
+
+      console.log("scroll", {
+        scrollTop,
+        scrollHeight: contentContainerRef.current.scrollHeight,
+        outerHeight: window.outerHeight,
+      });
+
+      contentContainerRef.current.scrollTop = scrollTop;
+
+      setHasScrolled(true);
+    }, 500);
+  }, [fetchStatus, hasScrolled, setHasScrolled]);
 
   return (
     <>
@@ -88,7 +119,14 @@ function Story({
         renderMainContent={React.useCallback(
           ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
             <>
-              <div className={classes.contentContainer}>
+              {(fetchStatus === null || !hasScrolled) &&
+                !canCurrentUserEdit && (
+                  <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />
+                )}
+              <div
+                className={classes.contentContainer}
+                ref={contentContainerRef}
+              >
                 <div className={classes.content}>
                   <div className={classes.actionBar}>
                     {!isWideScreen &&
@@ -147,6 +185,8 @@ function Story({
             secondsLeft,
             editingUser,
             onFocusOverlayClick,
+            fetchStatus,
+            hasScrolled,
           ]
         )}
         renderDrawerContent={React.useCallback(

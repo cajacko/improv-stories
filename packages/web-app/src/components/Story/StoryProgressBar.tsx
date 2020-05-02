@@ -1,7 +1,6 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import Typography from "@material-ui/core/Typography";
 
 const normalise = (maxValue: number, minValue: number, value: number) =>
   100 - ((value - minValue) * 100) / (maxValue - minValue);

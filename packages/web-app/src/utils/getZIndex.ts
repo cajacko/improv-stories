@@ -1,6 +1,8 @@
 import zIndexes, { zIndexMap } from "../config/zIndexes";
 
-function getZIndex(zIndex: keyof typeof zIndexMap) {
+export type ZIndex = keyof typeof zIndexMap;
+
+function getZIndex(zIndex: ZIndex) {
   const index = zIndexes.indexOf(zIndex);
 
   if (index < 0) return 0;

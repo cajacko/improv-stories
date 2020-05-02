@@ -40,11 +40,10 @@ function transformSessionsResponse(response: SessionsResponse): Session[] {
   );
 }
 
-function useStoryHistory(storyId: string): Session[] {
+function useStoryHistoryListener(storyId: string) {
   const story = useSelector(selectors.storiesById.selectStory(storyId));
   const activeSessionId = story && story.activeSessionId;
   const lastSessionId = story && story.lastSessionId;
-  const sessions = useSelector(selectors.misc.selectStorySessions(storyId));
   const ref = useEntriesRef(storyId);
   const dispatch = useDispatch();
 
@@ -54,7 +53,27 @@ function useStoryHistory(storyId: string): Session[] {
     function setSessionsFromSnapshot(snapshot: firebase.database.DataSnapshot) {
       var data = snapshot.val() as unknown;
 
-      if (!isSessionsResponse(data)) return;
+      if (data === null || data === undefined) {
+        dispatch(
+          actions.storyFetchStateByStoryId.setStoryFetchStatus({
+            storyId,
+            fetchStatus: "FETCHED_NOW_LISTENING",
+          })
+        );
+
+        return;
+      }
+
+      if (!isSessionsResponse(data)) {
+        dispatch(
+          actions.storyFetchStateByStoryId.setStoryFetchStatus({
+            storyId,
+            fetchStatus: "INVALID_DATA",
+          })
+        );
+
+        return;
+      }
 
       const sessionsResponse = data as SessionsResponse;
 
@@ -64,6 +83,7 @@ function useStoryHistory(storyId: string): Session[] {
           sessions: transformSessionsResponse(sessionsResponse),
           lastSessionId,
           activeSessionId,
+          fetchStatus: "FETCHED_NOW_LISTENING",
         })
       );
     }
@@ -77,7 +97,16 @@ function useStoryHistory(storyId: string): Session[] {
     };
   }, [storyId, ref, dispatch, lastSessionId, activeSessionId]);
 
-  return sessions || [];
+  React.useEffect(() => {
+    return () => {
+      dispatch(
+        actions.storyFetchStateByStoryId.setStoryFetchStatus({
+          fetchStatus: "REMOVE",
+          storyId,
+        })
+      );
+    };
+  }, [dispatch, storyId]);
 }
 
-export default useStoryHistory;
+export default useStoryHistoryListener;

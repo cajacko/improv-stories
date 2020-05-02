@@ -1,7 +1,8 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import useStoryHistory from "../../hooks/useStoryHistory";
 import { Session } from "../../store/sessionsById/types";
+import { useSelector } from "react-redux";
+import selectors from "../../store/selectors";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -58,7 +59,8 @@ function StoryContent({
   onTextAreaFocus,
   onTextAreaChange,
 }: Props) {
-  const sessions = useStoryHistory(storyId);
+  const sessions =
+    useSelector(selectors.misc.selectStorySessions(storyId)) || [];
   const classes = useStyles(canCurrentUserEdit);
 
   const editing = editingSession && {

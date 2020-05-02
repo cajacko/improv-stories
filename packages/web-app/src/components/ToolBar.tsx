@@ -18,9 +18,7 @@ import selectors from "../store/selectors";
 const useStyles = makeStyles((theme) => ({
   appBar: {
     position: "relative",
-  },
-  root: {
-    flexGrow: 1,
+    zIndex: getZIndex("TOOLBAR"),
   },
   menuButton: {
     marginRight: theme.spacing(2),

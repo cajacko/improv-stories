@@ -4,16 +4,8 @@ import { createGlobalStyle } from "styled-components";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { v4 as uuid } from "uuid";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  RouteComponentProps,
-} from "react-router-dom";
+import Router from "./Router";
 import { store, persistor } from "../store";
-import Story from "./Story";
 import "../store/socketActionDispatcher";
 import LoadingOverlay from "./LoadingOverlay";
 
@@ -39,23 +31,11 @@ function App() {
       <CssBaseline />
       <Global />
       <Provider store={store}>
-        <PersistGate loading={<LoadingOverlay />} persistor={persistor}>
-          <Router>
-            <LoadingOverlay>
-              <Switch>
-                <Route
-                  path="/story/:storyId"
-                  component={React.useCallback(
-                    (props: RouteComponentProps<{ storyId: string }>) => (
-                      <Story storyId={props.match.params.storyId} />
-                    ),
-                    []
-                  )}
-                ></Route>
-                <Redirect to={`/story/${uuid()}`} />
-              </Switch>
-            </LoadingOverlay>
-          </Router>
+        <PersistGate
+          loading={<LoadingOverlay zIndex="WHOLE_APP_LOADING_OVERLAY" />}
+          persistor={persistor}
+        >
+          <Router />
         </PersistGate>
       </Provider>
     </ThemeProvider>

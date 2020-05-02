@@ -72,6 +72,9 @@ function StoryActionBar({
   const isCurrentUserActive = useSelector(
     selectors.misc.selectIsCurrentUserActiveInStory(storyId)
   );
+  const fetchStatus = useSelector(
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
+  );
   const classes = useStyles();
 
   const [activeButtonStatus, setActiveButtonStatus] = React.useState<
@@ -114,6 +117,14 @@ function StoryActionBar({
     );
   }, [isCurrentUserActive, storyId]);
 
+  let isJoinButtonDisabled = disableButtons;
+
+  if (fetchStatus !== "FETCHED_NOW_LISTENING" && !isCurrentUserActive) {
+    isJoinButtonDisabled = true;
+  } else if (activeButtonState === "LOADING") {
+    isJoinButtonDisabled = true;
+  }
+
   return (
     <div className={classes.actionBar}>
       <div className={classes.activeButtonWrapper}>
@@ -123,8 +134,8 @@ function StoryActionBar({
           className={classes.activeButton}
           startIcon={activeButtonState === true && <ArrowBackIcon />}
           endIcon={activeButtonState === false && <AddIcon />}
-          onClick={handleToggleStatus}
-          disabled={disableButtons || activeButtonState === "LOADING"}
+          onClick={isJoinButtonDisabled ? undefined : handleToggleStatus}
+          disabled={isJoinButtonDisabled}
         >
           {activeButtonState === "LOADING" && "Updating..."}
           {activeButtonState === true && "Leave as Editor"}
@@ -135,7 +146,7 @@ function StoryActionBar({
         )}
       </div>
       <IconButton
-        onClick={toggleIsUsersDrawerOpen}
+        onClick={disableButtons ? undefined : toggleIsUsersDrawerOpen}
         className={classes.peopleButton}
         disabled={disableButtons}
       >
