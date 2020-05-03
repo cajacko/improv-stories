@@ -46,6 +46,7 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
       color: "grey",
     },
     paragraph: {
+      whiteSpace: "break-spaces",
       opacity: ({ isTextInvisible }) => (isTextInvisible ? 0 : 1),
     },
   })
@@ -97,7 +98,7 @@ function StoryContent({
   );
 
   const classes = useStyles({
-    showCursor: canCurrentUserEdit,
+    showCursor: canCurrentUserEdit || true,
     isTextInvisible: !!isTextInvisible,
   });
 
@@ -118,6 +119,8 @@ function StoryContent({
     !lastParagraph ||
     lastParagraph.trim() === "" ||
     lastParagraph.trim().endsWith(".");
+
+  console.log("paragraphs", { paragraphs, autoCapitalize });
 
   return (
     <>
