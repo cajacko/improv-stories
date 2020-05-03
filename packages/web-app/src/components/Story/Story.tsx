@@ -16,6 +16,7 @@ import StoryProgressBar from "./StoryProgressBar";
 import useStorySetup from "./useStorySetup";
 import selectors from "../../store/selectors";
 import LoadingOverlay from "../LoadingOverlay";
+import useStoryInitScroll from "./useStoryInitScroll";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -89,30 +90,15 @@ function Story({
       )
     ).length > 0;
 
-  const [hasScrolled, setHasScrolled] = React.useState(false);
-
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
     focusOnTextArea,
   ]);
 
-  React.useEffect(() => {
-    // The timeout gives the scroll div time to reset it's height with the content
-    setTimeout(() => {
-      if (hasScrolled) return;
-      if (fetchStatus !== "FETCHED_NOW_LISTENING") return;
-      if (!contentContainerRef.current) return;
-      if (!hasSessions) return;
-
-      const scrollTop =
-        contentContainerRef.current.scrollHeight -
-        window.innerHeight -
-        window.innerHeight / 2;
-
-      contentContainerRef.current.scrollTop = scrollTop;
-
-      setHasScrolled(true);
-    }, 500);
-  }, [fetchStatus, hasScrolled, setHasScrolled, editingSession, hasSessions]);
+  const hasScrolled = useStoryInitScroll(
+    fetchStatus,
+    contentContainerRef,
+    hasSessions
+  );
 
   // If the fetch status is null it means we are still fetching the stories
   let shouldShowLoading: boolean;
