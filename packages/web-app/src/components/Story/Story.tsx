@@ -81,14 +81,13 @@ function Story({
   const fetchStatus = useSelector(
     selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
   );
-  const hasSessions =
-    useSelector(
-      selectors.misc.selectAllStoryParagraphs(
-        storyId,
-        editingSession && editingSession.id,
-        editingSession && editingSession.finalEntry
-      )
-    ).length > 0;
+  const doesStoryHaveContent = useSelector(
+    selectors.misc.selectDoesStoryHaveContent(
+      storyId,
+      editingSession && editingSession.id,
+      editingSession && editingSession.finalEntry
+    )
+  );
 
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
     focusOnTextArea,
@@ -97,14 +96,14 @@ function Story({
   const hasScrolled = useStoryInitScroll(
     fetchStatus,
     contentContainerRef,
-    hasSessions
+    doesStoryHaveContent
   );
 
   // If the fetch status is null it means we are still fetching the stories
   let shouldShowLoading: boolean;
 
   // If we have finished fetching and there's no stories then don't show the loading
-  if (fetchStatus !== null && !hasSessions) {
+  if (fetchStatus !== null && !doesStoryHaveContent) {
     shouldShowLoading = false;
     // If we have finished fetching and have sessions, then wait until scrolled
   } else if (fetchStatus !== null && hasScrolled) {

@@ -4,7 +4,7 @@ import { StoryFetchStatus } from "../../store/storyFetchStateByStoryId/types";
 function useStoryInitScroll(
   fetchStatus: StoryFetchStatus | null,
   scrollRef: React.RefObject<HTMLDivElement>,
-  hasSessions: boolean
+  doesStoryHaveContent: boolean
 ) {
   const [hasScrolled, setHasScrolled] = React.useState(false);
 
@@ -19,7 +19,7 @@ function useStoryInitScroll(
       if (hasScrolled) return;
       if (fetchStatus !== "FETCHED_NOW_LISTENING") return;
       if (!scrollRef.current) return;
-      if (!hasSessions) return;
+      if (!doesStoryHaveContent) return;
 
       const scrollTop =
         scrollRef.current.scrollHeight -
@@ -30,7 +30,13 @@ function useStoryInitScroll(
 
       setHasScrolled(true);
     }, 500);
-  }, [fetchStatus, hasScrolled, setHasScrolled, hasSessions, scrollRef]);
+  }, [
+    fetchStatus,
+    hasScrolled,
+    setHasScrolled,
+    doesStoryHaveContent,
+    scrollRef,
+  ]);
 
   return hasScrolled;
 }

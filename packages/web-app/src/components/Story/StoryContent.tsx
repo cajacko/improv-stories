@@ -88,6 +88,14 @@ function StoryContent({
     )
   );
 
+  const doesStoryHaveContent = useSelector(
+    selectors.misc.selectDoesStoryHaveContent(
+      storyId,
+      editingSessionId,
+      editingSessionFinalEntry
+    )
+  );
+
   const classes = useStyles({
     showCursor: canCurrentUserEdit,
     isTextInvisible: !!isTextInvisible,
@@ -97,7 +105,7 @@ function StoryContent({
 
   if (fetchStatus === null) {
     showType = "NONE";
-  } else if (!paragraphs.length || fetchStatus !== "FETCHED_NOW_LISTENING") {
+  } else if (!doesStoryHaveContent || fetchStatus !== "FETCHED_NOW_LISTENING") {
     showType = "TUTORIAL";
   } else {
     showType = "CONTENT";
