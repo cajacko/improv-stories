@@ -89,7 +89,7 @@ function StoryContent({
   );
 
   const classes = useStyles({
-    showCursor: canCurrentUserEdit || true,
+    showCursor: canCurrentUserEdit,
     isTextInvisible: !!isTextInvisible,
   });
 
