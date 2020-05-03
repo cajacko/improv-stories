@@ -22,6 +22,6 @@ jobs:
       - name: Test
         env:
           FIRST_NAME: ${{ secrets.FIRST_NAME }}
-          middle_name: The
+          middle_name: ${{ secrets.MIDDLE_NAME }}
           Last_Name: Octocat
         run: printenv
