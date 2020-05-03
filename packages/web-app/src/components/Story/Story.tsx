@@ -168,6 +168,7 @@ function Story({
                 </div>
               </div>
               <StoryStatus
+                storyId={storyId}
                 isEditingSessionActive={!!editingSession}
                 secondsLeft={secondsLeft}
                 canCurrentUserEdit={canCurrentUserEdit}

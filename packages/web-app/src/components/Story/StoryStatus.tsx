@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface Props {
+  storyId: string;
   isEditingSessionActive: boolean;
   secondsLeft: number | null;
   canCurrentUserEdit: boolean;
@@ -49,6 +50,7 @@ interface Props {
 }
 
 function StoryStatus({
+  storyId,
   isEditingSessionActive,
   editingUser,
   secondsLeft,
@@ -56,8 +58,15 @@ function StoryStatus({
 }: Props) {
   const classes = useStyles(canCurrentUserEdit);
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+  const activeUserCount = (
+    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
+  ).length;
 
-  let statusText = "Waiting for more users to join...";
+  const countOfActiveUsersNeeded = 2 - activeUserCount;
+
+  let statusText = `Waiting for ${countOfActiveUsersNeeded} more editor${
+    countOfActiveUsersNeeded > 1 ? "s" : ""
+  } to join the story...`;
 
   if (isEditingSessionActive) {
     if (secondsLeft && secondsLeft >= 0) {
