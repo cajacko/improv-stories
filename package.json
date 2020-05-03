@@ -27,9 +27,7 @@
     "packages/web-app"
   ],
   "dependencies": {
-    "concurrently": "^5.2.0"
-  },
-  "devDependencies": {
+    "concurrently": "^5.2.0",
     "firebase-tools": "^8.2.0"
   }
 }
