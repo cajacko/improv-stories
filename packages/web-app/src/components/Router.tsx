@@ -7,6 +7,7 @@ import {
   Redirect,
   RouteComponentProps,
 } from "react-router-dom";
+import Link from "@material-ui/core/Link";
 import Story from "./Story";
 import "../store/socketActionDispatcher";
 import LoadingOverlay from "./LoadingOverlay";
@@ -20,24 +21,49 @@ function Router() {
   return (
     <AppLoading.Provider value={isAppLoading}>
       <BrowserRouter>
-        {isAppLoading && (
-          <LoadingOverlay
-            zIndex="WHOLE_APP_LOADING_OVERLAY"
-            shouldRenderIfAppIsLoading
-          />
-        )}
-        <Switch>
-          <Route
-            path="/story/:storyId"
-            component={React.useCallback(
-              (props: RouteComponentProps<{ storyId: string }>) => (
-                <Story storyId={props.match.params.storyId} />
-              ),
-              []
+        <>
+          <Link
+            style={{
+              height: 30,
+              width: "100%",
+              padding: 5,
+              textAlign: "center",
+              boxSizing: "border-box",
+            }}
+            href="https://forms.gle/hmCQCVqfwyZ3kueN7"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Click here to submit feedback
+          </Link>
+          <div
+            style={{
+              display: "flex",
+              flex: 1,
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {isAppLoading && (
+              <LoadingOverlay
+                zIndex="WHOLE_APP_LOADING_OVERLAY"
+                shouldRenderIfAppIsLoading
+              />
             )}
-          ></Route>
-          <Redirect to={`/story/${uuid()}`} />
-        </Switch>
+            <Switch>
+              <Route
+                path="/story/:storyId"
+                component={React.useCallback(
+                  (props: RouteComponentProps<{ storyId: string }>) => (
+                    <Story storyId={props.match.params.storyId} />
+                  ),
+                  []
+                )}
+              ></Route>
+              <Redirect to={`/story/${uuid()}`} />
+            </Switch>
+          </div>
+        </>
       </BrowserRouter>
     </AppLoading.Provider>
   );
