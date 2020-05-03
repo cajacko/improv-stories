@@ -2,7 +2,7 @@ name: CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
@@ -16,6 +16,12 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-      - run: gcloud info
-      - run: yarn install
-      - run: yarn deploy
+      # - run: gcloud info
+      # - run: yarn install
+      # - run: yarn deploy
+      - name: Test
+        env:
+          FIRST_NAME: Mona
+          middle_name: The
+          Last_Name: Octocat
+        run: printenv
