@@ -20,7 +20,7 @@ interface Props {
   color?: "primary" | "secondary";
 }
 
-function StoryStatus({ maxValue = 20, minValue = 0, value, color }: Props) {
+function StoryStatus({ maxValue = 40, minValue = 0, value, color }: Props) {
   const classes = useStyles();
 
   return (

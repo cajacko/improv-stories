@@ -9,9 +9,11 @@ interface StyleProps {
   isTextInvisible: boolean;
 }
 
+const animationKeyframeKey = "storycontent__flash";
+
 const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
   createStyles({
-    "@keyframes flash": {
+    [`@keyframes ${animationKeyframeKey}`]: {
       "0%": {
         opacity: 1,
       },
@@ -29,7 +31,7 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
       borderRight: ({ showCursor }) =>
         showCursor ? `1px solid ${theme.palette.secondary.main}` : 0,
       marginLeft: 0,
-      animation: "flash linear 1s infinite",
+      animation: `$${animationKeyframeKey} linear 1s infinite`,
     },
     textAreaContainer: {
       position: "relative",
@@ -87,7 +89,7 @@ function StoryContent({
   );
 
   const classes = useStyles({
-    showCursor: canCurrentUserEdit,
+    showCursor: canCurrentUserEdit || true,
     isTextInvisible: !!isTextInvisible,
   });
 
