@@ -21,7 +21,7 @@ jobs:
       # - run: yarn deploy
       - name: Test
         env:
-          FIRST_NAME: Mona
+          FIRST_NAME: ${{ secrets.FIRST_NAME }}
           middle_name: The
           Last_Name: Octocat
         run: printenv
