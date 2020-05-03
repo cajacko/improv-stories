@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
-import tutorialText from "../../config/tutorialText";
+import getTutorialText from "../../utils/getTutorialText";
 
 interface StyleProps {
   showCursor: boolean;
@@ -112,7 +112,7 @@ function StoryContent({
   return (
     <>
       {showType === "TUTORIAL" &&
-        tutorialText.map((text, i) => (
+        getTutorialText(window.location.href).map((text, i) => (
           <p key={i} className={classes.paragraph}>
             {0 === i && <span className={classes.cursor} />}
             <span className={classes.tutorialText}>{text}</span>
