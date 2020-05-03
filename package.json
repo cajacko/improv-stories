@@ -16,8 +16,9 @@
     "build:api": "yarn workspace api build",
     "build:web-app": "yarn workspace web-app build",
     "test": "yarn workspace api test:watch",
-    "deploy": "firebase deploy && yarn build:web-app && yarn build:api && gcloud app deploy -q",
-    "types:api": "yarn workspace api types:watch"
+    "deploy": "node .scripts/createEnv.js && firebase deploy && yarn build:web-app && yarn build:api && gcloud app deploy -q",
+    "types:api": "yarn workspace api types:watch",
+    "kill-port": "lsof -ti:4000 | xargs kill"
   },
   "engines": {
     "node": ">10.0.0"
@@ -28,6 +29,7 @@
   ],
   "dependencies": {
     "concurrently": "^5.2.0",
-    "firebase-tools": "^8.2.0"
+    "firebase-tools": "^8.2.0",
+    "fs-extra": "^9.0.0"
   }
 }
