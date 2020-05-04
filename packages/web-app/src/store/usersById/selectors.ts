@@ -1,16 +1,47 @@
 import ReduxTypes from "ReduxTypes";
+import createCachedSelector from "re-reselect";
+import { createSelector } from "reselect";
+import { User, UsersByIdState } from "./types";
+import { selectCurrentUser } from "../currentUser/selectors";
+import { CurrentUserState } from "../currentUser/types";
 
-export const selectUser = (userId: string) => (state: ReduxTypes.RootState) => {
-  const user = state.usersById[userId];
+export interface SelectUserProps {
+  userId: string;
+}
 
-  if (!user) return null;
+export const selectUsersById = createSelector<
+  ReduxTypes.RootState,
+  CurrentUserState,
+  UsersByIdState,
+  UsersByIdState
+>(
+  selectCurrentUser,
+  (state) => state.usersById,
+  (currentUser, usersById) => {
+    const existingUser = usersById[currentUser.id];
 
-  const currentUser = state.currentUser;
+    if (!existingUser) return usersById;
 
-  if (user.id !== currentUser.id) return user;
+    return {
+      ...usersById,
+      [existingUser.id]: {
+        ...existingUser,
+        ...currentUser,
+      },
+    };
+  }
+);
 
-  return {
-    ...user,
-    ...currentUser,
-  };
-};
+export const selectUser = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectUserProps,
+  UsersByIdState,
+  string,
+  User | null
+>(
+  selectUsersById,
+  (state, props) => props.userId,
+  (usersById, userId) => {
+    return usersById[userId] || null;
+  }
+)((state, props) => props.userId);

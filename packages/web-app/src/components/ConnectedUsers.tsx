@@ -44,13 +44,23 @@ function ConnectedUsers({
   handleClose?: () => void;
 }) {
   const activeStoryUsers =
-    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || [];
+    useSelector((state) =>
+      selectors.misc.selectStoryUsers(state, {
+        storyId,
+        storyUserType: "ACTIVE",
+      })
+    ) || [];
 
   const nonActiveStoryUsers =
-    useSelector(selectors.misc.selectNonActiveStoryUsers(storyId)) || [];
+    useSelector((state) =>
+      selectors.misc.selectStoryUsers(state, {
+        storyId,
+        storyUserType: "NON_ACTIVE",
+      })
+    ) || [];
 
-  const currentlyEditingUser = useSelector(
-    selectors.misc.selectActiveStorySessionUser(storyId)
+  const currentlyEditingUser = useSelector((state) =>
+    selectors.misc.selectActiveStorySessionUser(state, { storyId })
   );
 
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;

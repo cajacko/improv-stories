@@ -41,7 +41,9 @@ function transformSessionsResponse(response: SessionsResponse): Session[] {
 }
 
 function useStoryHistoryListener(storyId: string) {
-  const story = useSelector(selectors.storiesById.selectStory(storyId));
+  const story = useSelector((state) =>
+    selectors.storiesById.selectStory(state, { storyId })
+  );
   const activeSessionId = story && story.activeSessionId;
   const lastSessionId = story && story.lastSessionId;
   const ref = useEntriesRef(storyId);

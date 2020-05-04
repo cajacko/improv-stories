@@ -1,4 +1,10 @@
 import ReduxTypes from "ReduxTypes";
 
-export const selectStory = (storyId: string) => (state: ReduxTypes.RootState) =>
-  state.storiesById[storyId] || null;
+export interface SelectStoryProps {
+  storyId: string;
+}
+
+export const selectStory = (
+  state: ReduxTypes.RootState,
+  props: SelectStoryProps
+) => state.storiesById[props.storyId] || null;

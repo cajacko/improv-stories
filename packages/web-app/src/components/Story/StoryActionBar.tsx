@@ -67,13 +67,20 @@ function StoryActionBar({
   disableButtons,
 }: Props) {
   const userCount = (
-    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
+    useSelector((state) =>
+      selectors.misc.selectStoryUsers(state, {
+        storyId,
+        storyUserType: "ACTIVE",
+      })
+    ) || []
   ).length;
-  const isCurrentUserActive = useSelector(
-    selectors.misc.selectIsCurrentUserActiveInStory(storyId)
+  const isCurrentUserActive = useSelector((state) =>
+    selectors.misc.selectIsCurrentUserActiveInStory(state, { storyId })
   );
-  const fetchStatus = useSelector(
-    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
+  const fetchStatus = useSelector((state) =>
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
+      storyId,
+    })
   );
   const classes = useStyles();
 

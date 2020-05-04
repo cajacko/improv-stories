@@ -1,4 +1,4 @@
 import ReduxTypes from "ReduxTypes";
 
-export const selectCurrentUser = (state: ReduxTypes.RootState) =>
-  state.currentUser;
+export const selectCurrentUser = ({ currentUser }: ReduxTypes.RootState) =>
+  currentUser;

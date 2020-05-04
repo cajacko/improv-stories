@@ -59,7 +59,12 @@ function StoryStatus({
   const classes = useStyles(canCurrentUserEdit);
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
   const activeUserCount = (
-    useSelector(selectors.misc.selectActiveStoryUsers(storyId)) || []
+    useSelector((state) =>
+      selectors.misc.selectStoryUsers(state, {
+        storyId,
+        storyUserType: "ACTIVE",
+      })
+    ) || []
   ).length;
 
   const countOfActiveUsersNeeded = 2 - activeUserCount;
