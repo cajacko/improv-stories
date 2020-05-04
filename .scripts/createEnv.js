@@ -27,7 +27,13 @@ Promise.all(
           return `${acc}\n${key}=${value}`;
         }, "");
 
-      return writeFile(join(dir, ".env.production"), env);
+      return Promise.all([
+        writeFile(join(dir, ".env.production"), env),
+        writeFile(join(dir, ".env.local"), env),
+      ]);
     })
   )
-);
+).catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
