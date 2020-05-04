@@ -1,177 +1,177 @@
 import ReduxTypes from "ReduxTypes";
+import createCachedSelector from "re-reselect";
 import { Session } from "../sessionsById/types";
-import { User } from "../usersById/types";
+import { User, UsersByIdState } from "../usersById/types";
+import { Story } from "../storiesById/types";
 import { selectCurrentUser } from "../currentUser/selectors";
+import { selectUsersById } from "../usersById/selectors";
 import { selectStory } from "../storiesById/selectors";
-import { selectSession } from "../sessionsById/selectors";
-import { selectUser } from "../usersById/selectors";
+import { selectSessionsById } from "../sessionsById/selectors";
 import { selectStorySessionIds } from "../sessionIdsByStoryId/selectors";
 
-export const selectActiveStorySession = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const story = selectStory(storyId)(state);
+interface SelectorWithStoryIdProp {
+  storyId: string;
+}
 
-  if (!story) return null;
-  if (!story.activeSessionId) return null;
+export const selectActiveStorySession = createCachedSelector(
+  selectStory,
+  selectSessionsById,
+  (story, sessionsById) => {
+    if (!story) return null;
+    if (!story.activeSessionId) return null;
 
-  return selectSession(story.activeSessionId)(state);
-};
+    return sessionsById[story.activeSessionId] || null;
+  }
+)((state, props) => props.storyId);
 
-export const selectActiveStorySessionUser = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const session = selectActiveStorySession(storyId)(state);
+export const selectActiveStorySessionUser = createCachedSelector(
+  selectActiveStorySession,
+  selectUsersById,
+  (session, usersById) => {
+    if (!session) return null;
 
-  if (!session) return null;
+    return usersById[session.userId] || null;
+  }
+)((state, props) => props.storyId);
 
-  return selectUser(session.userId)(state);
-};
+export const selectStorySessions = createCachedSelector(
+  selectStorySessionIds,
+  selectSessionsById,
+  (sessionIds, sessionsById) => {
+    if (!sessionIds) return null;
 
-export const selectStorySessions = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const story = selectStory(storyId)(state);
+    const sessions: Session[] = [];
 
-  if (!story) return null;
+    sessionIds.forEach((sessionId) => {
+      const session = sessionsById[sessionId];
 
-  const sessionIds = selectStorySessionIds(storyId)(state);
+      if (!session) return;
 
-  if (!sessionIds) return null;
+      sessions.push(session);
+    });
 
-  const sessions: Session[] = [];
+    return sessions;
+  }
+)((state, props) => props.storyId);
 
-  sessionIds.forEach((sessionId) => {
-    const session = selectSession(sessionId)(state);
+interface SelectAllStoryParagraphsProps extends SelectorWithStoryIdProp {
+  editingSessionId: string | null;
+  editingSessionFinalEntry: string | null;
+}
 
-    if (!session) return;
+const getSelectAllStoryParagraphsKey = (
+  state: ReduxTypes.RootState,
+  props: SelectAllStoryParagraphsProps
+) => `${props.storyId}_${props.editingSessionId}`;
 
-    sessions.push(session);
-  });
+export const selectAllStoryParagraphs = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectAllStoryParagraphsProps,
+  Session[] | null,
+  string | null,
+  string | null,
+  string[]
+>(
+  selectStorySessions,
+  (state, props) => props.editingSessionId,
+  (state, props) => props.editingSessionFinalEntry,
+  (sessions, editingSessionId, editingSessionFinalEntry) => {
+    let didAddEditingSession = false;
 
-  return sessions;
-};
+    let combinedSessions = sessions
+      ? sessions.reduce((acc, { finalEntry, id }) => {
+          if (editingSessionFinalEntry && editingSessionId === id) {
+            didAddEditingSession = true;
+            return `${acc}${editingSessionFinalEntry}`;
+          }
 
-export const selectAllStoryParagraphs = (
-  storyId: string,
-  editingSessionId: string | null,
-  editingSessionFinalEntry: string | null
-) => (state: ReduxTypes.RootState): string[] => {
-  const sessions = selectStorySessions(storyId)(state) || [];
+          return `${acc}${finalEntry}`;
+        }, "")
+      : "";
 
-  let didAddEditingSession = false;
-
-  let combinedSessions = sessions.reduce((acc, { finalEntry, id }) => {
-    if (editingSessionFinalEntry && editingSessionId === id) {
-      didAddEditingSession = true;
-      return `${acc}${editingSessionFinalEntry}`;
+    if (!didAddEditingSession && editingSessionFinalEntry && editingSessionId) {
+      combinedSessions = `${combinedSessions}${editingSessionFinalEntry}`;
     }
 
-    return `${acc}${finalEntry}`;
-  }, "");
-
-  if (!didAddEditingSession && editingSessionFinalEntry && editingSessionId) {
-    combinedSessions = `${combinedSessions}${editingSessionFinalEntry}`;
+    return combinedSessions.split("\n");
   }
+)(getSelectAllStoryParagraphsKey);
 
-  return combinedSessions.split("\n");
-};
+export const selectDoesStoryHaveContent = createCachedSelector(
+  selectAllStoryParagraphs,
+  (paragraphs) => {
+    if (paragraphs.length > 1) return true;
+    if (paragraphs.length !== 1) return false;
+    if (!paragraphs[0]) return false;
 
-export const selectDoesStoryHaveContent = (
-  storyId: string,
-  editingSessionId: string | null,
-  editingSessionFinalEntry: string | null
-) => (state: ReduxTypes.RootState) => {
-  const paragraphs = selectAllStoryParagraphs(
-    storyId,
-    editingSessionId,
-    editingSessionFinalEntry
-  )(state);
+    return paragraphs[0] !== "";
+  }
+)(getSelectAllStoryParagraphsKey);
 
-  if (paragraphs.length > 1) return true;
-  if (paragraphs.length !== 1) return false;
-  if (!paragraphs[0]) return false;
+// TODO: How to select the users with selectors?
 
-  return paragraphs[0] !== "";
-};
+interface SelectStoryUsersProps extends SelectorWithStoryIdProp {
+  storyUserType: "NON_ACTIVE" | "ACTIVE" | "CONNECTED";
+}
 
-export const selectNonActiveStoryUsers = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const story = selectStory(storyId)(state);
+export const selectStoryUsers = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectStoryUsersProps,
+  Story | null,
+  UsersByIdState,
+  SelectStoryUsersProps["storyUserType"] | undefined,
+  User[] | null
+>(
+  selectStory,
+  selectUsersById,
+  (state, props) => props.storyUserType,
+  (story, usersById, storyUserType) => {
+    if (!story) return null;
 
-  if (!story) return null;
+    const connectedUserIds = story.connectedUserIds;
+    const activeUserIds = story.activeUserIds;
 
-  const connectedUserIds = story.connectedUserIds;
-  const activeUserIds = story.activeUserIds;
+    const users: User[] = [];
 
-  const users: User[] = [];
+    connectedUserIds.forEach((userId) => {
+      const user = usersById[userId] || null;
 
-  connectedUserIds.forEach((userId) => {
-    if (activeUserIds.includes(userId)) return;
+      if (!user) return;
 
-    const user = selectUser(userId)(state);
+      switch (storyUserType) {
+        case "ACTIVE":
+          if (!activeUserIds.includes(userId)) return;
+          break;
+        case "NON_ACTIVE":
+          if (activeUserIds.includes(userId)) return;
+          break;
+        default:
+          break;
+      }
 
-    if (!user) return;
+      users.push(user);
+    });
 
-    users.push(user);
-  });
+    return users;
+  }
+)((state, props) => `${props.storyId}_${props.storyUserType}`);
 
-  return users;
-};
+export const selectIsCurrentUserActiveInStory = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectorWithStoryIdProp,
+  string,
+  User[] | null,
+  boolean
+>(
+  (state) => selectCurrentUser(state).id,
+  (state, props) =>
+    selectStoryUsers(state, {
+      storyId: props.storyId,
+      storyUserType: "ACTIVE",
+    }),
+  (currentUserId, activeUsers) => {
+    if (!activeUsers) return false;
 
-export const selectConnectedStoryUsers = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const story = selectStory(storyId)(state);
-
-  if (!story) return null;
-
-  const connectedUserIds = story.connectedUserIds;
-
-  const users: User[] = [];
-
-  connectedUserIds.forEach((userId) => {
-    const user = selectUser(userId)(state);
-
-    if (!user) return;
-
-    users.push(user);
-  });
-
-  return users;
-};
-
-export const selectActiveStoryUsers = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const story = selectStory(storyId)(state);
-
-  if (!story) return null;
-
-  const activeUserIds = story.activeUserIds;
-
-  const users: User[] = [];
-
-  activeUserIds.forEach((userId) => {
-    const user = selectUser(userId)(state);
-
-    if (!user) return;
-
-    users.push(user);
-  });
-
-  return users;
-};
-
-export const selectIsCurrentUserActiveInStory = (storyId: string) => (
-  state: ReduxTypes.RootState
-) => {
-  const currentUserId = selectCurrentUser(state).id;
-
-  const users = selectActiveStoryUsers(storyId)(state);
-
-  if (!users) return false;
-
-  return users.some(({ id }) => id === currentUserId);
-};
+    return activeUsers.some(({ id }) => id === currentUserId);
+  }
+)((state, props) => props.storyId);

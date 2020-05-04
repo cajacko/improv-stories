@@ -311,14 +311,17 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
     const currentUserId = useSelector((state) => state.currentUser.id);
     const entriesRef = useEntriesRef(props.storyId);
-    const activeStoryUsers = useSelector(
-      selectors.misc.selectActiveStoryUsers(props.storyId)
+    const activeStoryUsers = useSelector((state) =>
+      selectors.misc.selectStoryUsers(state, {
+        storyId: props.storyId,
+        storyUserType: "ACTIVE",
+      })
     );
-    const activeSession = useSelector(
-      selectors.misc.selectActiveStorySession(props.storyId)
+    const activeSession = useSelector((state) =>
+      selectors.misc.selectActiveStorySession(state, props)
     );
-    const currentlyEditingUser = useSelector(
-      selectors.misc.selectActiveStorySessionUser(props.storyId)
+    const currentlyEditingUser = useSelector((state) =>
+      selectors.misc.selectActiveStorySessionUser(state, props)
     );
 
     const dispatch = useDispatch();

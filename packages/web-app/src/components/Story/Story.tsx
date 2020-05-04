@@ -78,15 +78,17 @@ function Story({
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
   useStorySetup(storyId);
-  const fetchStatus = useSelector(
-    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
-  );
-  const doesStoryHaveContent = useSelector(
-    selectors.misc.selectDoesStoryHaveContent(
+  const fetchStatus = useSelector((state) =>
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
       storyId,
-      editingSession && editingSession.id,
-      editingSession && editingSession.finalEntry
-    )
+    })
+  );
+  const doesStoryHaveContent = useSelector((state) =>
+    selectors.misc.selectDoesStoryHaveContent(state, {
+      storyId,
+      editingSessionId: editingSession && editingSession.id,
+      editingSessionFinalEntry: editingSession && editingSession.finalEntry,
+    })
   );
 
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [

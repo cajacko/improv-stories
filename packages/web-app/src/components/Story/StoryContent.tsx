@@ -77,24 +77,26 @@ function StoryContent({
   onTextAreaChange,
   isTextInvisible,
 }: Props) {
-  const fetchStatus = useSelector(
-    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(storyId)
+  const fetchStatus = useSelector((state) =>
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
+      storyId,
+    })
   );
 
-  const paragraphs = useSelector(
-    selectors.misc.selectAllStoryParagraphs(
+  const paragraphs = useSelector((state) =>
+    selectors.misc.selectAllStoryParagraphs(state, {
       storyId,
       editingSessionId,
-      editingSessionFinalEntry
-    )
+      editingSessionFinalEntry,
+    })
   );
 
-  const doesStoryHaveContent = useSelector(
-    selectors.misc.selectDoesStoryHaveContent(
+  const doesStoryHaveContent = useSelector((state) =>
+    selectors.misc.selectDoesStoryHaveContent(state, {
       storyId,
       editingSessionId,
-      editingSessionFinalEntry
-    )
+      editingSessionFinalEntry,
+    })
   );
 
   const classes = useStyles({
@@ -119,8 +121,6 @@ function StoryContent({
     !lastParagraph ||
     lastParagraph.trim() === "" ||
     lastParagraph.trim().endsWith(".");
-
-  console.log("paragraphs", { paragraphs, autoCapitalize });
 
   return (
     <>
