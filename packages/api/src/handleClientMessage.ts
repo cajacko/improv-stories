@@ -1,6 +1,7 @@
 import getDatabase from "./getDatabase";
 import { broadCastStoriesChanged, broadCastSessionChanged } from "./broadcast";
 import { ClientMessage, DatabaseSession } from "./sharedTypes";
+import logger from "./logger";
 import {
   removeActiveUserFromStory,
   addActiveUserToStory,
@@ -107,7 +108,11 @@ function storyLoop(storyId: string) {
 
     broadCastStoriesChanged([storyId]);
 
+    logger.log("Story timeout start", { storyId });
+
     storyTimeouts[storyId] = setTimeout(() => {
+      logger.log("Story timeout end", { storyId });
+
       const story = getStoreStory(storyId);
 
       if (story && story.activeSession && story.activeSession.entries.length) {
@@ -124,7 +129,16 @@ function storyLoop(storyId: string) {
           version: story.activeSession.version,
         };
 
-        ref.push(session);
+        logger.log("Setting session in database", session);
+
+        ref
+          .push(session)
+          .then(() => {
+            logger.log("Set session in database", session);
+          })
+          .catch((error) => {
+            logger.log("Error setting session in database", { session, error });
+          });
       }
 
       finishActiveStorySession(storyId);

@@ -3,6 +3,7 @@ import { broadCastStoriesChanged, broadCastUserStories } from "./broadcast";
 import { addUser, removeUser, getGetDate } from "./store";
 import { ClientMessage } from "./sharedTypes";
 import handleClientMessage from "./handleClientMessage";
+import logger from "./logger";
 
 function setupSockets(io: socket.Server) {
   function onClientMessage(userId: string) {
@@ -12,6 +13,8 @@ function setupSockets(io: socket.Server) {
   }
 
   function onSocketConnect(sock: socket.Socket, userId: string) {
+    logger.log("Socket connected", { userId });
+
     const date = getGetDate()();
 
     const changedStoryIds = addUser({
@@ -30,6 +33,8 @@ function setupSockets(io: socket.Server) {
   }
 
   function onSocketDisconnect(userId: string) {
+    logger.log("Socket disconnected", { userId });
+
     const changedStoryIds = removeUser(userId);
 
     broadCastStoriesChanged(changedStoryIds);

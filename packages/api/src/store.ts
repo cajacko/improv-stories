@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import { v4 as uuid } from "uuid";
 import { User, Story, ServerSession, UserDetails } from "./sharedTypes";
+import logger from "./logger";
 
 export type ChangedStories = string[];
 
@@ -236,6 +237,9 @@ export function finishActiveStorySession(storyId: string): ChangedStories {
   const story = getStoryOrCreate(storyId);
 
   const activeSession = story.activeSession;
+
+  logger.log("finishActiveStorySession", { storyId, activeSession });
+
   story.lastSession = activeSession && sessionHasChanged(activeSession);
   story.activeSession = null;
 
@@ -251,6 +255,8 @@ export function startNewStorySession(
   const story = getStoryOrCreate(storyId);
 
   story.activeSession = session;
+
+  logger.log("startNewStorySession", { storyId, session });
 
   return storyHasChanged(storyId);
 }
