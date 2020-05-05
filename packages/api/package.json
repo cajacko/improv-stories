@@ -4,12 +4,13 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "start:watch": "NODE_ENV=development nodemon --watch 'src/*.ts' --exec 'ts-node --log-error' src/index.ts",
+    "start:watch": "npm run clear-port && NODE_ENV=development nodemon --watch 'src/*.ts' --exec 'ts-node --log-error' src/index.ts",
     "start": "NODE_ENV=production pm2 start ecosystem.config.js && pm2 logs",
     "build:watch": "npm run build -- --watch --preserveWatchOutput",
     "build": "tsc",
     "types:watch": "tsc --noEmit --watch",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "clear-port": "node ./.scripts/clearEnvPort.js"
   },
   "dependencies": {
     "@sentry/node": "^5.15.5",
