@@ -58,7 +58,11 @@ type ActiveButtonStatus =
   | GenericActiveButtonStatus<false, true>
   | null;
 
-type ActiveButtonValue = "LOADING" | true | false;
+type ActiveButtonValue =
+  | "LOADING"
+  | "NO_NAME"
+  | "IS_STORY_EDITOR"
+  | "IS_NOT_STORY_EDITOR";
 
 function StoryActionBar({
   storyId,
@@ -82,13 +86,21 @@ function StoryActionBar({
       storyId,
     })
   );
+  const currentUserName = useSelector(selectors.currentUser.selectCurrentUser)
+    .name;
   const classes = useStyles();
+
+  const hasName = currentUserName && currentUserName.length > 0;
 
   const [activeButtonStatus, setActiveButtonStatus] = React.useState<
     ActiveButtonStatus
   >(null);
 
-  let activeButtonState: ActiveButtonValue = isCurrentUserActive;
+  let activeButtonState: ActiveButtonValue = !hasName
+    ? "NO_NAME"
+    : isCurrentUserActive
+    ? "IS_STORY_EDITOR"
+    : "IS_NOT_STORY_EDITOR";
 
   if (
     activeButtonStatus &&
@@ -124,12 +136,33 @@ function StoryActionBar({
     );
   }, [isCurrentUserActive, storyId]);
 
-  let isJoinButtonDisabled = disableButtons;
+  let isJoinButtonDisabled =
+    disableButtons || fetchStatus !== "FETCHED_NOW_LISTENING";
 
-  if (fetchStatus !== "FETCHED_NOW_LISTENING" && !isCurrentUserActive) {
-    isJoinButtonDisabled = true;
-  } else if (activeButtonState === "LOADING") {
-    isJoinButtonDisabled = true;
+  let joinButtonStartIcon: JSX.Element | undefined;
+  let joinButtonEndIcon: JSX.Element | undefined;
+  let joinButtonText: string;
+  let joinButtonColor: "default" | "secondary" = "default";
+
+  switch (activeButtonState) {
+    case "IS_NOT_STORY_EDITOR":
+      joinButtonEndIcon = <AddIcon />;
+      joinButtonText = "Join as Editor";
+      joinButtonColor = "secondary";
+      break;
+    case "IS_STORY_EDITOR":
+      joinButtonStartIcon = <ArrowBackIcon />;
+      joinButtonText = "Leave as Editor";
+      break;
+    case "NO_NAME":
+      joinButtonText = "Set a name to join";
+      isJoinButtonDisabled = true;
+      break;
+    case "LOADING":
+    default:
+      isJoinButtonDisabled = true;
+      joinButtonText = "Updating...";
+      break;
   }
 
   return (
@@ -137,16 +170,14 @@ function StoryActionBar({
       <div className={classes.activeButtonWrapper}>
         <Button
           variant="contained"
-          color={activeButtonState ? "default" : "secondary"}
+          color={joinButtonColor}
           className={classes.activeButton}
-          startIcon={activeButtonState === true && <ArrowBackIcon />}
-          endIcon={activeButtonState === false && <AddIcon />}
+          startIcon={joinButtonStartIcon}
+          endIcon={joinButtonEndIcon}
           onClick={isJoinButtonDisabled ? undefined : handleToggleStatus}
           disabled={isJoinButtonDisabled}
         >
-          {activeButtonState === "LOADING" && "Updating..."}
-          {activeButtonState === true && "Leave as Editor"}
-          {activeButtonState === false && "Join as Editor"}
+          {joinButtonText}
         </Button>
         {activeButtonState === "LOADING" && (
           <CircularProgress size={24} className={classes.buttonProgress} />

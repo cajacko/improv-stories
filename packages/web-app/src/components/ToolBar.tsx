@@ -81,9 +81,12 @@ function ToolBar() {
   const dispatch = useDispatch();
   const [value, setValue] = React.useState(currentUser.name);
   const { push } = useHistory();
-  const classes = useStyles();
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const canSave = value && !!value.length && !!currentUserId;
+  const canSave =
+    value && !!value.length && !!currentUserId && value !== currentUser.name;
+
+  const classes = useStyles();
 
   const onSetValue = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
@@ -93,6 +96,10 @@ function ToolBar() {
     event.preventDefault();
 
     if (!canSave || !value || !currentUserId) return;
+
+    if (inputRef && inputRef.current) {
+      inputRef.current.blur();
+    }
 
     dispatch(
       actions.currentUser.setCurrentUserName({
@@ -135,6 +142,7 @@ function ToolBar() {
         </Typography>
         <form className={classes.search} onSubmit={saveName}>
           <InputBase
+            inputRef={inputRef}
             disabled={!currentUserId}
             onChange={onSetValue}
             placeholder="Your name"
@@ -145,7 +153,11 @@ function ToolBar() {
             }}
             inputProps={{ "aria-label": "search" }}
           />
-          <IconButton className={classes.searchIcon} onClick={saveName}>
+          <IconButton
+            className={classes.searchIcon}
+            color={canSave ? "default" : "primary"}
+            onClick={saveName}
+          >
             <SaveIcon />
           </IconButton>
         </form>
