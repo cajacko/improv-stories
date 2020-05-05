@@ -28,7 +28,7 @@ Promise.all(
         }, "");
 
       return Promise.all([
-        writeFile(join(dir, ".env.production"), env),
+        writeFile(join(dir, ".env.production.local"), env),
         writeFile(join(dir, ".env.local"), env),
       ]);
     })
