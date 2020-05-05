@@ -13,10 +13,10 @@ import StoryStatus from "./StoryStatus";
 import StoryLayout, { RenderProps } from "./StoryLayout";
 import getZIndex from "../../utils/getZIndex";
 import StoryProgressBar from "./StoryProgressBar";
-import useStorySetup from "./useStorySetup";
+import useStorySetup from "../../hooks/useStorySetup";
 import selectors from "../../store/selectors";
 import LoadingOverlay from "../LoadingOverlay";
-import useStoryInitScroll from "./useStoryInitScroll";
+import useStoryInitScroll from "../../hooks/useStoryInitScroll";
 
 const useStyles = makeStyles(() =>
   createStyles({

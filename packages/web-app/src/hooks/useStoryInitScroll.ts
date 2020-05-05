@@ -1,5 +1,5 @@
 import React from "react";
-import { StoryFetchStatus } from "../../store/storyFetchStateByStoryId/types";
+import { StoryFetchStatus } from "../store/storyFetchStateByStoryId/types";
 
 function useStoryInitScroll(
   fetchStatus: StoryFetchStatus | null,
