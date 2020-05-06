@@ -42,11 +42,11 @@ function updateStatus(
   }
 }
 
-const reducer = createReducer<StoryFetchStatusByStoryIdState>(defaultState)
-  .handleAction(
-    actions.storyFetchStateByStoryId.setStoryFetchStatus,
-    updateStatus
-  )
-  .handleAction(actions.sessionIdsByStoryId.setStorySessions, updateStatus);
+const reducer = createReducer<StoryFetchStatusByStoryIdState>(
+  defaultState
+).handleAction(
+  actions.storyFetchStateByStoryId.setStoryFetchStatus,
+  updateStatus
+);
 
 export default reducer;

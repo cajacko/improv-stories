@@ -27,6 +27,14 @@ export interface DatabaseSession extends BaseSession {
   userId: string;
 }
 
+export interface DatabaseStoryProps {
+  secondsPerRound?: number;
+  storyId: string;
+  storyPropsDateCreated: string;
+  storyPropsDateModified: string;
+  storyPropsVersion: number;
+}
+
 export interface Story {
   id: string;
   connectedUsers: User[];

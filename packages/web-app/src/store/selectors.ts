@@ -5,6 +5,7 @@ import * as sessionsById from "./sessionsById/selectors";
 import * as currentUser from "./currentUser/selectors";
 import * as sessionIdsByStoryId from "./sessionIdsByStoryId/selectors";
 import * as storyFetchStateByStoryId from "./storyFetchStateByStoryId/selectors";
+import * as storyPropsByStoryId from "./storyPropsByStoryId/selectors";
 
 export default {
   usersById,
@@ -14,4 +15,5 @@ export default {
   currentUser,
   sessionIdsByStoryId,
   storyFetchStateByStoryId,
+  storyPropsByStoryId,
 };

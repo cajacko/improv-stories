@@ -1,6 +1,10 @@
 import getDatabase from "./getDatabase";
 import { broadCastStoriesChanged, broadCastSessionChanged } from "./broadcast";
-import { ClientMessage, DatabaseSession } from "./sharedTypes";
+import {
+  ClientMessage,
+  DatabaseSession,
+  DatabaseStoryProps,
+} from "./sharedTypes";
 import logger from "./logger";
 import {
   removeActiveUserFromStory,
@@ -18,7 +22,7 @@ import {
 import getRand from "./getRand";
 
 // Want 1 more as we always round down the number in ui
-const seconds = 40 + 1;
+const defaultSeconds = 40 + 1;
 
 function switchOverMessage(
   userId: string,
@@ -65,6 +69,36 @@ function switchOverMessage(
 
 const storyTimeouts: { [K: string]: number | undefined } = {};
 
+function getSeconds(storyId: string, callback: (seconds: number) => void) {
+  const onError = (error: Error) => {
+    logger.log("Error getting seconds from database", { error });
+    callback(defaultSeconds);
+  };
+
+  try {
+    // TODO: Share all refs with frontend
+    getDatabase()
+      .ref(`/storiesById/${storyId}/storyProps`)
+      .once(
+        "value",
+        (snapshot) => {
+          // TODO: Cast as unknown and do the same stuff we do in frontend to validate.
+          var data = snapshot.val() as undefined | DatabaseStoryProps;
+
+          if (!data) {
+            callback(defaultSeconds);
+            return;
+          }
+
+          callback(data.secondsPerRound || defaultSeconds);
+        },
+        onError
+      );
+  } catch (error) {
+    onError(error);
+  }
+}
+
 function storyLoop(storyId: string) {
   const clear = () => {
     if (storyTimeouts[storyId]) clearTimeout(storyTimeouts[storyId]);
@@ -81,70 +115,80 @@ function storyLoop(storyId: string) {
   const isActive = activeUsers.length >= 2 || !!story.activeSession;
 
   if (isActive && !story.activeSession) {
-    const id = getGetId()();
-    const startDate = getGetDate()();
-    const endDate = new Date(startDate);
-    endDate.setSeconds(endDate.getSeconds() + seconds);
+    getSeconds(storyId, (seconds) => {
+      const id = getGetId()();
+      const startDate = getGetDate()();
+      const endDate = new Date(startDate);
+      endDate.setSeconds(endDate.getSeconds() + seconds);
 
-    const lastUserId = story.lastSession && story.lastSession.user;
+      const lastUserId = story.lastSession && story.lastSession.user;
 
-    const nextUserIds = activeUsers.filter((userId) => userId !== lastUserId);
+      const nextUserIds = activeUsers.filter((userId) => userId !== lastUserId);
 
-    const nextUserId = nextUserIds[Math.floor(getRand() * nextUserIds.length)];
+      const nextUserId =
+        nextUserIds[Math.floor(getRand() * nextUserIds.length)];
 
-    startNewStorySession(
-      {
-        id,
-        dateModified: startDate,
-        dateStarted: startDate,
-        dateWillFinish: endDate.toISOString(),
-        entries: [],
-        finalEntry: "",
-        version: 0,
-        user: nextUserId,
-      },
-      storyId
-    );
+      startNewStorySession(
+        {
+          id,
+          dateModified: startDate,
+          dateStarted: startDate,
+          dateWillFinish: endDate.toISOString(),
+          entries: [],
+          finalEntry: "",
+          version: 0,
+          user: nextUserId,
+        },
+        storyId
+      );
 
-    broadCastStoriesChanged([storyId]);
-
-    logger.log("Story timeout start", { storyId });
-
-    storyTimeouts[storyId] = setTimeout(() => {
-      logger.log("Story timeout end", { storyId });
-
-      const story = getStoreStory(storyId);
-
-      if (story && story.activeSession && story.activeSession.entries.length) {
-        const ref = getDatabase().ref(`/storiesById/${storyId}/entries`);
-
-        const session: DatabaseSession = {
-          id: story.activeSession.id,
-          dateWillFinish: story.activeSession.dateWillFinish,
-          dateStarted: story.activeSession.dateStarted,
-          dateModified: story.activeSession.dateModified,
-          finalEntry: story.activeSession.finalEntry,
-          entries: story.activeSession.entries,
-          userId: story.activeSession.user,
-          version: story.activeSession.version,
-        };
-
-        logger.log("Setting session in database", session);
-
-        ref
-          .push(session)
-          .then(() => {
-            logger.log("Set session in database", session);
-          })
-          .catch((error) => {
-            logger.log("Error setting session in database", { session, error });
-          });
-      }
-
-      finishActiveStorySession(storyId);
-      storyLoop(storyId);
       broadCastStoriesChanged([storyId]);
-    }, seconds * 1000);
+
+      logger.log("Story timeout start", { storyId });
+
+      storyTimeouts[storyId] = setTimeout(() => {
+        logger.log("Story timeout end", { storyId });
+
+        const story = getStoreStory(storyId);
+
+        if (
+          story &&
+          story.activeSession &&
+          story.activeSession.entries.length
+        ) {
+          const ref = getDatabase().ref(`/storiesById/${storyId}/entries`);
+
+          const session: DatabaseSession = {
+            id: story.activeSession.id,
+            dateWillFinish: story.activeSession.dateWillFinish,
+            dateStarted: story.activeSession.dateStarted,
+            dateModified: story.activeSession.dateModified,
+            finalEntry: story.activeSession.finalEntry,
+            entries: story.activeSession.entries,
+            userId: story.activeSession.user,
+            version: story.activeSession.version,
+          };
+
+          logger.log("Setting session in database", session);
+
+          ref
+            .push(session)
+            .then(() => {
+              logger.log("Set session in database", session);
+            })
+            .catch((error) => {
+              logger.log("Error setting session in database", {
+                session,
+                error,
+              });
+            });
+        }
+
+        finishActiveStorySession(storyId);
+        storyLoop(storyId);
+        broadCastStoriesChanged([storyId]);
+      }, seconds * 1000);
+    });
   } else if (activeUsers.length <= 0) {
     clear();
 

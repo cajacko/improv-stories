@@ -13,6 +13,7 @@ import {
 } from "../utils/typeGuards";
 import { DatabaseSession } from "../sharedTypes";
 import { Session } from "../store/sessionsById/types";
+import { StoryFetchStatus } from "../store/storyFetchStateByStoryId/types";
 import selectors from "../store/selectors";
 
 interface SessionsResponse {
@@ -48,6 +49,7 @@ function useStoryHistoryListener(storyId: string) {
   const lastSessionId = story && story.lastSessionId;
   const ref = useEntriesRef(storyId);
   const dispatch = useDispatch();
+  const [status, setStatus] = React.useState<StoryFetchStatus | null>(null);
 
   React.useEffect(() => {
     if (!ref) return;
@@ -56,28 +58,18 @@ function useStoryHistoryListener(storyId: string) {
       var data = snapshot.val() as unknown;
 
       if (data === null || data === undefined) {
-        dispatch(
-          actions.storyFetchStateByStoryId.setStoryFetchStatus({
-            storyId,
-            fetchStatus: "FETCHED_NOW_LISTENING",
-          })
-        );
-
+        setStatus("FETCHED_NOW_LISTENING");
         return;
       }
 
       if (!isSessionsResponse(data)) {
-        dispatch(
-          actions.storyFetchStateByStoryId.setStoryFetchStatus({
-            storyId,
-            fetchStatus: "INVALID_DATA",
-          })
-        );
-
+        setStatus("INVALID_DATA");
         return;
       }
 
       const sessionsResponse = data as SessionsResponse;
+
+      setStatus("FETCHED_NOW_LISTENING");
 
       dispatch(
         actions.sessionIdsByStoryId.setStorySessions({
@@ -85,7 +77,6 @@ function useStoryHistoryListener(storyId: string) {
           sessions: transformSessionsResponse(sessionsResponse),
           lastSessionId,
           activeSessionId,
-          fetchStatus: "FETCHED_NOW_LISTENING",
         })
       );
     }
@@ -99,16 +90,7 @@ function useStoryHistoryListener(storyId: string) {
     };
   }, [storyId, ref, dispatch, lastSessionId, activeSessionId]);
 
-  React.useEffect(() => {
-    return () => {
-      dispatch(
-        actions.storyFetchStateByStoryId.setStoryFetchStatus({
-          fetchStatus: "REMOVE",
-          storyId,
-        })
-      );
-    };
-  }, [dispatch, storyId]);
+  return status;
 }
 
 export default useStoryHistoryListener;

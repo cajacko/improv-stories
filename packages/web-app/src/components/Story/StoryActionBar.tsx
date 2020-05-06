@@ -2,7 +2,7 @@ import React from "react";
 import { v4 as uuid } from "uuid";
 import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import PeopleIcon from "@material-ui/icons/People";
+import SettingsIcon from "@material-ui/icons/Settings";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
@@ -43,8 +43,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface Props {
   storyId: string;
-  isUsersDrawerOpen: boolean;
-  toggleIsUsersDrawerOpen: () => void;
+  isStorySettingsDrawerOpen: boolean;
+  toggleIsSettingsDrawerOpen: () => void;
   disableButtons?: boolean;
 }
 
@@ -66,8 +66,8 @@ type ActiveButtonValue =
 
 function StoryActionBar({
   storyId,
-  isUsersDrawerOpen,
-  toggleIsUsersDrawerOpen,
+  isStorySettingsDrawerOpen,
+  toggleIsSettingsDrawerOpen,
   disableButtons,
 }: Props) {
   const userCount = (
@@ -184,7 +184,7 @@ function StoryActionBar({
         )}
       </div>
       <IconButton
-        onClick={disableButtons ? undefined : toggleIsUsersDrawerOpen}
+        onClick={disableButtons ? undefined : toggleIsSettingsDrawerOpen}
         className={classes.peopleButton}
         disabled={disableButtons}
       >
@@ -198,7 +198,9 @@ function StoryActionBar({
             horizontal: "right",
           }}
         >
-          <PeopleIcon color={isUsersDrawerOpen ? "primary" : "disabled"} />
+          <SettingsIcon
+            color={isStorySettingsDrawerOpen ? "primary" : "disabled"}
+          />
         </Badge>
       </IconButton>
     </div>

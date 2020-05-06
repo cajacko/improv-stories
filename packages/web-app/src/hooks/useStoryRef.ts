@@ -17,4 +17,7 @@ function useStoryRef(storyId: string, additionalPath: string = "") {
 export const useEntriesRef = (storyId: string) =>
   useStoryRef(storyId, "/entries");
 
+export const useStoryPropsRef = (storyId: string) =>
+  useStoryRef(storyId, "/storyProps");
+
 export default useStoryRef;

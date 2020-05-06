@@ -3,24 +3,15 @@ import { useSelector } from "react-redux";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
-import IconButton from "@material-ui/core/IconButton";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import PersonIcon from "@material-ui/icons/Person";
 import Badge from "@material-ui/core/Badge";
-import selectors from "../store/selectors";
+import selectors from "../../store/selectors";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    listItem: {
-      cursor: "inherit",
-      "&:hover": {
-        backgroundColor: "inherit",
-      },
-      textAlign: "right",
-    },
     drawerHeader: {
       display: "flex",
       alignItems: "center",
@@ -30,19 +21,12 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: "space-between",
     },
     headerText: {
-      textAlign: "right",
-      marginRight: theme.spacing(1),
+      textDecoration: "underline",
     },
   })
 );
 
-function ConnectedUsers({
-  storyId,
-  handleClose,
-}: {
-  storyId: string;
-  handleClose?: () => void;
-}) {
+function StoryUsers({ storyId }: { storyId: string }) {
   const activeStoryUsers =
     useSelector((state) =>
       selectors.misc.selectStoryUsers(state, {
@@ -71,27 +55,23 @@ function ConnectedUsers({
   const classes = useStyles();
 
   const renderListItem = (text: string) => (
-    <ListItem button className={classes.listItem}>
+    <ListItem>
       <ListItemText primary={text} />
     </ListItem>
   );
 
   return (
     <>
-      <div className={classes.drawerHeader}>
-        {!!handleClose && (
-          <IconButton onClick={handleClose}>
-            <ChevronRightIcon />
-          </IconButton>
-        )}
-        <ListItemText primary="Editing Users" className={classes.headerText} />
-      </div>
-      <Divider />
-
       <List>
+        <ListItem>
+          <ListItemText
+            className={classes.headerText}
+            primary="Editing Users"
+          />
+        </ListItem>
         {!activeStoryUsers.length && renderListItem("No one is editing")}
         {activeStoryUsers.map(({ name, id }) => (
-          <ListItem button key={id} className={classes.listItem}>
+          <ListItem key={id}>
             <ListItemIcon>
               <Badge
                 variant="dot"
@@ -108,12 +88,17 @@ function ConnectedUsers({
       </List>
 
       <Divider />
-      {renderListItem("Observing users")}
-      <Divider />
+
       <List>
+        <ListItem>
+          <ListItemText
+            className={classes.headerText}
+            primary="Observing Users"
+          />
+        </ListItem>
         {!nonActiveStoryUsers.length && renderListItem("No one is watching")}
         {nonActiveStoryUsers.map(({ name, id }) => (
-          <ListItem button key={id} className={classes.listItem}>
+          <ListItem key={id}>
             <ListItemIcon>
               <Badge
                 variant="dot"
@@ -132,4 +117,4 @@ function ConnectedUsers({
   );
 }
 
-export default React.memo(ConnectedUsers);
+export default React.memo(StoryUsers);

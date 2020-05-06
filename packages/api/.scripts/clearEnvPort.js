@@ -1,4 +1,7 @@
-require("dotenv-flow").config();
+require("dotenv-flow").config({
+  node_env: process.env.NODE_ENV || "development",
+});
+
 const { exec } = require("child_process");
 
 var net = require("net");

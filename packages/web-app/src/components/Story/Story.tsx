@@ -1,11 +1,11 @@
 import React from "react";
-import { makeStyles, createStyles } from "@material-ui/core/styles";
+import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import withLiveStoryEditor, {
   InjectedLiveStoryEditorProps,
 } from "../../hoc/withLiveStoryEditor";
+import selectors from "../../store/selectors";
 import ToolBar from "../ToolBar";
-import ConnectedUsers from "../ConnectedUsers";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
 import StoryFocusOverlay from "./StoryFocusOverlay";
 import StoryContent from "./StoryContent";
@@ -14,11 +14,11 @@ import StoryLayout, { RenderProps } from "./StoryLayout";
 import getZIndex from "../../utils/getZIndex";
 import StoryProgressBar from "./StoryProgressBar";
 import useStorySetup from "../../hooks/useStorySetup";
-import selectors from "../../store/selectors";
 import LoadingOverlay from "../LoadingOverlay";
 import useStoryInitScroll from "../../hooks/useStoryInitScroll";
+import StorySettings from "./StorySettings";
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     actionBar: {
       position: "absolute",
@@ -38,6 +38,13 @@ const useStyles = makeStyles(() =>
       flexDirection: "column",
       alignItems: "center",
       overflow: "auto",
+    },
+    container: {
+      display: "flex",
+      flex: 1,
+      flexDirection: "row",
+      overflow: "hidden",
+      position: "relative",
     },
     content: {
       maxWidth: 500,
@@ -117,91 +124,91 @@ function Story({
   return (
     <>
       <ToolBar />
-      <StoryLayout
-        canCurrentUserEdit={canCurrentUserEdit}
-        renderMainContent={React.useCallback(
-          ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
-            <>
-              {shouldShowLoading && (
-                <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />
-              )}
-              <div
-                className={classes.contentContainer}
-                ref={contentContainerRef}
-              >
-                <div className={classes.content}>
-                  <div className={classes.actionBar}>
-                    {!isWideScreen &&
-                      secondsLeft !== null &&
-                      isTextAreaFocussed && (
-                        <div className={classes.storyProgressBar}>
-                          <StoryProgressBar
-                            value={secondsLeft}
-                            color="secondary"
-                          />
-                        </div>
-                      )}
+      <div className={classes.container}>
+        {shouldShowLoading && <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />}
+        <StoryLayout
+          canCurrentUserEdit={canCurrentUserEdit}
+          renderMainContent={React.useCallback(
+            ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
+              <>
+                <div
+                  className={classes.contentContainer}
+                  ref={contentContainerRef}
+                >
+                  <div className={classes.content}>
+                    <div className={classes.actionBar}>
+                      {!isWideScreen &&
+                        secondsLeft !== null &&
+                        isTextAreaFocussed && (
+                          <div className={classes.storyProgressBar}>
+                            <StoryProgressBar
+                              value={secondsLeft}
+                              color="secondary"
+                            />
+                          </div>
+                        )}
 
-                    <StoryActionBar
-                      storyId={storyId}
-                      isUsersDrawerOpen={isOpen}
-                      toggleIsUsersDrawerOpen={toggleIsOpen}
-                    />
-                  </div>
-                  {!isTextAreaFocussed && canCurrentUserEdit && (
-                    <StoryFocusOverlay onClick={onFocusOverlayClick} />
-                  )}
-                  <div className={classes.textContainer}>
-                    <StoryContent
-                      storyId={storyId}
-                      editingSessionFinalEntry={
-                        editingSession && editingSession.finalEntry
-                      }
-                      editingSessionId={editingSession && editingSession.id}
-                      textAreaRef={textAreaRef}
-                      textAreaValue={textAreaValue}
-                      onTextAreaBlur={onTextAreaBlur}
-                      onTextAreaFocus={onTextAreaFocus}
-                      onTextAreaChange={onTextAreaChange}
-                      canCurrentUserEdit={canCurrentUserEdit}
-                      isTextInvisible={shouldShowLoading}
-                    />
+                      <StoryActionBar
+                        storyId={storyId}
+                        isStorySettingsDrawerOpen={isOpen}
+                        toggleIsSettingsDrawerOpen={toggleIsOpen}
+                      />
+                    </div>
+                    {!isTextAreaFocussed && canCurrentUserEdit && (
+                      <StoryFocusOverlay onClick={onFocusOverlayClick} />
+                    )}
+                    <div className={classes.textContainer}>
+                      <StoryContent
+                        storyId={storyId}
+                        editingSessionFinalEntry={
+                          editingSession && editingSession.finalEntry
+                        }
+                        editingSessionId={editingSession && editingSession.id}
+                        textAreaRef={textAreaRef}
+                        textAreaValue={textAreaValue}
+                        onTextAreaBlur={onTextAreaBlur}
+                        onTextAreaFocus={onTextAreaFocus}
+                        onTextAreaChange={onTextAreaChange}
+                        canCurrentUserEdit={canCurrentUserEdit}
+                        isTextInvisible={shouldShowLoading}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <StoryStatus
-                storyId={storyId}
-                isEditingSessionActive={!!editingSession}
-                secondsLeft={secondsLeft}
-                canCurrentUserEdit={canCurrentUserEdit}
-                editingUser={editingUser}
-              />
-            </>
-          ),
-          [
-            classes,
-            storyId,
-            isTextAreaFocussed,
-            canCurrentUserEdit,
-            editingSession,
-            textAreaRef,
-            textAreaValue,
-            onTextAreaBlur,
-            onTextAreaFocus,
-            onTextAreaChange,
-            secondsLeft,
-            editingUser,
-            onFocusOverlayClick,
-            shouldShowLoading,
-          ]
-        )}
-        renderDrawerContent={React.useCallback(
-          ({ handleClose }) => (
-            <ConnectedUsers storyId={storyId} handleClose={handleClose} />
-          ),
-          [storyId]
-        )}
-      />
+                <StoryStatus
+                  storyId={storyId}
+                  isEditingSessionActive={!!editingSession}
+                  secondsLeft={secondsLeft}
+                  canCurrentUserEdit={canCurrentUserEdit}
+                  editingUser={editingUser}
+                />
+              </>
+            ),
+            [
+              classes,
+              storyId,
+              isTextAreaFocussed,
+              canCurrentUserEdit,
+              editingSession,
+              textAreaRef,
+              textAreaValue,
+              onTextAreaBlur,
+              onTextAreaFocus,
+              onTextAreaChange,
+              secondsLeft,
+              editingUser,
+              onFocusOverlayClick,
+              shouldShowLoading,
+            ]
+          )}
+          renderDrawerContent={React.useCallback(
+            ({ handleClose }) => (
+              <StorySettings storyId={storyId} handleClose={handleClose} />
+            ),
+            [storyId]
+          )}
+        />
+      </div>
     </>
   );
 }
