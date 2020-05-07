@@ -44,7 +44,13 @@ const min = 5;
 const max = 60;
 
 function Story({ storyId, handleClose }: Props) {
-  const currentStorySecondsPerTurn = 40;
+  let storyProps = useSelector((state) =>
+    selectors.storyPropsByStoryId.selectStoryProps(state, { storyId })
+  );
+  const currentStorySecondsPerTurn =
+    // TODO: Default length should be shared between api and web-app
+    (storyProps && storyProps.secondsPerRound) || 40;
+
   const classes = useStyles();
   const [secondsPerTurn, setSecondsPerTurn] = React.useState<number | null>(
     currentStorySecondsPerTurn
