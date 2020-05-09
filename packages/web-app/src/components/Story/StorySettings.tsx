@@ -14,6 +14,7 @@ import TimelapseIcon from "@material-ui/icons/Timelapse";
 import Button from "@material-ui/core/Button";
 import List from "@material-ui/core/List";
 import { useStoryPropsRef } from "../../hooks/useStoryRef";
+import { StoryPropsContent } from "../../store/storyPropsByStoryId/types";
 import { DatabaseStoryProps } from "../../sharedTypes";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -43,67 +44,90 @@ interface Props {
 const min = 5;
 const max = 60;
 
+type State = StoryPropsContent<number | null>;
+type Action =
+  | { type: "SET_SECONDS_PER_ROUND"; payload: number | null }
+  | { type: "SET_STORY_PROPS"; payload: StoryPropsContent };
+
+function reducer(state: State, action: Action): State {
+  if (!state) return state;
+
+  switch (action.type) {
+    case "SET_SECONDS_PER_ROUND":
+      return { ...state, secondsPerRound: action.payload };
+    case "SET_STORY_PROPS":
+      return action.payload;
+  }
+}
+
 function Story({ storyId, handleClose }: Props) {
-  let storyProps = useSelector((state) =>
-    selectors.storyPropsByStoryId.selectStoryProps(state, { storyId })
-  );
-  const currentStorySecondsPerTurn =
-    // TODO: Default length should be shared between api and web-app
-    (storyProps && storyProps.secondsPerRound) || 40;
+  const savedStoryProps =
+    useSelector((state) =>
+      selectors.storyPropsByStoryId.selectStoryPropsContent(state, { storyId })
+    ) || null;
 
   const classes = useStyles();
-  const [secondsPerTurn, setSecondsPerTurn] = React.useState<number | null>(
-    currentStorySecondsPerTurn
+
+  const [editingStoryProps, dispatch] = React.useReducer(
+    reducer,
+    savedStoryProps
   );
-  const savedStoryProps = useSelector((state) =>
-    selectors.storyPropsByStoryId.selectStoryProps(state, { storyId })
-  );
-  const savedSecondsPerRound =
-    (savedStoryProps && savedStoryProps.secondsPerRound) || null;
 
   const storyPropsRef = useStoryPropsRef(storyId);
 
   React.useEffect(() => {
-    if (savedSecondsPerRound === null) return;
-    setSecondsPerTurn(savedSecondsPerRound);
-  }, [savedSecondsPerRound]);
+    dispatch({
+      type: "SET_STORY_PROPS",
+      payload: savedStoryProps,
+    });
+  }, [savedStoryProps]);
 
   const onChangeSecondsPerTurn = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        setSecondsPerTurn(null);
+        dispatch({ type: "SET_SECONDS_PER_ROUND", payload: null });
         return;
       }
 
       const value = parseInt(event.target.value, 10);
-      setSecondsPerTurn(value);
+      dispatch({ type: "SET_SECONDS_PER_ROUND", payload: value });
     },
     []
   );
 
   const onSave = React.useCallback(() => {
-    if (!storyPropsRef || secondsPerTurn === null) return;
+    const { secondsPerRound } = editingStoryProps;
+
+    if (!storyPropsRef || secondsPerRound === null) {
+      return;
+    }
 
     const storyProps: DatabaseStoryProps = {
       storyId,
-      secondsPerRound: secondsPerTurn,
       storyPropsVersion: 1,
       storyPropsDateCreated: new Date().toISOString(),
       storyPropsDateModified: new Date().toISOString(),
+      ...editingStoryProps,
+      secondsPerRound,
     };
 
     // TODO: Should we optimistically set the data in redux as well?
     storyPropsRef.set(storyProps);
-  }, [secondsPerTurn, storyPropsRef, storyId]);
+  }, [editingStoryProps, storyPropsRef, storyId]);
 
   let shouldShowHelperText = false;
 
-  if (secondsPerTurn === null || secondsPerTurn > max || secondsPerTurn < min) {
+  if (
+    editingStoryProps.secondsPerRound === null ||
+    editingStoryProps.secondsPerRound > max ||
+    editingStoryProps.secondsPerRound < min
+  ) {
     shouldShowHelperText = true;
   }
 
   const isSaveDisabled =
-    currentStorySecondsPerTurn === secondsPerTurn || shouldShowHelperText;
+    savedStoryProps.secondsPerRound === editingStoryProps.secondsPerRound ||
+    shouldShowHelperText;
 
   return (
     <>
@@ -129,7 +153,11 @@ function Story({ storyId, handleClose }: Props) {
             error={shouldShowHelperText}
             id="filled-error-helper-text"
             label="Seconds per turn"
-            value={secondsPerTurn === null ? "" : secondsPerTurn}
+            value={
+              editingStoryProps.secondsPerRound === undefined
+                ? ""
+                : editingStoryProps.secondsPerRound
+            }
             helperText={
               shouldShowHelperText && `Must be between ${min} - ${max}`
             }

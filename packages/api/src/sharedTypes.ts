@@ -32,6 +32,7 @@ export interface DatabaseSession extends BaseSession {
 
 export interface DatabaseStoryProps {
   secondsPerRound?: number;
+  canUsersEndRoundEarly?: boolean;
   storyId: string;
   storyPropsDateCreated: string;
   storyPropsDateModified: string;
