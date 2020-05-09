@@ -11,16 +11,23 @@ import selectors from "../store/selectors";
 import convertServerSession from "../utils/convertServerSession";
 import actions from "../store/actions";
 
+// TODO: don't have an object for seconds left and total seconds, bad performance
 interface Generic<S = null, T = null, U = null, C = false, A = false> {
   editingSession: S;
-  secondsLeft: T;
+  secondsLeftProps: T;
   editingUser: U;
   canCurrentUserEdit: C;
   isCurrentUserEditing: A;
 }
 
 export type EditorProps =
-  | Generic<Session, number, User | null, boolean, boolean>
+  | Generic<
+      Session,
+      { secondsLeft: number; totalSeconds: number },
+      User | null,
+      boolean,
+      boolean
+    >
   | Generic;
 
 export type InjectedLiveStoryEditorProps = EditorProps & {
@@ -42,6 +49,7 @@ interface InjectedHookProps {
   dispatch: Dispatch<ReduxTypes.Action>;
   currentlyEditingUser: User | null;
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
+  didCurrentUserEndCurrentSessionEarly: boolean;
 }
 
 interface State {
@@ -72,7 +80,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       this.activeSession = props.activeSession;
 
       this.nullProps = {
-        secondsLeft: null,
+        secondsLeftProps: null,
         canCurrentUserEdit: false,
         editingSession: null,
         editingUser: null,
@@ -98,13 +106,19 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       if (activeSession.id !== props.activeSession.id)
         activeSession = props.activeSession;
 
+      const dateStarted = new Date(activeSession.dateStarted).getTime();
       const dateWillFinish = new Date(activeSession.dateWillFinish).getTime();
+
+      // FIXME: There's a bug where some users computer clocks are not accurate to our server so the
+      // time they get is out. We need to get the current time from our server somehow?
       const now = new Date().getTime();
       const diff = dateWillFinish - now;
       let secondsLeft: number | null = Math.floor(diff / 1000);
+      const totalSeconds = Math.ceil((dateWillFinish - dateStarted) / 1000);
 
       const isCurrentUserEditing = activeSession.userId === props.currentUserId;
       const canCurrentUserEdit =
+        !props.didCurrentUserEndCurrentSessionEarly &&
         isCurrentUserEditing &&
         secondsLeft > 0 &&
         props.activeStoryUsers.some(({ id }) => id === props.currentUserId);
@@ -119,7 +133,10 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
       }
 
       return {
-        secondsLeft,
+        secondsLeftProps: {
+          secondsLeft,
+          totalSeconds,
+        },
         editingSession,
         editingUser: props.currentlyEditingUser,
         canCurrentUserEdit,
@@ -323,6 +340,14 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     const currentlyEditingUser = useSelector((state) =>
       selectors.misc.selectActiveStorySessionUser(state, props)
     );
+    const didCurrentUserEndCurrentSessionEarly = useSelector((state) =>
+      activeSession
+        ? selectors.didCurrentUserEndSessionEarlyBySessionId.selectDidCurrentUserEndSessionEarlyBySessionId(
+            state,
+            { sessionId: activeSession.id }
+          )
+        : false
+    );
 
     const dispatch = useDispatch();
 
@@ -337,6 +362,9 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
         activeSession={activeSession}
         dispatch={dispatch}
         currentlyEditingUser={currentlyEditingUser}
+        didCurrentUserEndCurrentSessionEarly={
+          didCurrentUserEndCurrentSessionEarly
+        }
       />
     );
   };

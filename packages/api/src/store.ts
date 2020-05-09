@@ -21,6 +21,8 @@ export interface StoreSession {
   entries: string[];
   dateModified: string;
   version: number;
+  dateFinished: null | string;
+  finishedEarly?: boolean;
 }
 
 export interface StoreStory {
@@ -95,12 +97,17 @@ function getUserStories(userId: string): StoreStory[] {
 
 function sessionHasChanged(
   session: StoreSession,
-  { dateModified, version }: { dateModified?: string; version?: number } = {}
+  {
+    dateModified,
+    version,
+    dateFinished,
+  }: { dateModified?: string; version?: number; dateFinished?: string } = {}
 ) {
   return {
     ...session,
     dateModified: dateModified || getDate(),
     version: version || session.version + 1,
+    dateFinished: dateFinished || session.dateFinished,
   };
 }
 
@@ -240,7 +247,12 @@ export function finishActiveStorySession(storyId: string): ChangedStories {
 
   logger.log("finishActiveStorySession", { storyId, activeSession });
 
-  story.lastSession = activeSession && sessionHasChanged(activeSession);
+  if (activeSession) {
+    story.lastSession = sessionHasChanged(activeSession, {
+      dateFinished: getDate(),
+    });
+  }
+
   story.activeSession = null;
 
   return storyHasChanged(storyId);

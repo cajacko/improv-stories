@@ -72,7 +72,7 @@ function Story({
   storyId,
   editingSession,
   editingUser,
-  secondsLeft,
+  secondsLeftProps,
   canCurrentUserEdit,
   isTextAreaFocussed,
   focusOnTextArea,
@@ -138,11 +138,12 @@ function Story({
                   <div className={classes.content}>
                     <div className={classes.actionBar}>
                       {!isWideScreen &&
-                        secondsLeft !== null &&
+                        secondsLeftProps !== null &&
                         isTextAreaFocussed && (
                           <div className={classes.storyProgressBar}>
                             <StoryProgressBar
-                              value={secondsLeft}
+                              value={secondsLeftProps.secondsLeft}
+                              maxValue={secondsLeftProps.totalSeconds}
                               color="secondary"
                             />
                           </div>
@@ -177,8 +178,8 @@ function Story({
                 </div>
                 <StoryStatus
                   storyId={storyId}
-                  isEditingSessionActive={!!editingSession}
-                  secondsLeft={secondsLeft}
+                  editingSessionId={editingSession && editingSession.id}
+                  secondsLeftProps={secondsLeftProps}
                   canCurrentUserEdit={canCurrentUserEdit}
                   editingUser={editingUser}
                 />
@@ -195,7 +196,7 @@ function Story({
               onTextAreaBlur,
               onTextAreaFocus,
               onTextAreaChange,
-              secondsLeft,
+              secondsLeftProps,
               editingUser,
               onFocusOverlayClick,
               shouldShowLoading,

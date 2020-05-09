@@ -1,7 +1,11 @@
 import { v4 as uuid } from "uuid";
 import { ClientMessage, ServerMessage } from "../sharedTypes";
 import {
-  __TESTS__reset as reset,
+  __TESTS__setGetDatabase as setDatabase,
+  __TESTS__reset as resetDatabase,
+} from "../getDatabase";
+import {
+  __TESTS__reset as resetStore,
   __TESTS__getStore as getStore,
   __TESTS__setGetDate as setGetDate,
   __TESTS__setGetId as setGetId,
@@ -10,10 +14,12 @@ import { __TESTS__setGetRand as setGetRand } from "../getRand";
 
 import setupSockets from "../setupSockets";
 
+jest.useFakeTimers();
+
 function connectUserAndGetFuncs(userId: string) {
   let sendClientMessage: (
     message: Omit<ClientMessage, "id" | "createdAt">
-  ) => void;
+  ) => Promise<any>;
   let disconnect: () => {};
 
   const sendMock = jest.fn<unknown, [ServerMessage]>();
@@ -123,7 +129,15 @@ function expectSameUserLastSentMessages(users: Funcs[], doNotAsset = false) {
 }
 
 beforeEach(() => {
-  reset();
+  resetStore();
+  resetDatabase();
+
+  setDatabase(() => ({
+    ref: () => ({
+      push: () => Promise.resolve(),
+      once: (type: string, callback: any) => callback({ val: () => undefined }),
+    }),
+  }));
 
   const date = new Date(resetDateValue);
 
@@ -149,12 +163,22 @@ beforeEach(() => {
   });
 });
 
+afterEach(() => {
+  jest.clearAllTimers();
+});
+
 describe("user1 connects", () => {
   const user1Id = "user1";
   let user1: Funcs;
 
   beforeEach(() => {
     user1 = connectUserAndGetFuncs(user1Id);
+  });
+
+  afterEach(() => {
+    if (user1) {
+      user1.disconnect();
+    }
   });
 
   describe("user1 added to story1", () => {
@@ -183,6 +207,12 @@ describe("user1 connects", () => {
 
       beforeEach(() => {
         user2 = connectUserAndGetFuncs(user2Id);
+      });
+
+      afterEach(() => {
+        if (user2) {
+          user2.disconnect();
+        }
       });
 
       describe("user2 added to story1", () => {
@@ -227,6 +257,12 @@ describe("user1 connects", () => {
           describe("user1 connects", () => {
             beforeEach(() => {
               user1 = connectUserAndGetFuncs(user1Id);
+            });
+
+            afterEach(() => {
+              if (user1) {
+                user1.disconnect();
+              }
             });
 
             describe("user1 added to story1", () => {
@@ -328,6 +364,69 @@ describe("user1 connects", () => {
               }
 
               expect(message.payload.activeSession.user.id).toBe("user1");
+            });
+
+            describe("user1 sets text", () => {
+              beforeEach(() => {
+                user1.sendClientMessage({
+                  type: "SET_SESSION_TEXT",
+                  payload: {
+                    text: "a",
+                    storyId: story1Id,
+                  },
+                });
+              });
+
+              it("Broadcasts the correct changes to user2", () => {
+                expect(getLastUserSendCall(user2)).toMatchSnapshot();
+              });
+
+              it("the user2 broadcast count is 5", () => {
+                expectUserSendCount(user2, 5);
+              });
+
+              it("Broadcasts the same changes to user1", () => {
+                expectSameUserLastSentMessages([user1, user2]);
+                expectSameUserSentMessagesFromEnd([user1, user2], 1);
+              });
+
+              it("the user1 broadcast count is 6", () => {
+                expectUserSendCount(user1, 6);
+              });
+
+              // TODO: Test session elapsing, saving to db and switching users here
+              // TODO: Test setting session as done
+
+              describe("user1 ends the session early", () => {
+                beforeEach(() => {
+                  return user1.sendClientMessage({
+                    type: "SET_SESSION_DONE",
+                    payload: {
+                      sessionId: "8",
+                      storyId: story1Id,
+                    },
+                  });
+                });
+
+                it("Broadcasts the correct changes to user2", () => {
+                  expect(getLastUserSendCall(user2)).toMatchSnapshot();
+                });
+
+                it("the user2 broadcast count is 6", () => {
+                  expectUserSendCount(user2, 6);
+                });
+
+                it("Broadcasts the same changes to user1", () => {
+                  expectSameUserLastSentMessages([user1, user2]);
+                  expectSameUserSentMessagesFromEnd([user1, user2], 1);
+                });
+
+                it("the user1 broadcast count is 7", () => {
+                  expectUserSendCount(user1, 7);
+                });
+
+                // TODO: Check db saved, user id change is correct
+              });
             });
 
             describe("user1 disconnects", () => {

@@ -17,14 +17,17 @@ export interface BaseSession {
   entries: string[];
   dateModified: string;
   version: number;
+  finishedEarly?: boolean;
 }
 
 export interface ServerSession extends BaseSession {
   user: User;
+  dateFinished: null | string;
 }
 
 export interface DatabaseSession extends BaseSession {
   userId: string;
+  dateFinished: string;
 }
 
 export interface DatabaseStoryProps {
@@ -59,7 +62,8 @@ export type ClientMessage =
   | Message<"SET_USER_DETAILS", { userDetails: UserDetails }>
   | Message<"ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
   | Message<"REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
-  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>;
+  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>
+  | Message<"SET_SESSION_DONE", { storyId: string; sessionId: string }>;
 
 export type ServerMessage =
   | Message<"STORY_CHANGED", Story>

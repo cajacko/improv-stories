@@ -4,6 +4,7 @@ import * as sessionIdsByStoryId from "./sessionIdsByStoryId/actions";
 import * as sessionsById from "./sessionsById/actions";
 import * as storyFetchStateByStoryId from "./storyFetchStateByStoryId/actions";
 import * as storyPropsByStoryId from "./storyPropsByStoryId/actions";
+import * as didCurrentUserEndSessionEarlyBySessionId from "./didCurrentUserEndSessionEarlyBySessionId/actions";
 
 export default {
   currentUser,
@@ -12,4 +13,5 @@ export default {
   sessionsById,
   storyFetchStateByStoryId,
   storyPropsByStoryId,
+  didCurrentUserEndSessionEarlyBySessionId,
 };

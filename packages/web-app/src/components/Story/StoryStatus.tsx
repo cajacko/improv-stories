@@ -1,10 +1,15 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import { v4 as uuid } from "uuid";
+import { send } from "../../utils/socket";
 import { User } from "../../store/usersById/types";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import selectors from "../../store/selectors";
 import StoryProgressBar from "./StoryProgressBar";
+import getZIndex from "../../utils/getZIndex";
+import actions from "../../store/actions";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -12,52 +17,78 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100%",
       display: "flex",
       height: "50px",
-      backgroundColor: (isActive) =>
-        isActive ? theme.palette.secondary.main : theme.palette.primary.main,
+      backgroundColor: ({
+        backgroundColor,
+      }: {
+        backgroundColor: "secondary" | "primary";
+      }) => theme.palette[backgroundColor].main,
+      position: "relative",
+      zIndex: getZIndex("STORY_STATUS"),
+      flexDirection: "column",
+    },
+    content: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "row",
+      position: "relative",
       alignItems: "center",
       justifyContent: "center",
-      position: "relative",
     },
     name: {
       color: theme.palette.background.default,
     },
     time: {
       color: theme.palette.background.default,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       position: "absolute",
       top: 0,
-      right: 0,
+      left: theme.spacing(2),
       bottom: 0,
-      padding: theme.spacing(2),
+    },
+    progress: {
+      width: "100%",
+    },
+    doneContainer: {
+      position: "absolute",
+      top: 0,
+      right: theme.spacing(2),
+      bottom: 0,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
     },
-    progress: {
-      position: "absolute",
-      bottom: 0,
-      right: 0,
-      left: 0,
+    doneButton: {
+      color: theme.palette.common.white,
     },
   })
 );
 
 interface Props {
   storyId: string;
-  isEditingSessionActive: boolean;
-  secondsLeft: number | null;
+  editingSessionId: string | null;
+  secondsLeftProps: null | { secondsLeft: number; totalSeconds: number };
   canCurrentUserEdit: boolean;
   editingUser: User | null;
 }
 
 function StoryStatus({
   storyId,
-  isEditingSessionActive,
+  editingSessionId,
   editingUser,
-  secondsLeft,
+  secondsLeftProps,
   canCurrentUserEdit,
 }: Props) {
-  const classes = useStyles(canCurrentUserEdit);
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+  const didCurrentUserEndSessionEarly = useSelector((state) =>
+    editingSessionId
+      ? selectors.didCurrentUserEndSessionEarlyBySessionId.selectDidCurrentUserEndSessionEarlyBySessionId(
+          state,
+          { sessionId: editingSessionId }
+        )
+      : false
+  );
   const activeUserCount = (
     useSelector((state) =>
       selectors.misc.selectStoryUsers(state, {
@@ -66,20 +97,49 @@ function StoryStatus({
       })
     ) || []
   ).length;
+  const dispatch = useDispatch();
 
+  const onDone = React.useCallback(() => {
+    if (!editingSessionId) return;
+
+    dispatch(
+      actions.didCurrentUserEndSessionEarlyBySessionId.setDidCurrentUserEndSessionEarly(
+        { sessionId: editingSessionId }
+      )
+    );
+
+    send({
+      id: uuid(),
+      type: "SET_SESSION_DONE",
+      createdAt: new Date().toISOString(),
+      payload: {
+        storyId,
+        sessionId: editingSessionId,
+      },
+    });
+  }, [storyId, editingSessionId, dispatch]);
+
+  const isEditingSessionActive = !!editingSessionId;
   const countOfActiveUsersNeeded = 2 - activeUserCount;
 
-  let statusText = `Waiting for ${countOfActiveUsersNeeded} more editor${
-    countOfActiveUsersNeeded > 1 ? "s" : ""
-  } to join the story...`;
+  let statusText: string;
+  let progressBarColor: "secondary" | "primary" = "secondary";
+  let backgroundColor: "secondary" | "primary" = "primary";
+  let showSkipButton = false;
+  const updatingText = "Updating...";
 
   if (isEditingSessionActive) {
-    if (secondsLeft && secondsLeft >= 0) {
+    if (secondsLeftProps && secondsLeftProps.secondsLeft >= 0) {
       if (canCurrentUserEdit) {
         statusText = "You are editing! Start typing.";
+        progressBarColor = "primary";
+        backgroundColor = "secondary";
+        showSkipButton = true;
       } else {
         if (editingUser) {
-          if (currentUserId === editingUser.id) {
+          if (didCurrentUserEndSessionEarly) {
+            statusText = updatingText;
+          } else if (currentUserId === editingUser.id) {
             statusText = `Join the story to finish editing`;
           } else {
             statusText = `${editingUser.name || "Anonymous"} is editing`;
@@ -89,25 +149,48 @@ function StoryStatus({
         }
       }
     } else {
-      statusText = "Updating...";
+      statusText = updatingText;
     }
+  } else if (countOfActiveUsersNeeded > 0) {
+    statusText = `Waiting for ${countOfActiveUsersNeeded} more editor${
+      countOfActiveUsersNeeded > 1 ? "s" : ""
+    } to join the story...`;
+  } else {
+    statusText = updatingText;
   }
 
-  let seconds = secondsLeft !== null && secondsLeft < 0 ? 0 : secondsLeft;
+  const classes = useStyles({ backgroundColor });
+
+  let seconds =
+    secondsLeftProps === null
+      ? null
+      : secondsLeftProps.secondsLeft < 0
+      ? 0
+      : secondsLeftProps.secondsLeft;
 
   return (
     <div className={classes.footer}>
-      <Typography className={classes.name}>{statusText}</Typography>
-      {seconds !== null && (
-        <>
+      <div className={classes.content}>
+        {seconds !== null && (
           <Typography className={classes.time}>{seconds}</Typography>
-          <div className={classes.progress}>
-            <StoryProgressBar
-              value={seconds}
-              color={canCurrentUserEdit ? "primary" : "secondary"}
-            />
+        )}
+        <Typography className={classes.name}>{statusText}</Typography>
+        {showSkipButton && (
+          <div className={classes.doneContainer}>
+            <Button className={classes.doneButton} onClick={onDone}>
+              Done
+            </Button>
           </div>
-        </>
+        )}
+      </div>
+      {seconds !== null && secondsLeftProps && (
+        <div className={classes.progress}>
+          <StoryProgressBar
+            value={seconds}
+            color={progressBarColor}
+            maxValue={secondsLeftProps.totalSeconds}
+          />
+        </div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import sessionsById from "./sessionsById/reducer";
 import sessionIdsByStoryId from "./sessionIdsByStoryId/reducer";
 import storyFetchStateByStoryId from "./storyFetchStateByStoryId/reducer";
 import storyPropsByStoryId from "./storyPropsByStoryId/reducer";
+import didCurrentUserEndSessionEarlyBySessionId from "./didCurrentUserEndSessionEarlyBySessionId/reducer";
 
 export const rawReducersObj = {
   currentUser,
@@ -15,6 +16,7 @@ export const rawReducersObj = {
   sessionIdsByStoryId,
   storyFetchStateByStoryId,
   storyPropsByStoryId,
+  didCurrentUserEndSessionEarlyBySessionId,
 };
 
 export default combineReducers(rawReducersObj);

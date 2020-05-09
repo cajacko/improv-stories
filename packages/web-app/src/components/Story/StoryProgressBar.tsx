@@ -14,13 +14,13 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface Props {
-  maxValue?: number;
+  maxValue: number;
   minValue?: number;
   value: number;
   color?: "primary" | "secondary";
 }
 
-function StoryStatus({ maxValue = 40, minValue = 0, value, color }: Props) {
+function StoryStatus({ maxValue, minValue = 0, value, color }: Props) {
   const classes = useStyles();
 
   return (
