@@ -81,6 +81,9 @@ function StoryStatus({
   canCurrentUserEdit,
 }: Props) {
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+  const { canUsersEndRoundEarly } = useSelector((state) =>
+    selectors.storyPropsByStoryId.selectStoryPropsContent(state, { storyId })
+  );
   const didCurrentUserEndSessionEarly = useSelector((state) =>
     editingSessionId
       ? selectors.didCurrentUserEndSessionEarlyBySessionId.selectDidCurrentUserEndSessionEarlyBySessionId(
@@ -175,7 +178,7 @@ function StoryStatus({
           <Typography className={classes.time}>{seconds}</Typography>
         )}
         <Typography className={classes.name}>{statusText}</Typography>
-        {showSkipButton && (
+        {showSkipButton && canUsersEndRoundEarly && (
           <div className={classes.doneContainer}>
             <Button className={classes.doneButton} onClick={onDone}>
               Done

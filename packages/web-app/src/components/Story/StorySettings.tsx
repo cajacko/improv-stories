@@ -13,6 +13,9 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import TimelapseIcon from "@material-ui/icons/Timelapse";
 import Button from "@material-ui/core/Button";
 import List from "@material-ui/core/List";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
+import InputLabel from "@material-ui/core/InputLabel";
 import { useStoryPropsRef } from "../../hooks/useStoryRef";
 import { StoryPropsContent } from "../../store/storyPropsByStoryId/types";
 import { DatabaseStoryProps } from "../../sharedTypes";
@@ -44,19 +47,24 @@ interface Props {
 const min = 5;
 const max = 60;
 
-type State = StoryPropsContent<number | null>;
+type InputValues = StoryPropsContent<number | null>;
+type State = Partial<InputValues>;
+
 type Action =
-  | { type: "SET_SECONDS_PER_ROUND"; payload: number | null }
-  | { type: "SET_STORY_PROPS"; payload: StoryPropsContent };
+  | { type: "SET_SECONDS_PER_ROUND"; payload?: number | null }
+  | { type: "RESET"; payload?: undefined }
+  | { type: "SET_CAN_USERS_END_ROUND_EARLY"; payload?: boolean };
 
 function reducer(state: State, action: Action): State {
   if (!state) return state;
 
   switch (action.type) {
+    case "SET_CAN_USERS_END_ROUND_EARLY":
+      return { ...state, canUsersEndRoundEarly: action.payload };
     case "SET_SECONDS_PER_ROUND":
       return { ...state, secondsPerRound: action.payload };
-    case "SET_STORY_PROPS":
-      return action.payload;
+    case "RESET":
+      return {};
   }
 }
 
@@ -68,66 +76,104 @@ function Story({ storyId, handleClose }: Props) {
 
   const classes = useStyles();
 
-  const [editingStoryProps, dispatch] = React.useReducer(
+  const [editingStoryProps, dispatchEditingStoryProps] = React.useReducer(
     reducer,
-    savedStoryProps
+    {}
   );
 
   const storyPropsRef = useStoryPropsRef(storyId);
 
-  React.useEffect(() => {
-    dispatch({
-      type: "SET_STORY_PROPS",
-      payload: savedStoryProps,
-    });
-  }, [savedStoryProps]);
-
   const onChangeSecondsPerTurn = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        dispatch({ type: "SET_SECONDS_PER_ROUND", payload: null });
+        dispatchEditingStoryProps({
+          type: "SET_SECONDS_PER_ROUND",
+          payload: null,
+        });
         return;
       }
 
       const value = parseInt(event.target.value, 10);
-      dispatch({ type: "SET_SECONDS_PER_ROUND", payload: value });
+
+      dispatchEditingStoryProps({
+        type: "SET_SECONDS_PER_ROUND",
+        payload: value === savedStoryProps.secondsPerRound ? undefined : value,
+      });
     },
-    []
+    [dispatchEditingStoryProps, savedStoryProps.secondsPerRound]
   );
 
-  const onSave = React.useCallback(() => {
-    const { secondsPerRound } = editingStoryProps;
+  const onChangeCanUsersEndRoundEarly = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.checked;
 
-    if (!storyPropsRef || secondsPerRound === null) {
+      dispatchEditingStoryProps({
+        type: "SET_CAN_USERS_END_ROUND_EARLY",
+        payload:
+          value === savedStoryProps.canUsersEndRoundEarly ? undefined : value,
+      });
+    },
+    [dispatchEditingStoryProps, savedStoryProps.canUsersEndRoundEarly]
+  );
+
+  const inputStoryPropsValues: InputValues = Object.keys(
+    savedStoryProps
+  ).reduce((acc, key) => {
+    // @ts-ignore
+    const editingStoryProp = editingStoryProps[key];
+
+    if (editingStoryProp === undefined) return acc;
+
+    return {
+      ...acc,
+      [key]: editingStoryProp,
+    };
+  }, savedStoryProps);
+
+  const onSave = React.useCallback(() => {
+    const { secondsPerRound } = inputStoryPropsValues;
+
+    if (!storyPropsRef || !secondsPerRound) {
       return;
     }
+
+    dispatchEditingStoryProps({ type: "RESET" });
 
     const storyProps: DatabaseStoryProps = {
       storyId,
       storyPropsVersion: 1,
       storyPropsDateCreated: new Date().toISOString(),
       storyPropsDateModified: new Date().toISOString(),
-      ...editingStoryProps,
+      ...inputStoryPropsValues,
       secondsPerRound,
     };
 
     // TODO: Should we optimistically set the data in redux as well?
     storyPropsRef.set(storyProps);
-  }, [editingStoryProps, storyPropsRef, storyId]);
+  }, [
+    inputStoryPropsValues,
+    storyPropsRef,
+    storyId,
+    dispatchEditingStoryProps,
+  ]);
 
   let shouldShowHelperText = false;
 
   if (
-    editingStoryProps.secondsPerRound === null ||
-    editingStoryProps.secondsPerRound > max ||
-    editingStoryProps.secondsPerRound < min
+    !inputStoryPropsValues.secondsPerRound ||
+    inputStoryPropsValues.secondsPerRound > max ||
+    inputStoryPropsValues.secondsPerRound < min
   ) {
     shouldShowHelperText = true;
   }
 
   const isSaveDisabled =
-    savedStoryProps.secondsPerRound === editingStoryProps.secondsPerRound ||
-    shouldShowHelperText;
+    shouldShowHelperText ||
+    Object.keys(inputStoryPropsValues).every(
+      (key) =>
+        // @ts-ignore
+        inputStoryPropsValues[key] === savedStoryProps[key]
+    );
 
   return (
     <>
@@ -154,9 +200,9 @@ function Story({ storyId, handleClose }: Props) {
             id="filled-error-helper-text"
             label="Seconds per turn"
             value={
-              editingStoryProps.secondsPerRound === undefined
-                ? ""
-                : editingStoryProps.secondsPerRound
+              inputStoryPropsValues.secondsPerRound === 0
+                ? 0
+                : inputStoryPropsValues.secondsPerRound || ""
             }
             helperText={
               shouldShowHelperText && `Must be between ${min} - ${max}`
@@ -170,6 +216,20 @@ function Story({ storyId, handleClose }: Props) {
               ),
             }}
           />
+        </ListItem>
+        <ListItem>
+          <div>
+            <InputLabel shrink>Can users finish their round early</InputLabel>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!inputStoryPropsValues.canUsersEndRoundEarly}
+                  onChange={onChangeCanUsersEndRoundEarly}
+                />
+              }
+              label={inputStoryPropsValues.canUsersEndRoundEarly ? "Yes" : "No"}
+            />
+          </div>
         </ListItem>
         <ListItem>
           <Button

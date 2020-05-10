@@ -2,9 +2,9 @@ import { DatabaseStoryProps } from "../../sharedTypes";
 
 export type StoryProps = DatabaseStoryProps;
 
-export interface StoryPropsContent<S = number> {
+export interface StoryPropsContent<S = number, C = boolean> {
   secondsPerRound: S;
-  canUsersEndRoundEarly?: boolean;
+  canUsersEndRoundEarly: C;
 }
 
 export interface StoryPropsByStoryId {
