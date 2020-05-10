@@ -4,24 +4,23 @@ import { v4 as uuid } from "uuid";
 import actions from "../store/actions";
 import { send } from "../utils/socket";
 import { fade, makeStyles } from "@material-ui/core/styles";
-import { useHistory } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
-import AddIcon from "@material-ui/icons/FiberNew";
 import SaveIcon from "@material-ui/icons/Save";
 import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 import getZIndex from "../utils/getZIndex";
 import selectors from "../store/selectors";
+import NewStoryButton from "./NewStoryButton";
 
 const useStyles = makeStyles((theme) => ({
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
   appBar: {
     position: "relative",
     zIndex: getZIndex("TOOLBAR"),
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
   },
   title: {
     flexGrow: 1,
@@ -80,7 +79,6 @@ function ToolBar() {
   const currentUserId = currentUser.id;
   const dispatch = useDispatch();
   const [value, setValue] = React.useState(currentUser.name);
-  const { push } = useHistory();
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const canSave =
@@ -121,22 +119,12 @@ function ToolBar() {
     });
   };
 
-  const onNewStoryClick = React.useCallback(() => push(`/story/${uuid()}`), [
-    push,
-  ]);
-
   return (
     <AppBar className={classes.appBar}>
       <Toolbar>
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="open drawer"
-          onClick={onNewStoryClick}
-        >
-          <AddIcon />
-        </IconButton>
+        <div className={classes.menuButton}>
+          <NewStoryButton />
+        </div>
         <Typography className={classes.title} variant="h6" noWrap>
           Improv Stories
         </Typography>

@@ -1,5 +1,4 @@
 import React from "react";
-import { v4 as uuid } from "uuid";
 import {
   BrowserRouter,
   Switch,
@@ -13,6 +12,8 @@ import "../store/socketActionDispatcher";
 import LoadingOverlay from "./LoadingOverlay";
 import useIsConnected from "../hooks/useIsConnected";
 import AppLoading from "../context/AppLoading";
+import ToolBar from "./ToolBar";
+import ChooseStoryPage from "./ChooseStoryPage";
 
 function Router() {
   const isConnected = useIsConnected();
@@ -50,9 +51,12 @@ function Router() {
                 shouldRenderIfAppIsLoading
               />
             )}
+
+            <ToolBar />
+
             <Switch>
               <Route
-                path="/story/:storyId"
+                path="/story/live/:storyId"
                 component={React.useCallback(
                   (props: RouteComponentProps<{ storyId: string }>) => (
                     <Story storyId={props.match.params.storyId} />
@@ -60,7 +64,32 @@ function Router() {
                   []
                 )}
               ></Route>
-              <Redirect to={`/story/${uuid()}`} />
+
+              <Route
+                path="/story/standard/:storyId"
+                component={React.useCallback(
+                  (props: RouteComponentProps<{ storyId: string }>) => (
+                    <Story storyId={props.match.params.storyId} />
+                  ),
+                  []
+                )}
+              ></Route>
+
+              <Route
+                path="/story/:storyId"
+                component={React.useCallback(
+                  (props: RouteComponentProps<{ storyId: string }>) => (
+                    <Redirect
+                      to={`/story/live/${props.match.params.storyId}`}
+                    />
+                  ),
+                  []
+                )}
+              ></Route>
+
+              <Route>
+                <ChooseStoryPage />
+              </Route>
             </Switch>
           </div>
         </>
