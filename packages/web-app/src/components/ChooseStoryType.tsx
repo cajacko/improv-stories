@@ -11,17 +11,27 @@ const useStyles = makeStyles({
   },
 });
 
-function ChooseStoryType() {
+interface Props {
+  onChooseStory?: (storyType: "LIVE" | "STANDARD", id: string) => void;
+}
+
+function ChooseStoryType({ onChooseStory }: Props) {
   const classes = useStyles();
   const { push } = useHistory();
 
   const onLiveStoryClick = React.useCallback(() => {
-    push(`/story/live/${uuid()}`);
-  }, [push]);
+    const id = uuid();
+
+    if (onChooseStory) onChooseStory("LIVE", id);
+    push(`/story/live/${id}`);
+  }, [push, onChooseStory]);
 
   const onStandardStoryClick = React.useCallback(() => {
-    push(`/story/standard/${uuid()}`);
-  }, [push]);
+    const id = uuid();
+
+    if (onChooseStory) onChooseStory("STANDARD", id);
+    push(`/story/standard/${id}`);
+  }, [push, onChooseStory]);
 
   return (
     <div className={classes.root}>

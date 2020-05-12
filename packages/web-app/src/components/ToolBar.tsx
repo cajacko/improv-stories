@@ -1,10 +1,12 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
+import { Link as RRLink } from "react-router-dom";
 import actions from "../store/actions";
 import { send } from "../utils/socket";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
+import Link from "@material-ui/core/Link";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import SaveIcon from "@material-ui/icons/Save";
@@ -23,11 +25,22 @@ const useStyles = makeStyles((theme) => ({
     zIndex: getZIndex("TOOLBAR"),
   },
   title: {
-    flexGrow: 1,
+    display: "inline-block",
+    cursor: "pointer",
+    color: theme.palette.common.white,
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     display: "none",
     [theme.breakpoints.up("sm")]: {
-      display: "block",
+      display: "flex",
     },
+  },
+  subTitle: {
+    marginLeft: theme.spacing(2),
+    marginTop: 4,
   },
   search: {
     position: "relative",
@@ -74,7 +87,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ToolBar() {
+interface Props {
+  subTitle?: string;
+}
+
+function ToolBar({ subTitle }: Props) {
   const currentUser = useSelector(selectors.currentUser.selectCurrentUser);
   const currentUserId = currentUser.id;
   const dispatch = useDispatch();
@@ -125,9 +142,23 @@ function ToolBar() {
         <div className={classes.menuButton}>
           <NewStoryButton />
         </div>
-        <Typography className={classes.title} variant="h6" noWrap>
-          Improv Stories
-        </Typography>
+        <div className={classes.titleContainer}>
+          <Link
+            className={classes.title}
+            variant="h6"
+            noWrap
+            to="/"
+            component={RRLink}
+          >
+            Improv Stories
+          </Link>
+          {!!subTitle && (
+            <Typography className={classes.subTitle} component="span">
+              {subTitle}
+            </Typography>
+          )}
+        </div>
+
         <form className={classes.search} onSubmit={saveName}>
           <InputBase
             inputRef={inputRef}

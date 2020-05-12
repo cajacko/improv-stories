@@ -65,7 +65,7 @@ function NewStoryButton() {
       </IconButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent dividers>
-          <ChooseStoryType />
+          <ChooseStoryType onChooseStory={handleClose} />
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={handleClose} color="default">

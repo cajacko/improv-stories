@@ -29,7 +29,7 @@ export function StoryTypeCard({ title, description, onClick }: Props) {
   const classes = useStyles();
 
   return (
-    <Card className={classes.root} component="button" onClick={onClick}>
+    <Card className={classes.root} onClick={onClick}>
       <CardContent className={classes.content}>
         <Typography color="primary" variant="h5" gutterBottom>
           {title}
