@@ -8,7 +8,7 @@ import StoryActionBar, {
 } from "../Story/StoryActionBar";
 import StoryFocusOverlay from "../Story/StoryFocusOverlay";
 import LiveStoryContent from "./LiveStoryContent";
-import StoryStatus from "../Story/StoryStatus";
+import LiveStoryStatus from "./LiveStoryStatus";
 import StoryLayout, { RenderProps } from "../Story/StoryLayout";
 import getZIndex from "../../utils/getZIndex";
 import StoryProgressBar from "../Story/StoryProgressBar";
@@ -159,7 +159,7 @@ function LiveStory({
                   />
                 </div>
               </div>
-              <StoryStatus
+              <LiveStoryStatus
                 storyId={storyId}
                 editingSessionId={editingSession && editingSession.id}
                 secondsLeftProps={secondsLeftProps}

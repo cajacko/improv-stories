@@ -4,10 +4,17 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { StoryOwnProps } from "../components/Story/types";
 import StoryContent from "./Story/StoryContent";
 import { getStandardStoryTutorialText } from "../utils/getTutorialText";
+import StoryStatus from "./Story/StoryStatus";
 
 const useStyles = makeStyles<Theme>((theme: Theme) =>
   createStyles({
     container: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+    },
+    content: {
       flex: 1,
       display: "flex",
       justifyContent: "center",
@@ -51,30 +58,33 @@ function StandardStory(props: StoryOwnProps) {
 
   return (
     <div className={classes.container}>
-      <StoryContent
-        showCursor
-        cursorPosition={showTutorialContent ? "START" : "END"}
-        paragraphs={paragraphs}
-        textStyle={showTutorialContent ? "FADED" : "NORMAL"}
-        onTextAreaChange={onTextAreaChange}
-        textAreaRef={textAreaRef}
-        onTextAreaBlur={onTextAreaBlur}
-        onTextAreaFocus={onTextAreaFocus}
-      >
-        <>
-          {!isFocussed && (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={onTakeTurnClick}
-            >
-              Take Turn
-            </Button>
-          )}
-        </>
-      </StoryContent>
+      <div className={classes.content}>
+        <StoryContent
+          showCursor
+          cursorPosition={showTutorialContent ? "START" : "END"}
+          paragraphs={paragraphs}
+          textStyle={showTutorialContent ? "FADED" : "NORMAL"}
+          onTextAreaChange={onTextAreaChange}
+          textAreaRef={textAreaRef}
+          onTextAreaBlur={onTextAreaBlur}
+          onTextAreaFocus={onTextAreaFocus}
+        >
+          <>
+            {!isFocussed && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={onTakeTurnClick}
+              >
+                Take Turn
+              </Button>
+            )}
+          </>
+        </StoryContent>
+      </div>
+      <StoryStatus statusText={isFocussed ? "You are currently editing. Write!" : "You can take your turn. Scroll down!"} />
     </div>
   );
 }
 
-export default StandardStory;
+export default React.memo(StandardStory);
