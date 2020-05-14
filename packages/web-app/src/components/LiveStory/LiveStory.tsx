@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     textContainer: {
       paddingTop: actionBarHeight,
-      paddingBottom: "100vh",
       position: "relative",
     },
     contentContainer: {
@@ -45,12 +44,6 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: "row",
       overflow: "hidden",
       position: "relative",
-    },
-    content: {
-      maxWidth: 500,
-      width: "100%",
-      margin: 20,
-      padding: "0 20px",
     },
     storyProgressBar: {
       position: "absolute",
@@ -127,45 +120,43 @@ function LiveStory({
                 className={classes.contentContainer}
                 ref={contentContainerRef}
               >
-                <div className={classes.content}>
-                  <div className={classes.actionBar}>
-                    {!isWideScreen &&
-                      secondsLeftProps !== null &&
-                      isTextAreaFocussed && (
-                        <div className={classes.storyProgressBar}>
-                          <StoryProgressBar
-                            value={secondsLeftProps.secondsLeft}
-                            maxValue={secondsLeftProps.totalSeconds}
-                            color="secondary"
-                          />
-                        </div>
-                      )}
+                <div className={classes.actionBar}>
+                  {!isWideScreen &&
+                    secondsLeftProps !== null &&
+                    isTextAreaFocussed && (
+                      <div className={classes.storyProgressBar}>
+                        <StoryProgressBar
+                          value={secondsLeftProps.secondsLeft}
+                          maxValue={secondsLeftProps.totalSeconds}
+                          color="secondary"
+                        />
+                      </div>
+                    )}
 
-                    <StoryActionBar
-                      storyId={storyId}
-                      isStorySettingsDrawerOpen={isOpen}
-                      toggleIsSettingsDrawerOpen={toggleIsOpen}
-                    />
-                  </div>
-                  {!isTextAreaFocussed && canCurrentUserEdit && (
-                    <StoryFocusOverlay onClick={onFocusOverlayClick} />
-                  )}
-                  <div className={classes.textContainer}>
-                    <LiveStoryContent
-                      storyId={storyId}
-                      editingSessionFinalEntry={
-                        editingSession && editingSession.finalEntry
-                      }
-                      editingSessionId={editingSession && editingSession.id}
-                      textAreaRef={textAreaRef}
-                      textAreaValue={textAreaValue}
-                      onTextAreaBlur={onTextAreaBlur}
-                      onTextAreaFocus={onTextAreaFocus}
-                      onTextAreaChange={onTextAreaChange}
-                      canCurrentUserEdit={canCurrentUserEdit}
-                      isTextInvisible={shouldShowLoading}
-                    />
-                  </div>
+                  <StoryActionBar
+                    storyId={storyId}
+                    isStorySettingsDrawerOpen={isOpen}
+                    toggleIsSettingsDrawerOpen={toggleIsOpen}
+                  />
+                </div>
+                {!isTextAreaFocussed && canCurrentUserEdit && (
+                  <StoryFocusOverlay onClick={onFocusOverlayClick} />
+                )}
+                <div className={classes.textContainer}>
+                  <LiveStoryContent
+                    storyId={storyId}
+                    editingSessionFinalEntry={
+                      editingSession && editingSession.finalEntry
+                    }
+                    editingSessionId={editingSession && editingSession.id}
+                    textAreaRef={textAreaRef}
+                    textAreaValue={textAreaValue}
+                    onTextAreaBlur={onTextAreaBlur}
+                    onTextAreaFocus={onTextAreaFocus}
+                    onTextAreaChange={onTextAreaChange}
+                    canCurrentUserEdit={canCurrentUserEdit}
+                    isTextInvisible={shouldShowLoading}
+                  />
                 </div>
               </div>
               <StoryStatus

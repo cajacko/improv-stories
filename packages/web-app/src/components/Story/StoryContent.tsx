@@ -12,6 +12,7 @@ export interface Props {
   showCursor?: boolean;
   textStyle?: "NORMAL" | "FADED";
   cursorPosition?: "START" | "END";
+  children?: JSX.Element;
 }
 
 interface StyleProps {
@@ -60,6 +61,12 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
       whiteSpace: "break-spaces",
       opacity: ({ isTextInvisible }) => (isTextInvisible ? 0 : 1),
     },
+    container: {
+      maxWidth: 500,
+      width: "100%",
+      margin: 20,
+      padding: "0 20px 100vh",
+    },
   })
 );
 
@@ -74,6 +81,7 @@ function StoryContent({
   isTextInvisible,
   textStyle = "NORMAL",
   cursorPosition = "END",
+  children,
 }: Props) {
   const classes = useStyles({
     showCursor: !!showCursor,
@@ -89,7 +97,7 @@ function StoryContent({
     lastParagraph.trim().endsWith(".");
 
   return (
-    <>
+    <div className={classes.container}>
       {paragraphs.map((text, i) => (
         <p key={i} className={classes.paragraph}>
           {cursorPosition === "START" && 0 === i && (
@@ -114,7 +122,8 @@ function StoryContent({
           autoCapitalize={autoCapitalize ? "sentences" : "none"}
         />
       </span>
-    </>
+      {children}
+    </div>
   );
 }
 
