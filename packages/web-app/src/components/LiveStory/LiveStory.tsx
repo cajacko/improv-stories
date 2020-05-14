@@ -1,21 +1,22 @@
 import React from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
-import withLiveStoryEditor, {
-  InjectedLiveStoryEditorProps,
-} from "../../hoc/withLiveStoryEditor";
+import { StoryProps, StoryOwnProps } from "../Story/types";
 import selectors from "../../store/selectors";
-import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
-import StoryFocusOverlay from "./StoryFocusOverlay";
-import StoryContent from "./StoryContent";
-import StoryStatus from "./StoryStatus";
-import StoryLayout, { RenderProps } from "./StoryLayout";
+import StoryActionBar, {
+  height as actionBarHeight,
+} from "../Story/StoryActionBar";
+import StoryFocusOverlay from "../Story/StoryFocusOverlay";
+import LiveStoryContent from "./LiveStoryContent";
+import StoryStatus from "../Story/StoryStatus";
+import StoryLayout, { RenderProps } from "../Story/StoryLayout";
 import getZIndex from "../../utils/getZIndex";
-import StoryProgressBar from "./StoryProgressBar";
+import StoryProgressBar from "../Story/StoryProgressBar";
 import useStorySetup from "../../hooks/useStorySetup";
 import LoadingOverlay from "../LoadingOverlay";
 import useStoryInitScroll from "../../hooks/useStoryInitScroll";
-import StorySettings from "./StorySettings";
+import StorySettings from "../Story/StorySettings";
+import withLiveStoryEditor from "../../hoc/withLiveStoryEditor";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -61,13 +62,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface OwnProps {
-  storyId: string;
-}
-
-type Props = OwnProps & InjectedLiveStoryEditorProps;
-
-function Story({
+function LiveStory({
   storyId,
   editingSession,
   editingUser,
@@ -80,7 +75,7 @@ function Story({
   onTextAreaBlur,
   onTextAreaFocus,
   onTextAreaChange,
-}: Props) {
+}: StoryProps) {
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
   useStorySetup(storyId);
@@ -156,7 +151,7 @@ function Story({
                     <StoryFocusOverlay onClick={onFocusOverlayClick} />
                   )}
                   <div className={classes.textContainer}>
-                    <StoryContent
+                    <LiveStoryContent
                       storyId={storyId}
                       editingSessionFinalEntry={
                         editingSession && editingSession.finalEntry
@@ -210,4 +205,4 @@ function Story({
   );
 }
 
-export default withLiveStoryEditor<OwnProps>(React.memo(Story));
+export default withLiveStoryEditor<StoryOwnProps>(React.memo(LiveStory));

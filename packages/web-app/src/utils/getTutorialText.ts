@@ -1,5 +1,5 @@
-export function getTutorialText(storyLink: string) {
-  const raw = `Hello and welcome to improv stories! This is the start of a new story!
+export function getLiveStoryTutorialText(storyLink: string) {
+  const raw = `Hello and welcome to improv stories! This is the start of a new live story!
 Improv stories is a way of writing strange, fun, and curious stories with others. To get started, copy the link to this page and send it to some friends:
 ${storyLink}
 Make sure you set your name and then press the "Join Story" button.
@@ -10,4 +10,10 @@ It's also more fun to go on a group call whilst writing :)
   return raw.split("\n");
 }
 
-export default getTutorialText;
+export function getStandardStoryTutorialText(storyLink: string) {
+  const raw = `Hello and welcome to improv stories! This is the start of a new story!
+Improv stories is a way of writing strange, fun, and curious stories with others.
+`;
+
+  return raw.split("\n");
+}

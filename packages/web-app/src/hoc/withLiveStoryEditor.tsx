@@ -10,35 +10,11 @@ import { Session } from "../store/sessionsById/types";
 import selectors from "../store/selectors";
 import convertServerSession from "../utils/convertServerSession";
 import actions from "../store/actions";
-
-// TODO: don't have an object for seconds left and total seconds, bad performance
-interface Generic<S = null, T = null, U = null, C = false, A = false> {
-  editingSession: S;
-  secondsLeftProps: T;
-  editingUser: U;
-  canCurrentUserEdit: C;
-  isCurrentUserEditing: A;
-}
-
-export type EditorProps =
-  | Generic<
-      Session,
-      { secondsLeft: number; totalSeconds: number },
-      User | null,
-      boolean,
-      boolean
-    >
-  | Generic;
-
-export type InjectedLiveStoryEditorProps = EditorProps & {
-  isTextAreaFocussed: boolean;
-  focusOnTextArea: () => void;
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus: () => void;
-  onTextAreaBlur: () => void;
-  textAreaValue: string;
-  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-};
+import {
+  StoryEditorProps,
+  InjectedStoryProps,
+  StoryOwnProps,
+} from "../components/Story/types";
 
 interface InjectedHookProps {
   currentUserId: string;
@@ -54,24 +30,20 @@ interface InjectedHookProps {
 
 interface State {
   listenerKey: string;
-  injectedLiveStoryEditorProps: EditorProps;
+  injectedLiveStoryEditorProps: StoryEditorProps;
   isTextAreaFocussed: boolean;
-}
-
-interface OwnProps {
-  storyId: string;
 }
 
 type RemoveListener = () => void;
 
 type HocProps<P> = InjectedHookProps & { originalProps: P };
 
-function withLiveStoryEditor<P extends OwnProps = OwnProps>(
-  Component: React.ComponentType<P & InjectedLiveStoryEditorProps>
+function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
+  Component: React.ComponentType<P & InjectedStoryProps>
 ): React.ComponentType<P> {
   class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
     activeSession: Session | null;
-    nullProps: EditorProps;
+    nullProps: StoryEditorProps;
     interval: null | number = null;
     removeTextListener: null | RemoveListener = null;
 
@@ -100,7 +72,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     getInjectedLiveStoryEditorProps = (
       text: string | null,
       props = this.props
-    ): EditorProps => {
+    ): StoryEditorProps => {
       if (!props.activeSession) return this.nullProps;
       let activeSession = this.activeSession || props.activeSession;
       if (activeSession.id !== props.activeSession.id)
@@ -160,7 +132,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
     setInjectedLiveStoryEditorPropsIfChanged = (
       props = this.props,
       state = this.state,
-      newInjectedLiveStoryEditorProps?: EditorProps
+      newInjectedLiveStoryEditorProps?: StoryEditorProps
     ) => {
       const newProps =
         newInjectedLiveStoryEditorProps ||
@@ -318,6 +290,7 @@ function withLiveStoryEditor<P extends OwnProps = OwnProps>(
           onTextAreaChange={this.onTextChange}
           onTextAreaFocus={this.onTextAreaFocus}
           onTextAreaBlur={this.onTextAreaBlur}
+          storyType="LIVE"
           {...props}
         />
       );

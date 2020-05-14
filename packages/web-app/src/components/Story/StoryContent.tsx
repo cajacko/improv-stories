@@ -1,12 +1,23 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
-import { useSelector } from "react-redux";
-import selectors from "../../store/selectors";
-import getTutorialText from "../../utils/getTutorialText";
+
+export interface Props {
+  paragraphs?: string[];
+  textAreaRef?: React.RefObject<HTMLTextAreaElement>;
+  onTextAreaFocus?: () => void;
+  onTextAreaBlur?: () => void;
+  textAreaValue?: string;
+  onTextAreaChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  isTextInvisible?: boolean;
+  showCursor?: boolean;
+  textStyle?: "NORMAL" | "FADED";
+  cursorPosition?: "START" | "END";
+}
 
 interface StyleProps {
   showCursor: boolean;
   isTextInvisible: boolean;
+  textStyle?: Props["textStyle"];
 }
 
 const animationKeyframeKey = "storycontent__flash";
@@ -42,8 +53,8 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
       width: 200,
       height: 0,
     },
-    tutorialText: {
-      color: "grey",
+    paragraphText: {
+      color: ({ textStyle }) => (textStyle === "FADED" ? "grey" : "initial"),
     },
     paragraph: {
       whiteSpace: "break-spaces",
@@ -52,71 +63,26 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
   })
 );
 
-interface Props {
-  storyId: string;
-  editingSessionId: string | null;
-  editingSessionFinalEntry: string | null;
-  canCurrentUserEdit: boolean;
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus: () => void;
-  onTextAreaBlur: () => void;
-  textAreaValue: string;
-  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  isTextInvisible?: boolean;
-}
-
 function StoryContent({
-  storyId,
-  editingSessionId,
-  editingSessionFinalEntry,
-  canCurrentUserEdit,
+  showCursor,
+  paragraphs = [],
   textAreaRef,
   textAreaValue,
   onTextAreaBlur,
   onTextAreaFocus,
   onTextAreaChange,
   isTextInvisible,
+  textStyle = "NORMAL",
+  cursorPosition = "END",
 }: Props) {
-  const fetchStatus = useSelector((state) =>
-    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
-      storyId,
-    })
-  );
-
-  const paragraphs = useSelector((state) =>
-    selectors.misc.selectAllStoryParagraphs(state, {
-      storyId,
-      editingSessionId,
-      editingSessionFinalEntry,
-    })
-  );
-
-  const doesStoryHaveContent = useSelector((state) =>
-    selectors.misc.selectDoesStoryHaveContent(state, {
-      storyId,
-      editingSessionId,
-      editingSessionFinalEntry,
-    })
-  );
-
   const classes = useStyles({
-    showCursor: canCurrentUserEdit,
+    showCursor: !!showCursor,
     isTextInvisible: !!isTextInvisible,
+    textStyle,
   });
-
-  let showType: "TUTORIAL" | "CONTENT" | "NONE";
-
-  if (fetchStatus === null) {
-    showType = "NONE";
-  } else if (!doesStoryHaveContent || fetchStatus !== "FETCHED_NOW_LISTENING") {
-    showType = "TUTORIAL";
-  } else {
-    showType = "CONTENT";
-  }
 
   const lastParagraph = paragraphs[paragraphs.length - 1] as string | undefined;
 
-  // TODO: Need a way of identifying a new paragraph, also need this for the cursor.
   const autoCapitalize =
     !lastParagraph ||
     lastParagraph.trim() === "" ||
@@ -124,20 +90,17 @@ function StoryContent({
 
   return (
     <>
-      {showType === "TUTORIAL" &&
-        getTutorialText(window.location.href).map((text, i) => (
-          <p key={i} className={classes.paragraph}>
-            {0 === i && <span className={classes.cursor} />}
-            <span className={classes.tutorialText}>{text}</span>
-          </p>
-        ))}
-      {showType === "CONTENT" &&
-        paragraphs.map((text, i) => (
-          <p key={i} className={classes.paragraph}>
-            {text}
-            {paragraphs.length - 1 === i && <span className={classes.cursor} />}
-          </p>
-        ))}
+      {paragraphs.map((text, i) => (
+        <p key={i} className={classes.paragraph}>
+          {cursorPosition === "START" && 0 === i && (
+            <span className={classes.cursor} />
+          )}
+          <span className={classes.paragraphText}>{text}</span>
+          {cursorPosition === "END" && paragraphs.length - 1 === i && (
+            <span className={classes.cursor} />
+          )}
+        </p>
+      ))}
       {/* Textarea must always be statically rendered and never unmount */}
       <span className={classes.textAreaContainer}>
         <textarea
@@ -148,7 +111,7 @@ function StoryContent({
           onFocus={onTextAreaFocus}
           onChange={onTextAreaChange}
           autoCorrect="off"
-          autoCapitalize={autoCapitalize ? undefined : "none"}
+          autoCapitalize={autoCapitalize ? "sentences" : "none"}
         />
       </span>
     </>
