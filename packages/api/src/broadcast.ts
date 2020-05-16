@@ -36,7 +36,7 @@ export function broadCastStoryChanged(storyId: string) {
 
     const message: ServerMessage = {
       id: getGetId()(),
-      type: "STORY_CHANGED",
+      type: "LIVE_STORY_STORY_CHANGED",
       payload: story,
       createdAt: getGetDate()(),
     };
@@ -77,7 +77,7 @@ export function broadCastSessionChanged(
 
     const message: ServerMessage = {
       id: getGetId()(),
-      type: "SESSION_CHANGED",
+      type: "LIVE_STORY_SESSION_CHANGED",
       payload: session,
       createdAt: getGetDate()(),
     };

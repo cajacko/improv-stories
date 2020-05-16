@@ -55,7 +55,7 @@ function LiveStoryStatus({
 
     send({
       id: uuid(),
-      type: "SET_SESSION_DONE",
+      type: "LIVE_STORY_SET_SESSION_DONE",
       createdAt: new Date().toISOString(),
       payload: {
         storyId,

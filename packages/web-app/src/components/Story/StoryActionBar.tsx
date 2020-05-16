@@ -116,8 +116,8 @@ function StoryActionBar({
       id: uuid(),
       createdAt: new Date().toISOString(),
       type: newIsCurrentUserActive
-        ? "ADD_ACTIVE_USER_TO_STORY"
-        : "REMOVE_ACTIVE_USER_FROM_STORY",
+        ? "LIVE_STORY_ADD_ACTIVE_USER_TO_STORY"
+        : "LIVE_STORY_REMOVE_ACTIVE_USER_FROM_STORY",
       payload: {
         storyId,
       },

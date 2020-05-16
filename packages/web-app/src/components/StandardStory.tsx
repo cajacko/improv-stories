@@ -5,6 +5,7 @@ import { StoryOwnProps } from "../components/Story/types";
 import StoryContent from "./Story/StoryContent";
 import { getStandardStoryTutorialText } from "../utils/getTutorialText";
 import StoryStatus from "./Story/StoryStatus";
+import { send } from "../utils/socket";
 
 const useStyles = makeStyles<Theme>((theme: Theme) =>
   createStyles({
@@ -37,6 +38,8 @@ function StandardStory(props: StoryOwnProps) {
   );
 
   const onTakeTurnClick = React.useCallback(() => {
+    // send();
+
     if (!textAreaRef.current) return;
 
     textAreaRef.current.focus();
@@ -82,7 +85,13 @@ function StandardStory(props: StoryOwnProps) {
           </>
         </StoryContent>
       </div>
-      <StoryStatus statusText={isFocussed ? "You are currently editing. Write!" : "You can take your turn. Scroll down!"} />
+      <StoryStatus
+        statusText={
+          isFocussed
+            ? "You are currently editing. Write!"
+            : "You can take your turn. Scroll down!"
+        }
+      />
     </div>
   );
 }

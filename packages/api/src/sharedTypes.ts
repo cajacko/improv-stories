@@ -58,14 +58,21 @@ export interface Message<T, P = undefined> {
 }
 
 export type ClientMessage =
-  | Message<"ADD_USER_TO_STORY", { storyId: string; isActive: boolean }>
-  | Message<"REMOVE_USER_FROM_STORY", { storyId: string }>
+  | Message<
+      "LIVE_STORY_ADD_USER_TO_STORY",
+      { storyId: string; isActive: boolean }
+    >
+  | Message<"LIVE_STORY_REMOVE_USER_FROM_STORY", { storyId: string }>
   | Message<"SET_USER_DETAILS", { userDetails: UserDetails }>
-  | Message<"ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
-  | Message<"REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
-  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>
-  | Message<"SET_SESSION_DONE", { storyId: string; sessionId: string }>;
+  | Message<"LIVE_STORY_ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
+  | Message<"LIVE_STORY_REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
+  | Message<"LIVE_STORY_SET_SESSION_TEXT", { storyId: string; text: string }>
+  | Message<
+      "LIVE_STORY_SET_SESSION_DONE",
+      { storyId: string; sessionId: string }
+    >;
+// | Message<"STANDARD_STORY_REQUEST_TAKE_TURN", { storyId: string }>;
 
 export type ServerMessage =
-  | Message<"STORY_CHANGED", Story>
-  | Message<"SESSION_CHANGED", ServerSession>;
+  | Message<"LIVE_STORY_STORY_CHANGED", Story>
+  | Message<"LIVE_STORY_SESSION_CHANGED", ServerSession>;

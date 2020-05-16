@@ -162,7 +162,7 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         send({
           id: uuid(),
           createdAt: new Date().toISOString(),
-          type: "SET_SESSION_TEXT",
+          type: "LIVE_STORY_SET_SESSION_TEXT",
           payload: {
             text: newText,
             storyId: this.props.storyId,
@@ -178,10 +178,10 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       );
 
       this.removeTextListener = listen(
-        "SESSION_CHANGED",
+        "LIVE_STORY_SESSION_CHANGED",
         this.state.listenerKey,
         (message) => {
-          if (message.type !== "SESSION_CHANGED") return;
+          if (message.type !== "LIVE_STORY_SESSION_CHANGED") return;
 
           if (
             !this.props.activeSession ||

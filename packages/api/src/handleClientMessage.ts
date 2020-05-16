@@ -19,13 +19,13 @@ function switchOverMessage(
   // condition
 ): Promise<string[]> | undefined {
   switch (action.type) {
-    case "ADD_ACTIVE_USER_TO_STORY":
+    case "LIVE_STORY_ADD_ACTIVE_USER_TO_STORY":
       return Promise.resolve(
         broadCastStoriesChanged(
           addActiveUserToStory(userId, action.payload.storyId)
         )
       );
-    case "SET_SESSION_TEXT": {
+    case "LIVE_STORY_SET_SESSION_TEXT": {
       const session = setSessionText(
         userId,
         action.payload.storyId,
@@ -38,7 +38,7 @@ function switchOverMessage(
 
       return Promise.resolve([]);
     }
-    case "ADD_USER_TO_STORY":
+    case "LIVE_STORY_ADD_USER_TO_STORY":
       return Promise.resolve(
         broadCastStoriesChanged(
           addUserToStory(
@@ -48,13 +48,13 @@ function switchOverMessage(
           )
         )
       );
-    case "REMOVE_ACTIVE_USER_FROM_STORY":
+    case "LIVE_STORY_REMOVE_ACTIVE_USER_FROM_STORY":
       return Promise.resolve(
         broadCastStoriesChanged(
           removeActiveUserFromStory(userId, action.payload.storyId)
         )
       );
-    case "REMOVE_USER_FROM_STORY":
+    case "LIVE_STORY_REMOVE_USER_FROM_STORY":
       return Promise.resolve(
         broadCastStoriesChanged(removeStoryUser(userId, action.payload.storyId))
       );
@@ -62,7 +62,7 @@ function switchOverMessage(
       return Promise.resolve(
         broadCastStoriesChanged(setUser(userId, action.payload.userDetails))
       );
-    case "SET_SESSION_DONE": {
+    case "LIVE_STORY_SET_SESSION_DONE": {
       const story = getStoreStory(action.payload.storyId);
 
       if (!story) return Promise.resolve([]);

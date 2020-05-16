@@ -5,8 +5,8 @@ import { listen } from "../utils/socket";
 
 let lastDispatchedStoryVersion: number | null = null;
 
-listen("STORY_CHANGED", uuid(), (message) => {
-  if (message.type !== "STORY_CHANGED") return;
+listen("LIVE_STORY_STORY_CHANGED", uuid(), (message) => {
+  if (message.type !== "LIVE_STORY_STORY_CHANGED") return;
 
   if (
     lastDispatchedStoryVersion !== null &&
