@@ -22,7 +22,7 @@ Object {
     "lastSession": null,
     "version": 2,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -55,7 +55,7 @@ Object {
     "lastSession": null,
     "version": 3,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -96,7 +96,7 @@ Object {
     "lastSession": null,
     "version": 4,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -144,7 +144,7 @@ Object {
     "lastSession": null,
     "version": 5,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -208,7 +208,7 @@ Object {
     "lastSession": null,
     "version": 7,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -258,7 +258,7 @@ Object {
     "lastSession": null,
     "version": 9,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -285,7 +285,7 @@ Object {
     },
     "version": 1,
   },
-  "type": "SESSION_CHANGED",
+  "type": "LIVE_STORY_SESSION_CHANGED",
 }
 `;
 
@@ -367,7 +367,7 @@ Object {
     },
     "version": 11,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -417,7 +417,7 @@ Object {
     "lastSession": null,
     "version": 9,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -443,7 +443,7 @@ Object {
     "lastSession": null,
     "version": 5,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
 
@@ -476,6 +476,6 @@ Object {
     "lastSession": null,
     "version": 6,
   },
-  "type": "STORY_CHANGED",
+  "type": "LIVE_STORY_STORY_CHANGED",
 }
 `;
