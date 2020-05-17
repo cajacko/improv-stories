@@ -8,7 +8,7 @@ export interface Generic<S = null, T = null, U = null, C = false, A = false> {
   secondsLeftProps: T;
   editingUser: U;
   canCurrentUserEdit: C;
-  isCurrentUserEditing: A;
+  isCurrentUserActiveSessionUser: A;
 }
 
 export type StoryEditorProps =
@@ -29,11 +29,13 @@ export type InjectedStoryProps = StoryEditorProps & {
   onTextAreaBlur: () => void;
   textAreaValue: string;
   onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  storyType: "STANDARD" | "LIVE";
+  onTakeTurnClick?: () => void;
+  requestTurnState: "CAN_REQUEST_TURN" | "REQUESTING" | "CANNOT_REQUEST_TURN";
 };
 
 export interface StoryOwnProps {
   storyId: string;
+  type: "LIVE" | "STANDARD";
 }
 
 export type StoryProps = StoryOwnProps & InjectedStoryProps;

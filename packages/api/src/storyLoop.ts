@@ -11,6 +11,7 @@ import {
 } from "./store";
 import getRand from "./getRand";
 import getSeconds from "./getSeconds";
+import finishStorySession from "./utils/finishStorySession";
 
 const storyTimeouts: { [K: string]: number | undefined } = {};
 
@@ -29,58 +30,13 @@ export function finishStoryLoop(
 
   clearStoryTimeout(storyId);
 
-  const storyPreFinish = getStoreStory(storyId);
+  const changedStoryIds = finishStorySession(storyId, sessionId, finishedEarly);
 
-  if (!storyPreFinish || !storyPreFinish.activeSession) return [];
-
-  const storeSessionId = storyPreFinish.activeSession.id;
-
-  if (sessionId && sessionId !== storeSessionId) return [];
-
-  finishActiveStorySession(storyId);
-
-  const storyPostFinish = getStoreStory(storyId);
-
-  if (
-    storyPostFinish &&
-    storyPostFinish.lastSession &&
-    storyPostFinish.lastSession.id === storeSessionId &&
-    storyPostFinish.lastSession.entries.length
-  ) {
-    const ref = getDatabase().ref(`/storiesById/${storyId}/entries`);
-
-    const session: DatabaseSession = {
-      id: storyPostFinish.lastSession.id,
-      dateWillFinish: storyPostFinish.lastSession.dateWillFinish,
-      dateStarted: storyPostFinish.lastSession.dateStarted,
-      dateModified: storyPostFinish.lastSession.dateModified,
-      finalEntry: storyPostFinish.lastSession.finalEntry,
-      entries: storyPostFinish.lastSession.entries,
-      userId: storyPostFinish.lastSession.user,
-      version: storyPostFinish.lastSession.version,
-      finishedEarly: !!finishedEarly,
-      dateFinished:
-        storyPostFinish.lastSession.dateFinished || new Date().toISOString(),
-    };
-
-    logger.log("Setting session in database", session);
-
-    ref
-      .push(session)
-      .then(() => {
-        logger.log("Set session in database", session);
-      })
-      .catch((error) => {
-        logger.log("Error setting session in database", {
-          session,
-          error,
-        });
-      });
-  }
+  if (!changedStoryIds) return [];
 
   storyLoop(storyId, seconds);
 
-  return [storyId];
+  return changedStoryIds;
 }
 
 function storyLoop(storyId: string, seconds: number) {
@@ -121,13 +77,16 @@ function storyLoop(storyId: string, seconds: number) {
       storyId
     );
 
-    broadCastStoriesChanged([storyId]);
+    broadCastStoriesChanged([storyId], "LIVE_STORY_STORY_CHANGED");
 
     logger.log("Story timeout start", { storyId });
 
     storyTimeouts[storyId] = setTimeout(() => {
       getSeconds(storyId).then((latestSeconds) =>
-        broadCastStoriesChanged(finishStoryLoop(storyId, latestSeconds))
+        broadCastStoriesChanged(
+          finishStoryLoop(storyId, latestSeconds),
+          "LIVE_STORY_STORY_CHANGED"
+        )
       );
     }, seconds * 1000);
   } else if (activeUsers.length <= 0) {
@@ -135,7 +94,7 @@ function storyLoop(storyId: string, seconds: number) {
 
     if (story.activeSession) {
       finishActiveStorySession(storyId);
-      broadCastStoriesChanged([storyId]);
+      broadCastStoriesChanged([storyId], "LIVE_STORY_STORY_CHANGED");
     }
   }
 }

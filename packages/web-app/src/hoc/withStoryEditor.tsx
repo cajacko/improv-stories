@@ -5,7 +5,6 @@ import { Dispatch } from "redux";
 import ReduxTypes from "ReduxTypes";
 import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
-import { useEntriesRef } from "../hooks/useStoryRef";
 import { Session } from "../store/sessionsById/types";
 import selectors from "../store/selectors";
 import convertServerSession from "../utils/convertServerSession";
@@ -18,27 +17,28 @@ import {
 
 interface InjectedHookProps {
   currentUserId: string;
-  entriesRef: ReturnType<typeof useEntriesRef>;
   storyId: string;
-  activeStoryUsers: User[];
+  isCurrentUserActiveInStory: boolean;
   activeSession: Session | null;
   dispatch: Dispatch<ReduxTypes.Action>;
   currentlyEditingUser: User | null;
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
   didCurrentUserEndCurrentSessionEarly: boolean;
+  isCurrentUserLastActiveSessionUserForStory: boolean;
 }
 
 interface State {
   listenerKey: string;
   injectedLiveStoryEditorProps: StoryEditorProps;
   isTextAreaFocussed: boolean;
+  requestTurnState: InjectedStoryProps["requestTurnState"];
 }
 
 type RemoveListener = () => void;
 
 type HocProps<P> = InjectedHookProps & { originalProps: P };
 
-function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
+function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
   Component: React.ComponentType<P & InjectedStoryProps>
 ): React.ComponentType<P> {
   class LiveStoryEditorHoc extends React.Component<HocProps<P>, State> {
@@ -56,7 +56,7 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         canCurrentUserEdit: false,
         editingSession: null,
         editingUser: null,
-        isCurrentUserEditing: false,
+        isCurrentUserActiveSessionUser: false,
       };
 
       this.state = {
@@ -66,6 +66,11 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           props
         ),
         listenerKey: uuid(),
+        // TODO: Should always default to cannot, this is temp
+        requestTurnState:
+          props.originalProps.type === "LIVE"
+            ? "CANNOT_REQUEST_TURN"
+            : "CAN_REQUEST_TURN",
       };
     }
 
@@ -88,12 +93,18 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       let secondsLeft: number | null = Math.floor(diff / 1000);
       const totalSeconds = Math.ceil((dateWillFinish - dateStarted) / 1000);
 
-      const isCurrentUserEditing = activeSession.userId === props.currentUserId;
-      const canCurrentUserEdit =
+      const isCurrentUserActiveSessionUser =
+        activeSession.userId === props.currentUserId;
+
+      let canCurrentUserEdit =
         !props.didCurrentUserEndCurrentSessionEarly &&
-        isCurrentUserEditing &&
-        secondsLeft > 0 &&
-        props.activeStoryUsers.some(({ id }) => id === props.currentUserId);
+        isCurrentUserActiveSessionUser &&
+        secondsLeft > 0;
+
+      if (props.originalProps.type === "LIVE") {
+        canCurrentUserEdit =
+          canCurrentUserEdit && props.isCurrentUserActiveInStory;
+      }
 
       let editingSession = activeSession;
 
@@ -112,7 +123,7 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         editingSession,
         editingUser: props.currentlyEditingUser,
         canCurrentUserEdit,
-        isCurrentUserEditing,
+        isCurrentUserActiveSessionUser,
       };
     };
 
@@ -275,6 +286,47 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       this.setState({ isTextAreaFocussed: false });
     };
 
+    onTakeTurnClick = () => {
+      if (this.getRequestTurnState() !== "CAN_REQUEST_TURN") return;
+
+      this.setState({
+        requestTurnState: "REQUESTING",
+      });
+
+      send({
+        type: "STANDARD_STORY_REQUEST_TAKE_TURN",
+        id: uuid(),
+        createdAt: new Date().toUTCString(),
+        payload: {
+          storyId: this.props.storyId,
+        },
+      });
+    };
+
+    getRequestTurnState(
+      props = this.props,
+      state = this.state
+    ): InjectedStoryProps["requestTurnState"] {
+      if (props.originalProps.type === "LIVE") return "CANNOT_REQUEST_TURN";
+
+      const injectedProps = this.getInjectedLiveStoryEditorPropsWithText(
+        props,
+        state
+      );
+
+      if (injectedProps.canCurrentUserEdit) return "CANNOT_REQUEST_TURN";
+
+      if (injectedProps.isCurrentUserActiveSessionUser) {
+        return "CANNOT_REQUEST_TURN";
+      }
+
+      if (props.isCurrentUserLastActiveSessionUserForStory) {
+        return "CANNOT_REQUEST_TURN";
+      }
+
+      return state.requestTurnState;
+    }
+
     render() {
       const props = this.getInjectedLiveStoryEditorPropsWithText();
 
@@ -290,28 +342,37 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           onTextAreaChange={this.onTextChange}
           onTextAreaFocus={this.onTextAreaFocus}
           onTextAreaBlur={this.onTextAreaBlur}
-          storyType="LIVE"
+          onTakeTurnClick={
+            this.getRequestTurnState() === "CAN_REQUEST_TURN"
+              ? this.onTakeTurnClick
+              : undefined
+          }
+          requestTurnState={this.getRequestTurnState()}
           {...props}
         />
       );
     }
   }
 
-  const LiveStoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
+  const StoryEditorWithHooks: React.ComponentType<P> = (props: P) => {
     const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
     const currentUserId = useSelector((state) => state.currentUser.id);
-    const entriesRef = useEntriesRef(props.storyId);
-    const activeStoryUsers = useSelector((state) =>
-      selectors.misc.selectStoryUsers(state, {
+    const isCurrentUserActiveInStory = useSelector((state) =>
+      selectors.misc.selectIsCurrentUserActiveInStory(state, {
         storyId: props.storyId,
-        storyUserType: "ACTIVE",
       })
     );
     const activeSession = useSelector((state) =>
       selectors.misc.selectActiveStorySession(state, props)
     );
+    const isCurrentUserLastActiveSessionUserForStory = useSelector((state) =>
+      selectors.misc.selectIsCurrentUserLastActiveSessionUserForStory(
+        state,
+        props
+      )
+    );
     const currentlyEditingUser = useSelector((state) =>
-      selectors.misc.selectActiveStorySessionUser(state, props)
+      selectors.misc.selectCurrentlyEditingStoryUser(state, props)
     );
     const didCurrentUserEndCurrentSessionEarly = useSelector((state) =>
       activeSession
@@ -326,12 +387,14 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
     return (
       <LiveStoryEditorHoc
+        isCurrentUserLastActiveSessionUserForStory={
+          isCurrentUserLastActiveSessionUserForStory
+        }
         textAreaRef={textAreaRef}
         originalProps={props}
         currentUserId={currentUserId}
-        entriesRef={entriesRef}
         storyId={props.storyId}
-        activeStoryUsers={activeStoryUsers || []}
+        isCurrentUserActiveInStory={isCurrentUserActiveInStory}
         activeSession={activeSession}
         dispatch={dispatch}
         currentlyEditingUser={currentlyEditingUser}
@@ -342,7 +405,7 @@ function withLiveStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     );
   };
 
-  return LiveStoryEditorWithHooks;
+  return StoryEditorWithHooks;
 }
 
-export default withLiveStoryEditor;
+export default withStoryEditor;

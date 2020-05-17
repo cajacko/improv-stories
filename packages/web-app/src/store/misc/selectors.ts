@@ -24,7 +24,31 @@ export const selectActiveStorySession = createCachedSelector(
   }
 )((state, props) => props.storyId);
 
-export const selectActiveStorySessionUser = createCachedSelector(
+export const selectLastStorySession = createCachedSelector(
+  selectStory,
+  selectSessionsById,
+  (story, sessionsById) => {
+    if (!story) return null;
+
+    // TODO: Not sure we're actually setting the last session properly. May need to check the
+    // sessions we get from the database
+    if (!story.lastSessionId) return null;
+
+    return sessionsById[story.lastSessionId] || null;
+  }
+)((state, props) => props.storyId);
+
+export const selectIsCurrentUserLastActiveSessionUserForStory = createCachedSelector(
+  selectCurrentUser,
+  selectLastStorySession,
+  (currentUser, lastSession) => {
+    if (!lastSession) return false;
+
+    return lastSession.userId === currentUser.id;
+  }
+)((state, props) => props.storyId);
+
+export const selectCurrentlyEditingStoryUser = createCachedSelector(
   selectActiveStorySession,
   selectUsersById,
   (session, usersById) => {

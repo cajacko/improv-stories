@@ -1,24 +1,27 @@
 import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import { useSelector } from "react-redux";
+import selectors from "../../store/selectors";
 
 export interface Props {
-  paragraphs?: string[];
-  textAreaRef?: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus?: () => void;
-  onTextAreaBlur?: () => void;
-  textAreaValue?: string;
-  onTextAreaChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  storyId: string;
+  editingSessionId: string | null;
+  editingSessionFinalEntry: string | null;
+  canCurrentUserEdit: boolean;
+  textAreaRef: React.RefObject<HTMLTextAreaElement>;
+  onTextAreaFocus: () => void;
+  onTextAreaBlur: () => void;
+  textAreaValue: string;
+  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   isTextInvisible?: boolean;
-  showCursor?: boolean;
-  textStyle?: "NORMAL" | "FADED";
-  cursorPosition?: "START" | "END";
+  tutorialText: string[];
   children?: JSX.Element;
 }
 
 interface StyleProps {
   showCursor: boolean;
   isTextInvisible: boolean;
-  textStyle?: Props["textStyle"];
+  textStyle?: "FADED" | "NORMAL";
 }
 
 const animationKeyframeKey = "storycontent__flash";
@@ -71,18 +74,58 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
 );
 
 function StoryContent({
-  showCursor,
-  paragraphs = [],
   textAreaRef,
   textAreaValue,
   onTextAreaBlur,
   onTextAreaFocus,
   onTextAreaChange,
   isTextInvisible,
-  textStyle = "NORMAL",
-  cursorPosition = "END",
   children,
+  storyId,
+  editingSessionFinalEntry,
+  editingSessionId,
+  tutorialText,
 }: Props) {
+  const fetchStatus = useSelector((state) =>
+    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
+      storyId,
+    })
+  );
+
+  const storyParagraphs = useSelector((state) =>
+    selectors.misc.selectAllStoryParagraphs(state, {
+      storyId,
+      editingSessionId,
+      editingSessionFinalEntry,
+    })
+  );
+
+  const doesStoryHaveContent = useSelector((state) =>
+    selectors.misc.selectDoesStoryHaveContent(state, {
+      storyId,
+      editingSessionId,
+      editingSessionFinalEntry,
+    })
+  );
+
+  let paragraphs: string[] = [];
+  let textStyle: StyleProps["textStyle"] = "NORMAL";
+  let cursorPosition: "START" | "END" | undefined;
+  let showCursor: boolean = false;
+
+  if (fetchStatus !== null) {
+    showCursor = true;
+
+    if (!doesStoryHaveContent || fetchStatus !== "FETCHED_NOW_LISTENING") {
+      paragraphs = tutorialText;
+      textStyle = "FADED";
+      cursorPosition = "START";
+    } else {
+      paragraphs = storyParagraphs;
+      cursorPosition = "END";
+    }
+  }
+
   const classes = useStyles({
     showCursor: !!showCursor,
     isTextInvisible: !!isTextInvisible,

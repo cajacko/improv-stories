@@ -7,25 +7,15 @@ import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import selectors from "../../store/selectors";
 import { send } from "../../utils/socket";
+import ProgressButton from "../ProgressButton";
 
 export const height = 70;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    activeButtonWrapper: {
-      position: "relative",
-    },
-    buttonProgress: {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      marginTop: -12,
-      marginLeft: -12,
-    },
     actionBar: {
       height: height,
       padding: theme.spacing(2),
@@ -37,7 +27,6 @@ const useStyles = makeStyles((theme: Theme) =>
       border: "1px solid #e2e2e2",
       backgroundColor: "white",
     },
-    activeButton: {},
   })
 );
 
@@ -46,6 +35,7 @@ interface Props {
   isStorySettingsDrawerOpen: boolean;
   toggleIsSettingsDrawerOpen: () => void;
   disableButtons?: boolean;
+  hideJoinButton?: boolean;
 }
 
 interface GenericActiveButtonStatus<P, N> {
@@ -69,6 +59,7 @@ function StoryActionBar({
   isStorySettingsDrawerOpen,
   toggleIsSettingsDrawerOpen,
   disableButtons,
+  hideJoinButton,
 }: Props) {
   const userCount = (
     useSelector((state) =>
@@ -167,22 +158,23 @@ function StoryActionBar({
 
   return (
     <div className={classes.actionBar}>
-      <div className={classes.activeButtonWrapper}>
-        <Button
-          variant="contained"
-          color={joinButtonColor}
-          className={classes.activeButton}
-          startIcon={joinButtonStartIcon}
-          endIcon={joinButtonEndIcon}
-          onClick={isJoinButtonDisabled ? undefined : handleToggleStatus}
-          disabled={isJoinButtonDisabled}
-        >
-          {joinButtonText}
-        </Button>
-        {activeButtonState === "LOADING" && (
-          <CircularProgress size={24} className={classes.buttonProgress} />
+      <div>
+        {!hideJoinButton && (
+          <ProgressButton isLoading={activeButtonState === "LOADING"}>
+            <Button
+              variant="contained"
+              color={joinButtonColor}
+              startIcon={joinButtonStartIcon}
+              endIcon={joinButtonEndIcon}
+              onClick={isJoinButtonDisabled ? undefined : handleToggleStatus}
+              disabled={isJoinButtonDisabled}
+            >
+              {joinButtonText}
+            </Button>
+          </ProgressButton>
         )}
       </div>
+
       <IconButton
         onClick={disableButtons ? undefined : toggleIsSettingsDrawerOpen}
         className={classes.peopleButton}

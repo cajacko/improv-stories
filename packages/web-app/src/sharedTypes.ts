@@ -70,9 +70,10 @@ export type ClientMessage =
   | Message<
       "LIVE_STORY_SET_SESSION_DONE",
       { storyId: string; sessionId: string }
-    >;
-// | Message<"STANDARD_STORY_REQUEST_TAKE_TURN", { storyId: string }>;
+    >
+  | Message<"STANDARD_STORY_REQUEST_TAKE_TURN", { storyId: string }>;
 
 export type ServerMessage =
   | Message<"LIVE_STORY_STORY_CHANGED", Story>
-  | Message<"LIVE_STORY_SESSION_CHANGED", ServerSession>;
+  | Message<"LIVE_STORY_SESSION_CHANGED", ServerSession>
+  | Message<"STANDARD_STORY_STORY_CHANGED", Story>;

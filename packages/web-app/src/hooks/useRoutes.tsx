@@ -5,8 +5,7 @@ import {
   matchPath,
   useHistory,
 } from "react-router-dom";
-import LiveStory from "../components/LiveStory/LiveStory";
-import StandardStory from "../components/StandardStory";
+import Story from "../components/Story";
 import "../store/socketActionDispatcher";
 import ChooseStoryPage from "../components/ChooseStoryPage";
 
@@ -53,7 +52,7 @@ function useRoutes() {
       toolBarSubTitle: "Live",
       component: React.useCallback(
         (props: RouteComponentProps<{ storyId: string }>) => (
-          <LiveStory storyId={props.match.params.storyId} />
+          <Story storyId={props.match.params.storyId} type="LIVE" />
         ),
         []
       ),
@@ -65,7 +64,7 @@ function useRoutes() {
       toolBarSubTitle: "Standard",
       component: React.useCallback(
         (props: RouteComponentProps<{ storyId: string }>) => (
-          <StandardStory storyId={props.match.params.storyId} />
+          <Story storyId={props.match.params.storyId} type="STANDARD" />
         ),
         []
       ),
