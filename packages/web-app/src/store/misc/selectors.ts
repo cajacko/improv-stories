@@ -2,12 +2,14 @@ import ReduxTypes from "ReduxTypes";
 import createCachedSelector from "re-reselect";
 import { Session } from "../sessionsById/types";
 import { User, UsersByIdState } from "../usersById/types";
+import { CurrentUserState } from "../currentUser/types";
 import { Story } from "../storiesById/types";
 import { selectCurrentUser } from "../currentUser/selectors";
 import { selectUsersById } from "../usersById/selectors";
 import { selectStory } from "../storiesById/selectors";
 import { selectSessionsById } from "../sessionsById/selectors";
 import { selectStorySessionIds } from "../sessionIdsByStoryId/selectors";
+import transformSessionsToParagraphs from "../../utils/transformSessionsToParagraphs";
 
 interface SelectorWithStoryIdProp {
   storyId: string;
@@ -99,26 +101,36 @@ export const selectAllStoryParagraphs = createCachedSelector<
   selectStorySessions,
   (state, props) => props.editingSessionId,
   (state, props) => props.editingSessionFinalEntry,
-  (sessions, editingSessionId, editingSessionFinalEntry) => {
-    let didAddEditingSession = false;
+  (sessions, editingSessionId, editingSessionFinalEntry) =>
+    sessions
+      ? transformSessionsToParagraphs(sessions, {
+          editingSessionId: editingSessionId || undefined,
+          editingSessionFinalEntry: editingSessionFinalEntry || undefined,
+        })
+      : []
+)(getSelectAllStoryParagraphsKey);
 
-    let combinedSessions = sessions
-      ? sessions.reduce((acc, { finalEntry, id }) => {
-          if (editingSessionFinalEntry && editingSessionId === id) {
-            didAddEditingSession = true;
-            return `${acc}${editingSessionFinalEntry}`;
-          }
-
-          return `${acc}${finalEntry}`;
-        }, "")
-      : "";
-
-    if (!didAddEditingSession && editingSessionFinalEntry && editingSessionId) {
-      combinedSessions = `${combinedSessions}${editingSessionFinalEntry}`;
-    }
-
-    return combinedSessions.split("\n");
-  }
+export const selectAllStandardStoryParagraphs = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectAllStoryParagraphsProps,
+  Session[] | null,
+  CurrentUserState,
+  string | null,
+  string | null,
+  string[]
+>(
+  selectStorySessions,
+  selectCurrentUser,
+  (state, props) => props.editingSessionId,
+  (state, props) => props.editingSessionFinalEntry,
+  (sessions, currentUser, editingSessionId, editingSessionFinalEntry) =>
+    sessions
+      ? transformSessionsToParagraphs(sessions, {
+          editingSessionId: editingSessionId || undefined,
+          editingSessionFinalEntry: editingSessionFinalEntry || undefined,
+          shouldRemoveLastSessionIfNotUserId: currentUser.id,
+        })
+      : []
 )(getSelectAllStoryParagraphsKey);
 
 export const selectDoesStoryHaveContent = createCachedSelector(

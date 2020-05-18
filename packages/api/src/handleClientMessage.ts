@@ -47,6 +47,11 @@ function _switchOverAllTypedMessages(
           "LIVE_STORY_STORY_CHANGED"
         )
       ).then(transformToRunStoryLoop);
+    case "STANDARD_STORY_SET_SESSION_TEXT": {
+      setSessionText(userId, action.payload.storyId, action.payload.text);
+
+      return Promise.resolve(null);
+    }
     case "LIVE_STORY_SET_SESSION_TEXT": {
       const session = setSessionText(
         userId,

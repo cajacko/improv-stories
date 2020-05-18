@@ -8,7 +8,6 @@ export interface User extends UserDetails {
   id: string;
   version: number;
 }
-
 export interface BaseSession {
   id: string;
   dateStarted: string;
@@ -23,6 +22,10 @@ export interface BaseSession {
 export interface ServerSession extends BaseSession {
   user: User;
   dateFinished: null | string;
+}
+
+export interface ClientSession extends BaseSession {
+  userId: string;
 }
 
 export interface DatabaseSession extends BaseSession {
@@ -68,10 +71,17 @@ export type ClientMessage =
   | Message<"LIVE_STORY_REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
   | Message<"LIVE_STORY_SET_SESSION_TEXT", { storyId: string; text: string }>
   | Message<
+      "STANDARD_STORY_SET_SESSION_TEXT",
+      { storyId: string; text: string }
+    >
+  | Message<
       "LIVE_STORY_SET_SESSION_DONE",
       { storyId: string; sessionId: string }
     >
-  | Message<"STANDARD_STORY_REQUEST_TAKE_TURN", { storyId: string }>;
+  | Message<
+      "STANDARD_STORY_REQUEST_TAKE_TURN",
+      { storyId: string; lastSession: ClientSession | null }
+    >;
 
 export type ServerMessage =
   | Message<"LIVE_STORY_STORY_CHANGED", Story>

@@ -78,7 +78,7 @@ function Story({
   onTextAreaChange,
   type,
   requestTurnState,
-  onTakeTurnClick,
+  onRequestTakeTurn,
 }: StoryProps) {
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
@@ -95,6 +95,14 @@ function Story({
       editingSessionFinalEntry: editingSession && editingSession.finalEntry,
     })
   );
+
+  const lastSession = useSelector((state) =>
+    selectors.misc.selectLastStorySession(state, { storyId })
+  );
+
+  const onTakeTurnClick = React.useCallback(() => {
+    if (onRequestTakeTurn) onRequestTakeTurn(lastSession);
+  }, [onRequestTakeTurn, lastSession]);
 
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
     focusOnTextArea,
@@ -175,6 +183,7 @@ function Story({
                     canCurrentUserEdit={canCurrentUserEdit}
                     isTextInvisible={shouldShowLoading}
                     tutorialText={tutorialText}
+                    storyType={type}
                   >
                     <>
                       {requestTurnState !== "CANNOT_REQUEST_TURN" && (
@@ -205,6 +214,7 @@ function Story({
                 secondsLeftProps={secondsLeftProps}
                 canCurrentUserEdit={canCurrentUserEdit}
                 editingUser={editingUser}
+                storyType={type}
               />
             </>
           ),

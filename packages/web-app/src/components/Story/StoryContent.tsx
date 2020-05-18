@@ -16,6 +16,7 @@ export interface Props {
   isTextInvisible?: boolean;
   tutorialText: string[];
   children?: JSX.Element;
+  storyType: "LIVE" | "STANDARD";
 }
 
 interface StyleProps {
@@ -23,6 +24,8 @@ interface StyleProps {
   isTextInvisible: boolean;
   textStyle?: "FADED" | "NORMAL";
 }
+
+const width = 500;
 
 const animationKeyframeKey = "storycontent__flash";
 
@@ -65,8 +68,8 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
       opacity: ({ isTextInvisible }) => (isTextInvisible ? 0 : 1),
     },
     container: {
-      maxWidth: 500,
-      width: "100%",
+      maxWidth: width,
+      width,
       margin: 20,
       padding: "0 20px 100vh",
     },
@@ -85,6 +88,7 @@ function StoryContent({
   editingSessionFinalEntry,
   editingSessionId,
   tutorialText,
+  storyType,
 }: Props) {
   const fetchStatus = useSelector((state) =>
     selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
@@ -93,7 +97,9 @@ function StoryContent({
   );
 
   const storyParagraphs = useSelector((state) =>
-    selectors.misc.selectAllStoryParagraphs(state, {
+    (storyType === "LIVE"
+      ? selectors.misc.selectAllStoryParagraphs
+      : selectors.misc.selectAllStandardStoryParagraphs)(state, {
       storyId,
       editingSessionId,
       editingSessionFinalEntry,

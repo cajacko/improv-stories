@@ -29,7 +29,7 @@ export type InjectedStoryProps = StoryEditorProps & {
   onTextAreaBlur: () => void;
   textAreaValue: string;
   onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onTakeTurnClick?: () => void;
+  onRequestTakeTurn?: (lastSession: Session | null) => void;
   requestTurnState: "CAN_REQUEST_TURN" | "REQUESTING" | "CANNOT_REQUEST_TURN";
 };
 

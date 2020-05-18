@@ -1,13 +1,6 @@
-export interface Session {
-  userId: string;
-  id: string;
-  dateStarted: string;
-  dateWillFinish: string;
-  finalEntry: string;
-  entries: string[];
-  dateModified: string;
-  version: number;
-}
+import { ClientSession } from "../../sharedTypes";
+
+export type Session = ClientSession;
 
 export interface SessionsByIdState {
   [K: string]: undefined | Session;

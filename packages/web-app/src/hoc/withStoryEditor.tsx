@@ -173,7 +173,10 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         send({
           id: uuid(),
           createdAt: new Date().toISOString(),
-          type: "LIVE_STORY_SET_SESSION_TEXT",
+          type:
+            this.props.originalProps.type === "LIVE"
+              ? "LIVE_STORY_SET_SESSION_TEXT"
+              : "STANDARD_STORY_SET_SESSION_TEXT",
           payload: {
             text: newText,
             storyId: this.props.storyId,
@@ -217,6 +220,13 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         newProps.activeSession.id !== this.activeSession.id;
 
       if (isNewSession) {
+        if (
+          this.state.requestTurnState === "REQUESTING" &&
+          newProps.originalProps.type === "STANDARD"
+        ) {
+          this.setState({ requestTurnState: "CAN_REQUEST_TURN" });
+        }
+
         if (this.activeSession) {
           newProps.dispatch(
             actions.sessionsById.setSession(this.activeSession)
@@ -286,7 +296,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       this.setState({ isTextAreaFocussed: false });
     };
 
-    onTakeTurnClick = () => {
+    onRequestTakeTurn = (lastSession: Session | null) => {
       if (this.getRequestTurnState() !== "CAN_REQUEST_TURN") return;
 
       this.setState({
@@ -299,6 +309,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         createdAt: new Date().toUTCString(),
         payload: {
           storyId: this.props.storyId,
+          lastSession,
         },
       });
     };
@@ -344,7 +355,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           onTextAreaBlur={this.onTextAreaBlur}
           onTakeTurnClick={
             this.getRequestTurnState() === "CAN_REQUEST_TURN"
-              ? this.onTakeTurnClick
+              ? this.onRequestTakeTurn
               : undefined
           }
           requestTurnState={this.getRequestTurnState()}

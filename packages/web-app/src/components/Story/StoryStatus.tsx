@@ -71,6 +71,7 @@ interface Props {
   secondsLeftProps: null | { secondsLeft: number; totalSeconds: number };
   canCurrentUserEdit: boolean;
   editingUser: User | null;
+  storyType: "LIVE" | "STANDARD";
 }
 
 function StoryStatus({
@@ -79,8 +80,16 @@ function StoryStatus({
   storyId,
   canCurrentUserEdit,
   editingUser,
+  storyType,
 }: Props) {
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+
+  const isCurrentUserLastActiveSessionUserForStory = useSelector((state) =>
+    selectors.misc.selectIsCurrentUserLastActiveSessionUserForStory(state, {
+      storyId,
+    })
+  );
+
   const { canUsersEndRoundEarly } = useSelector((state) =>
     selectors.storyPropsByStoryId.selectStoryPropsContent(state, { storyId })
   );
@@ -140,7 +149,7 @@ function StoryStatus({
         if (editingUser) {
           if (didCurrentUserEndSessionEarly) {
             statusText = updatingText;
-          } else if (currentUserId === editingUser.id) {
+          } else if (storyType === "LIVE" && currentUserId === editingUser.id) {
             statusText = `Join the story to finish editing`;
           } else {
             statusText = `${editingUser.name || "Anonymous"} is editing`;
@@ -152,10 +161,17 @@ function StoryStatus({
     } else {
       statusText = updatingText;
     }
-  } else if (countOfActiveUsersNeeded > 0) {
+  } else if (storyType === "LIVE" && countOfActiveUsersNeeded > 0) {
     statusText = `Waiting for ${countOfActiveUsersNeeded} more editor${
       countOfActiveUsersNeeded > 1 ? "s" : ""
     } to join the story...`;
+  } else if (
+    storyType === "STANDARD" &&
+    isCurrentUserLastActiveSessionUserForStory
+  ) {
+    statusText = "You went last! Wait for someone else to go.";
+  } else if (storyType === "STANDARD") {
+    statusText = "Scroll down and take your turn!";
   } else {
     statusText = updatingText;
   }
