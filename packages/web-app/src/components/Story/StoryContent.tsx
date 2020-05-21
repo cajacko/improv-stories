@@ -106,13 +106,16 @@ function StoryContent({
     })
   );
 
-  const doesStoryHaveContent = useSelector((state) =>
-    selectors.misc.selectDoesStoryHaveContent(state, {
-      storyId,
-      editingSessionId,
-      editingSessionFinalEntry,
-    })
-  );
+  const doesStoryHaveContent =
+    useSelector((state) =>
+      selectors.misc.selectDoesStoryHaveContent(state, {
+        storyId,
+        editingSessionId,
+        editingSessionFinalEntry,
+      })
+    ) &&
+    storyParagraphs.length > 1 &&
+    storyParagraphs[0] !== "";
 
   let paragraphs: string[] = [];
   let textStyle: StyleProps["textStyle"] = "NORMAL";
