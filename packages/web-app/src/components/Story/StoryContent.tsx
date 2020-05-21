@@ -17,6 +17,8 @@ export interface Props {
   tutorialText: string[];
   children?: JSX.Element;
   storyType: "LIVE" | "STANDARD";
+  playingSessionId: string | null;
+  playingSessionText: string | null;
 }
 
 interface StyleProps {
@@ -89,12 +91,16 @@ function StoryContent({
   editingSessionId,
   tutorialText,
   storyType,
+  playingSessionId,
+  playingSessionText,
 }: Props) {
   const fetchStatus = useSelector((state) =>
     selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
       storyId,
     })
   );
+
+  console.log("StoryContent", playingSessionText);
 
   const storyParagraphs = useSelector((state) =>
     (storyType === "LIVE"
@@ -103,19 +109,15 @@ function StoryContent({
       storyId,
       editingSessionId,
       editingSessionFinalEntry,
+      playingSessionId,
+      playingSessionText,
     })
   );
 
   const doesStoryHaveContent =
-    useSelector((state) =>
-      selectors.misc.selectDoesStoryHaveContent(state, {
-        storyId,
-        editingSessionId,
-        editingSessionFinalEntry,
-      })
-    ) &&
-    storyParagraphs.length > 1 &&
-    storyParagraphs[0] !== "";
+    storyParagraphs &&
+    storyParagraphs.length > 0 &&
+    !storyParagraphs.every((paragraph) => paragraph === "");
 
   let paragraphs: string[] = [];
   let textStyle: StyleProps["textStyle"] = "NORMAL";

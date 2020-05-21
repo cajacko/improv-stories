@@ -17,7 +17,7 @@ function standardStoryRequestTakeTurn(
 
     if (didUserWriteLastSession) return Promise.resolve(null);
 
-    const dateStarted = new Date().toUTCString();
+    const dateStarted = new Date().toISOString();
     const dateWillFinish = new Date(dateStarted);
     dateWillFinish.setSeconds(dateWillFinish.getSeconds() + seconds);
 
@@ -35,7 +35,7 @@ function standardStoryRequestTakeTurn(
       {
         id: sessionId,
         dateStarted,
-        dateWillFinish: dateWillFinish.toUTCString(),
+        dateWillFinish: dateWillFinish.toISOString(),
         dateFinished: null,
         user: userId,
         dateModified: dateStarted,

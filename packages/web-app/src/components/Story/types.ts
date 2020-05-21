@@ -30,6 +30,7 @@ export type StoryEditorProps =
         session: Session;
         currentEntryIndex: number;
         showedCurrentEntryAt: string;
+        currentEntryText: string;
       } | null
     >
   | Generic;

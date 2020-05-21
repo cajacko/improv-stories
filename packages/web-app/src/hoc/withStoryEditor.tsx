@@ -15,7 +15,7 @@ import {
   StoryOwnProps,
 } from "../components/Story/types";
 
-const playingIntervalMilliseconds = 200;
+const playingIntervalMilliseconds = 100;
 
 interface InjectedHookProps {
   currentUserId: string;
@@ -27,6 +27,8 @@ interface InjectedHookProps {
   textAreaRef: React.RefObject<HTMLTextAreaElement>;
   didCurrentUserEndCurrentSessionEarly: boolean;
   isCurrentUserLastActiveSessionUserForStory: boolean;
+  lastSession: Session | null;
+  isLastSessionRevealed: boolean;
 }
 
 interface State {
@@ -47,7 +49,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     activeSession: Session | null;
     nullProps: StoryEditorProps;
     interval: null | number = null;
-    playingInterval: null | number = null;
+    intervalTimeout: number = 1000;
     removeTextListener: null | RemoveListener = null;
 
     constructor(props: HocProps<P>) {
@@ -68,7 +70,6 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         injectedLiveStoryEditorProps: this.getInjectedLiveStoryEditorProps(
           null,
           props,
-          null,
           null
         ),
         listenerKey: uuid(),
@@ -83,8 +84,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     getInjectedLiveStoryEditorProps = (
       text: string | null,
       props: HocProps<P>,
-      state: State | null,
-      lastSession: Session | null
+      state: State | null
     ): StoryEditorProps => {
       if (!props.activeSession) return this.nullProps;
       let activeSession = this.activeSession || props.activeSession;
@@ -105,6 +105,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         activeSession.userId === props.currentUserId;
 
       let canCurrentUserEdit =
+        !!props.activeSession &&
         !props.didCurrentUserEndCurrentSessionEarly &&
         isCurrentUserActiveSessionUser &&
         secondsLeft > 0;
@@ -115,14 +116,17 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         canCurrentUserEdit =
           canCurrentUserEdit && props.isCurrentUserActiveInStory;
       } else {
-        playingSession = state
-          ? state.injectedLiveStoryEditorProps.playingSession
-          : null;
+        playingSession =
+          canCurrentUserEdit && state
+            ? state.injectedLiveStoryEditorProps.playingSession
+            : null;
 
         if (playingSession) {
           const nextEntryIndex = playingSession.currentEntryIndex + 1;
 
-          if (playingSession.session.entries[nextEntryIndex]) {
+          const nextEntryText = playingSession.session.entries[nextEntryIndex];
+
+          if (nextEntryText) {
             const showNetEntryAfterDate = new Date(
               playingSession.showedCurrentEntryAt
             );
@@ -135,22 +139,29 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
             if (now.getTime() > showNetEntryAfterDate.getTime()) {
               playingSession = {
-                ...playingSession,
+                session: playingSession.session,
                 currentEntryIndex: nextEntryIndex,
-                showedCurrentEntryAt: now.toUTCString(),
+                showedCurrentEntryAt: now.toISOString(),
+                currentEntryText: nextEntryText,
               };
             }
           } else {
             playingSession = null;
           }
-        } else if (canCurrentUserEdit && lastSession) {
+        } else if (
+          canCurrentUserEdit &&
+          props.lastSession &&
+          !props.isLastSessionRevealed
+        ) {
           const currentEntryIndex = 0;
+          const currentEntryText = props.lastSession.entries[currentEntryIndex];
 
-          if (lastSession.entries[currentEntryIndex]) {
+          if (currentEntryText) {
             playingSession = {
-              session: lastSession,
+              session: props.lastSession,
               currentEntryIndex,
-              showedCurrentEntryAt: new Date().toUTCString(),
+              showedCurrentEntryAt: new Date().toISOString(),
+              currentEntryText,
             };
           }
         }
@@ -167,8 +178,9 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         };
       }
 
-      if (!playingSession && this.playingInterval) {
-        clearInterval(this.playingInterval);
+      if (!playingSession) {
+        // Reset it back to the default
+        this.setInterval();
       }
 
       return {
@@ -194,7 +206,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       state = this.state
     ) => {
       const text = this.getActiveSessionFinalEntry(state);
-      return this.getInjectedLiveStoryEditorProps(text, props, state, null);
+      return this.getInjectedLiveStoryEditorProps(text, props, state);
     };
 
     setInjectedLiveStoryEditorPropsIfChanged = (
@@ -223,12 +235,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       this.setInjectedLiveStoryEditorPropsIfChanged(
         undefined,
         undefined,
-        this.getInjectedLiveStoryEditorProps(
-          newText,
-          this.props,
-          this.state,
-          null
-        )
+        this.getInjectedLiveStoryEditorProps(newText, this.props, this.state)
       );
 
       try {
@@ -247,11 +254,19 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       } catch {}
     };
 
-    componentDidMount() {
+    setInterval = (interval = 1000) => {
+      if (interval === this.intervalTimeout) return;
+
+      this.intervalTimeout = interval;
+
       this.interval = setInterval(
         this.setInjectedLiveStoryEditorPropsIfChanged,
-        1000
+        interval
       );
+    };
+
+    componentDidMount() {
+      this.setInterval();
 
       this.removeTextListener = listen(
         "LIVE_STORY_SESSION_CHANGED",
@@ -278,15 +293,12 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
     // Store this.session outside the component, like a store
     componentWillReceiveProps(newProps: HocProps<P>) {
-      const lastSession = this.activeSession;
       const isNewSession =
-        !lastSession ||
+        !this.activeSession ||
         !newProps.activeSession ||
-        newProps.activeSession.id !== lastSession.id;
+        newProps.activeSession.id !== this.activeSession.id;
 
       if (isNewSession) {
-        // TODO: If an you are editor then start playing, set new interval.
-
         if (
           this.state.requestTurnState === "REQUESTING" &&
           newProps.originalProps.type === "STANDARD"
@@ -294,8 +306,10 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           this.setState({ requestTurnState: "CAN_REQUEST_TURN" });
         }
 
-        if (lastSession) {
-          newProps.dispatch(actions.sessionsById.setSession(lastSession));
+        if (this.activeSession) {
+          newProps.dispatch(
+            actions.sessionsById.setSession(this.activeSession)
+          );
         }
 
         this.activeSession = newProps.activeSession;
@@ -303,12 +317,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         this.setInjectedLiveStoryEditorPropsIfChanged(
           undefined,
           undefined,
-          this.getInjectedLiveStoryEditorProps(
-            "",
-            newProps,
-            this.state,
-            lastSession
-          )
+          this.getInjectedLiveStoryEditorProps("", newProps, this.state)
         );
       } else {
         this.setInjectedLiveStoryEditorPropsIfChanged(newProps);
@@ -324,12 +333,17 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
       if (
         this.props.originalProps.type === "STANDARD" &&
-        playingSession &&
-        !this.playingInterval
+        !this.props.isLastSessionRevealed &&
+        playingSession
       ) {
-        this.playingInterval = setInterval(
-          () => this.setInjectedLiveStoryEditorPropsIfChanged,
-          playingIntervalMilliseconds
+        console.log("PLAY STORY");
+
+        setInterval(playingIntervalMilliseconds);
+
+        this.props.dispatch(
+          actions.revealedSessionsBySessionId.setRevealedSessionBySessionId({
+            sessionId: playingSession.session.id,
+          })
         );
       }
 
@@ -351,6 +365,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     componentWillUnmount() {
       if (this.interval) {
         clearInterval(this.interval);
+        this.interval = null;
       }
 
       if (this.removeTextListener) {
@@ -390,7 +405,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       send({
         type: "STANDARD_STORY_REQUEST_TAKE_TURN",
         id: uuid(),
-        createdAt: new Date().toUTCString(),
+        createdAt: new Date().toISOString(),
         payload: {
           storyId: this.props.storyId,
           lastSession,
@@ -457,6 +472,18 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     const activeSession = useSelector((state) =>
       selectors.misc.selectActiveStorySession(state, props)
     );
+    const lastSession = useSelector((state) =>
+      selectors.misc.selectLastStorySession(state, props)
+    );
+
+    const isLastSessionRevealed = useSelector((state) =>
+      lastSession
+        ? selectors.revealedSessionsBySessionId.selectIsSessionRevealed(state, {
+            sessionId: lastSession.id,
+          })
+        : false
+    );
+
     const isCurrentUserLastActiveSessionUserForStory = useSelector((state) =>
       selectors.misc.selectIsCurrentUserLastActiveSessionUserForStory(
         state,
@@ -488,11 +515,13 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         storyId={props.storyId}
         isCurrentUserActiveInStory={isCurrentUserActiveInStory}
         activeSession={activeSession}
+        lastSession={lastSession}
         dispatch={dispatch}
         currentlyEditingUser={currentlyEditingUser}
         didCurrentUserEndCurrentSessionEarly={
           didCurrentUserEndCurrentSessionEarly
         }
+        isLastSessionRevealed={isLastSessionRevealed}
       />
     );
   };

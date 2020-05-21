@@ -6,6 +6,7 @@ import * as currentUser from "./currentUser/selectors";
 import * as sessionIdsByStoryId from "./sessionIdsByStoryId/selectors";
 import * as storyFetchStateByStoryId from "./storyFetchStateByStoryId/selectors";
 import * as storyPropsByStoryId from "./storyPropsByStoryId/selectors";
+import * as revealedSessionsBySessionId from "./revealedSessionsBySessionId/selectors";
 import * as didCurrentUserEndSessionEarlyBySessionId from "./didCurrentUserEndSessionEarlyBySessionId/selectors";
 
 export default {
@@ -18,4 +19,5 @@ export default {
   storyFetchStateByStoryId,
   storyPropsByStoryId,
   didCurrentUserEndSessionEarlyBySessionId,
+  revealedSessionsBySessionId,
 };

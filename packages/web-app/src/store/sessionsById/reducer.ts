@@ -7,8 +7,10 @@ const defaultState: SessionsByIdState = {};
 
 function addNewSessions(
   state: SessionsByIdState,
-  sessions: Array<Session | null>
+  sessions: Array<Session | null> | null
 ): SessionsByIdState {
+  if (!sessions) return state;
+
   let hasChanged = false;
 
   let newState = {
@@ -33,7 +35,7 @@ function addNewSessions(
 const reducer = createReducer<SessionsByIdState>(defaultState)
   .handleAction(
     actions.sessionIdsByStoryId.setStorySessions,
-    (state, { payload }) => addNewSessions(state, payload.sessions)
+    (state, { payload }) => addNewSessions(state, payload.sessions || null)
   )
   .handleAction(actions.storiesById.setStory, (state, { payload }) =>
     addNewSessions(state, [

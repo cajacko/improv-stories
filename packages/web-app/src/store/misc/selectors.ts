@@ -29,14 +29,28 @@ export const selectActiveStorySession = createCachedSelector(
 export const selectLastStorySession = createCachedSelector(
   selectStory,
   selectSessionsById,
-  (story, sessionsById) => {
+  selectStorySessionIds,
+  (story, sessionsById, storySessionsById) => {
     if (!story) return null;
 
-    // TODO: Not sure we're actually setting the last session properly. May need to check the
-    // sessions we get from the database
-    if (!story.lastSessionId) return null;
+    let lastSessionId: string | undefined;
+    let secondLastSessionId: string | undefined;
+    let actualLastSessionId: string | undefined;
 
-    return sessionsById[story.lastSessionId] || null;
+    if (storySessionsById) {
+      lastSessionId = storySessionsById[storySessionsById.length - 1];
+      secondLastSessionId = storySessionsById[storySessionsById.length - 2];
+    }
+
+    if (story.activeSessionId && lastSessionId === story.activeSessionId) {
+      actualLastSessionId = secondLastSessionId;
+    } else {
+      actualLastSessionId = lastSessionId;
+    }
+
+    if (!actualLastSessionId) return null;
+
+    return sessionsById[actualLastSessionId] || null;
   }
 )((state, props) => props.storyId);
 
@@ -83,6 +97,8 @@ export const selectStorySessions = createCachedSelector(
 interface SelectAllStoryParagraphsProps extends SelectorWithStoryIdProp {
   editingSessionId: string | null;
   editingSessionFinalEntry: string | null;
+  playingSessionId: string | null;
+  playingSessionText: string | null;
 }
 
 const getSelectAllStoryParagraphsKey = (
@@ -96,16 +112,28 @@ export const selectAllStoryParagraphs = createCachedSelector<
   Session[] | null,
   string | null,
   string | null,
+  string | null,
+  string | null,
   string[]
 >(
   selectStorySessions,
   (state, props) => props.editingSessionId,
   (state, props) => props.editingSessionFinalEntry,
-  (sessions, editingSessionId, editingSessionFinalEntry) =>
+  (state, props) => props.playingSessionId,
+  (state, props) => props.playingSessionText,
+  (
+    sessions,
+    editingSessionId,
+    editingSessionFinalEntry,
+    playingSessionId,
+    playingSessionText
+  ) =>
     sessions
       ? transformSessionsToParagraphs(sessions, {
           editingSessionId: editingSessionId || undefined,
           editingSessionFinalEntry: editingSessionFinalEntry || undefined,
+          playingSessionId: playingSessionId || undefined,
+          playingSessionText: playingSessionText || undefined,
         })
       : []
 )(getSelectAllStoryParagraphsKey);
@@ -117,30 +145,42 @@ export const selectAllStandardStoryParagraphs = createCachedSelector<
   CurrentUserState,
   string | null,
   string | null,
+  string | null,
+  string | null,
   string[]
 >(
   selectStorySessions,
   selectCurrentUser,
   (state, props) => props.editingSessionId,
   (state, props) => props.editingSessionFinalEntry,
-  (sessions, currentUser, editingSessionId, editingSessionFinalEntry) =>
+  (state, props) => props.playingSessionId,
+  (state, props) => props.playingSessionText,
+  (
+    sessions,
+    currentUser,
+    editingSessionId,
+    editingSessionFinalEntry,
+    playingSessionId,
+    playingSessionText
+  ) =>
     sessions
       ? transformSessionsToParagraphs(sessions, {
           editingSessionId: editingSessionId || undefined,
           editingSessionFinalEntry: editingSessionFinalEntry || undefined,
           shouldRemoveLastSessionIfNotUserId: currentUser.id,
+          playingSessionId: playingSessionId || undefined,
+          playingSessionText: playingSessionText || undefined,
         })
       : []
 )(getSelectAllStoryParagraphsKey);
 
+// TODO: This doesn't switch depending on type of story
 export const selectDoesStoryHaveContent = createCachedSelector(
   selectAllStoryParagraphs,
-  (paragraphs) => {
-    if (paragraphs.length > 1) return true;
-    if (paragraphs.length !== 1) return false;
-    if (!paragraphs[0]) return false;
+  (paragraphs): boolean => {
+    if (paragraphs.length < 1) return false;
 
-    return paragraphs[0] !== "";
+    return !paragraphs.every((paragraph) => paragraph === "");
   }
 )(getSelectAllStoryParagraphsKey);
 

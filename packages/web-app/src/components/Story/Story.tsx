@@ -79,6 +79,7 @@ function Story({
   type,
   requestTurnState,
   onRequestTakeTurn,
+  playingSession,
 }: StoryProps) {
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
@@ -93,6 +94,8 @@ function Story({
       storyId,
       editingSessionId: editingSession && editingSession.id,
       editingSessionFinalEntry: editingSession && editingSession.finalEntry,
+      playingSessionId: playingSession && playingSession.session.id,
+      playingSessionText: playingSession && playingSession.currentEntryText,
     })
   );
 
@@ -107,6 +110,25 @@ function Story({
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
     focusOnTextArea,
   ]);
+
+  const isPlayingSession = !!playingSession;
+
+  const playingSessionUserName = useSelector((state) => {
+    if (!playingSession) return null;
+
+    const user = selectors.usersById.selectUser(state, {
+      userId: playingSession.session.userId,
+    });
+
+    if (!user) return null;
+
+    return user.name;
+  });
+
+  const playingSessionId = playingSession ? playingSession.session.id : null;
+  const playingSessionText = playingSession
+    ? playingSession.currentEntryText
+    : null;
 
   const hasScrolled = useStoryInitScroll(
     fetchStatus,
@@ -184,6 +206,8 @@ function Story({
                     isTextInvisible={shouldShowLoading}
                     tutorialText={tutorialText}
                     storyType={type}
+                    playingSessionId={playingSessionId}
+                    playingSessionText={playingSessionText}
                   >
                     <>
                       {requestTurnState !== "CANNOT_REQUEST_TURN" &&
@@ -218,6 +242,8 @@ function Story({
                 canCurrentUserEdit={canCurrentUserEdit}
                 editingUser={editingUser}
                 storyType={type}
+                isPlayingSession={isPlayingSession}
+                playingSessionUserName={playingSessionUserName}
               />
             </>
           ),
@@ -240,6 +266,10 @@ function Story({
             onTakeTurnClick,
             requestTurnState,
             type,
+            isPlayingSession,
+            playingSessionUserName,
+            playingSessionId,
+            playingSessionText,
           ]
         )}
         renderDrawerContent={React.useCallback(

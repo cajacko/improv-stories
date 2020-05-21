@@ -6,12 +6,21 @@ function transformSessionsToParagraphs(
     editingSessionFinalEntry?: string;
     editingSessionId?: string;
     shouldRemoveLastSessionIfNotUserId?: string;
+    playingSessionId?: string;
+    playingSessionText?: string;
   } = {}
 ): string[] {
   let didAddEditingSession = false;
 
+  console.log("transformSessionsToParagraphs", opts.playingSessionText);
+
   let combinedSessions = sessions
     ? sessions.reduce((acc, { finalEntry, id, userId }, i, array) => {
+        if (opts.playingSessionText && opts.playingSessionId === id) {
+          didAddEditingSession = true;
+          return `${acc}${opts.playingSessionText}`;
+        }
+
         if (
           opts.shouldRemoveLastSessionIfNotUserId &&
           opts.shouldRemoveLastSessionIfNotUserId !== userId &&

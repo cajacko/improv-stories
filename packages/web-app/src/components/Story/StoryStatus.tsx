@@ -72,6 +72,8 @@ interface Props {
   canCurrentUserEdit: boolean;
   editingUser: User | null;
   storyType: "LIVE" | "STANDARD";
+  isPlayingSession: boolean;
+  playingSessionUserName: string | null;
 }
 
 function StoryStatus({
@@ -80,6 +82,8 @@ function StoryStatus({
   storyId,
   canCurrentUserEdit,
   editingUser,
+  isPlayingSession,
+  playingSessionUserName,
   storyType,
 }: Props) {
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
@@ -139,7 +143,9 @@ function StoryStatus({
   let showSkipButton = false;
   const updatingText = "Updating...";
 
-  if (isEditingSessionActive) {
+  if (isPlayingSession) {
+    statusText = `Playing entry by ${playingSessionUserName || "Anonymous"}`;
+  } else if (isEditingSessionActive) {
     if (secondsLeftProps && secondsLeftProps.secondsLeft >= 0) {
       if (canCurrentUserEdit) {
         statusText = "You are editing! Start typing.";

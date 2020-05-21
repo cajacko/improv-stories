@@ -1,6 +1,7 @@
 import { createReducer } from "typesafe-actions";
 import actions from "../actionsThatDefineTypes";
 import { SessionIdsByStoryIdState } from "./types";
+import { insertAllSessionTypes } from "./transforms";
 
 const defaultState: SessionIdsByStoryIdState = {};
 
@@ -8,32 +9,33 @@ const reducer = createReducer<SessionIdsByStoryIdState>(defaultState)
   .handleAction(
     actions.sessionIdsByStoryId.setStorySessions,
     (state, { payload }) => {
-      const sessionIds = payload.sessions.map(({ id }) => id);
+      const existingSortIds = state[payload.storyId];
 
-      if (payload.lastSessionId) {
-        if (!sessionIds.includes(payload.lastSessionId)) {
-          sessionIds.push(payload.lastSessionId);
-        }
-      }
+      const newSortIds = insertAllSessionTypes(
+        existingSortIds,
+        payload.sessions,
+        payload.activeSession,
+        payload.lastSession
+      );
 
-      if (payload.activeSessionId) {
-        if (!sessionIds.includes(payload.activeSessionId)) {
-          sessionIds.push(payload.activeSessionId);
-        }
-      }
+      if (existingSortIds === newSortIds) return state;
 
       return {
         ...state,
-        [payload.storyId]: sessionIds,
+        [payload.storyId]: newSortIds,
       };
     }
   )
   .handleAction(actions.storiesById.setStory, (state, { payload }) => {
-    if (!payload.sessionIds) return state;
+    if (!payload.sessionSortIds) return state;
+
+    const existingSortIds = state[payload.story.id];
+
+    if (existingSortIds === payload.sessionSortIds) return state;
 
     return {
       ...state,
-      [payload.story.id]: payload.sessionIds,
+      [payload.story.id]: payload.sessionSortIds,
     };
   });
 
