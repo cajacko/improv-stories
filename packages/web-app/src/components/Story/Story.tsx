@@ -101,7 +101,7 @@ function Story({
   );
 
   const onTakeTurnClick = React.useCallback(() => {
-    if (onRequestTakeTurn) onRequestTakeTurn(lastSession);
+    onRequestTakeTurn(lastSession);
   }, [onRequestTakeTurn, lastSession]);
 
   const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
@@ -186,24 +186,27 @@ function Story({
                     storyType={type}
                   >
                     <>
-                      {requestTurnState !== "CANNOT_REQUEST_TURN" && (
-                        <div className={classes.takeTurn}>
-                          <ProgressButton
-                            isLoading={requestTurnState === "REQUESTING"}
-                          >
-                            <Button
-                              variant="contained"
-                              color="secondary"
-                              onClick={onTakeTurnClick}
-                              disabled={requestTurnState !== "CAN_REQUEST_TURN"}
+                      {requestTurnState !== "CANNOT_REQUEST_TURN" &&
+                        !shouldShowLoading && (
+                          <div className={classes.takeTurn}>
+                            <ProgressButton
+                              isLoading={requestTurnState === "REQUESTING"}
                             >
-                              {requestTurnState === "CAN_REQUEST_TURN"
-                                ? "Take Turn"
-                                : "Updating"}
-                            </Button>
-                          </ProgressButton>
-                        </div>
-                      )}
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={onTakeTurnClick}
+                                disabled={
+                                  requestTurnState !== "CAN_REQUEST_TURN"
+                                }
+                              >
+                                {requestTurnState === "CAN_REQUEST_TURN"
+                                  ? "Take Turn"
+                                  : "Updating"}
+                              </Button>
+                            </ProgressButton>
+                          </div>
+                        )}
                     </>
                   </StoryContent>
                 </div>

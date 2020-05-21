@@ -1,7 +1,7 @@
 import { ServerSession } from "../sharedTypes";
 import { Session } from "../store/sessionsById/types";
 
-export function convertServerSession(
+export function transformServerSessionToClientSession(
   session: ServerSession | null
 ): Session | null {
   if (!session) return null;
@@ -18,4 +18,4 @@ export function convertServerSession(
   };
 }
 
-export default convertServerSession;
+export default transformServerSessionToClientSession;

@@ -7,13 +7,15 @@ import { User } from "../sharedTypes";
 import { send, listen } from "../utils/socket";
 import { Session } from "../store/sessionsById/types";
 import selectors from "../store/selectors";
-import convertServerSession from "../utils/convertServerSession";
+import transformServerSessionToClientSession from "../utils/transformServerSessionToClientSession";
 import actions from "../store/actions";
 import {
   StoryEditorProps,
   InjectedStoryProps,
   StoryOwnProps,
 } from "../components/Story/types";
+
+const playingIntervalMilliseconds = 200;
 
 interface InjectedHookProps {
   currentUserId: string;
@@ -45,6 +47,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
     activeSession: Session | null;
     nullProps: StoryEditorProps;
     interval: null | number = null;
+    playingInterval: null | number = null;
     removeTextListener: null | RemoveListener = null;
 
     constructor(props: HocProps<P>) {
@@ -57,13 +60,16 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         editingSession: null,
         editingUser: null,
         isCurrentUserActiveSessionUser: false,
+        playingSession: null,
       };
 
       this.state = {
         isTextAreaFocussed: false,
         injectedLiveStoryEditorProps: this.getInjectedLiveStoryEditorProps(
           null,
-          props
+          props,
+          null,
+          null
         ),
         listenerKey: uuid(),
         // TODO: Should always default to cannot, this is temp
@@ -76,7 +82,9 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
     getInjectedLiveStoryEditorProps = (
       text: string | null,
-      props = this.props
+      props: HocProps<P>,
+      state: State | null,
+      lastSession: Session | null
     ): StoryEditorProps => {
       if (!props.activeSession) return this.nullProps;
       let activeSession = this.activeSession || props.activeSession;
@@ -101,9 +109,53 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         isCurrentUserActiveSessionUser &&
         secondsLeft > 0;
 
+      let playingSession: StoryEditorProps["playingSession"] | null = null;
+
       if (props.originalProps.type === "LIVE") {
         canCurrentUserEdit =
           canCurrentUserEdit && props.isCurrentUserActiveInStory;
+      } else {
+        playingSession = state
+          ? state.injectedLiveStoryEditorProps.playingSession
+          : null;
+
+        if (playingSession) {
+          const nextEntryIndex = playingSession.currentEntryIndex + 1;
+
+          if (playingSession.session.entries[nextEntryIndex]) {
+            const showNetEntryAfterDate = new Date(
+              playingSession.showedCurrentEntryAt
+            );
+            showNetEntryAfterDate.setMilliseconds(
+              showNetEntryAfterDate.getMilliseconds() +
+                playingIntervalMilliseconds
+            );
+
+            const now = new Date();
+
+            if (now.getTime() > showNetEntryAfterDate.getTime()) {
+              playingSession = {
+                ...playingSession,
+                currentEntryIndex: nextEntryIndex,
+                showedCurrentEntryAt: now.toUTCString(),
+              };
+            }
+          } else {
+            playingSession = null;
+          }
+        } else if (canCurrentUserEdit && lastSession) {
+          const currentEntryIndex = 0;
+
+          if (lastSession.entries[currentEntryIndex]) {
+            playingSession = {
+              session: lastSession,
+              currentEntryIndex,
+              showedCurrentEntryAt: new Date().toUTCString(),
+            };
+          }
+        }
+
+        if (playingSession) canCurrentUserEdit = false;
       }
 
       let editingSession = activeSession;
@@ -115,7 +167,12 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         };
       }
 
+      if (!playingSession && this.playingInterval) {
+        clearInterval(this.playingInterval);
+      }
+
       return {
+        playingSession,
         secondsLeftProps: {
           secondsLeft,
           totalSeconds,
@@ -137,7 +194,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       state = this.state
     ) => {
       const text = this.getActiveSessionFinalEntry(state);
-      return this.getInjectedLiveStoryEditorProps(text, props);
+      return this.getInjectedLiveStoryEditorProps(text, props, state, null);
     };
 
     setInjectedLiveStoryEditorPropsIfChanged = (
@@ -166,7 +223,12 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       this.setInjectedLiveStoryEditorPropsIfChanged(
         undefined,
         undefined,
-        this.getInjectedLiveStoryEditorProps(newText)
+        this.getInjectedLiveStoryEditorProps(
+          newText,
+          this.props,
+          this.state,
+          null
+        )
       );
 
       try {
@@ -205,7 +267,9 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
             return;
           }
 
-          this.activeSession = convertServerSession(message.payload);
+          this.activeSession = transformServerSessionToClientSession(
+            message.payload
+          );
 
           this.setInjectedLiveStoryEditorPropsIfChanged();
         }
@@ -214,12 +278,15 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
 
     // Store this.session outside the component, like a store
     componentWillReceiveProps(newProps: HocProps<P>) {
+      const lastSession = this.activeSession;
       const isNewSession =
-        !this.activeSession ||
+        !lastSession ||
         !newProps.activeSession ||
-        newProps.activeSession.id !== this.activeSession.id;
+        newProps.activeSession.id !== lastSession.id;
 
       if (isNewSession) {
+        // TODO: If an you are editor then start playing, set new interval.
+
         if (
           this.state.requestTurnState === "REQUESTING" &&
           newProps.originalProps.type === "STANDARD"
@@ -227,10 +294,8 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           this.setState({ requestTurnState: "CAN_REQUEST_TURN" });
         }
 
-        if (this.activeSession) {
-          newProps.dispatch(
-            actions.sessionsById.setSession(this.activeSession)
-          );
+        if (lastSession) {
+          newProps.dispatch(actions.sessionsById.setSession(lastSession));
         }
 
         this.activeSession = newProps.activeSession;
@@ -238,7 +303,12 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         this.setInjectedLiveStoryEditorPropsIfChanged(
           undefined,
           undefined,
-          this.getInjectedLiveStoryEditorProps("", newProps)
+          this.getInjectedLiveStoryEditorProps(
+            "",
+            newProps,
+            this.state,
+            lastSession
+          )
         );
       } else {
         this.setInjectedLiveStoryEditorPropsIfChanged(newProps);
@@ -249,10 +319,22 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       const {
         editingSession,
         canCurrentUserEdit,
+        playingSession,
       } = this.state.injectedLiveStoryEditorProps;
 
+      if (
+        this.props.originalProps.type === "STANDARD" &&
+        playingSession &&
+        !this.playingInterval
+      ) {
+        this.playingInterval = setInterval(
+          () => this.setInjectedLiveStoryEditorPropsIfChanged,
+          playingIntervalMilliseconds
+        );
+      }
+
       if (!editingSession || !canCurrentUserEdit) {
-        this.blueTextArea();
+        this.blurTextArea();
         return;
       }
 
@@ -276,7 +358,7 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       }
     }
 
-    blueTextArea = (props = this.props) => {
+    blurTextArea = (props = this.props) => {
       if (props.textAreaRef.current) {
         props.textAreaRef.current.blur();
       }
@@ -296,7 +378,9 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       this.setState({ isTextAreaFocussed: false });
     };
 
-    onRequestTakeTurn = (lastSession: Session | null) => {
+    onRequestTakeTurn: InjectedStoryProps["onRequestTakeTurn"] = (
+      lastSession
+    ) => {
       if (this.getRequestTurnState() !== "CAN_REQUEST_TURN") return;
 
       this.setState({
@@ -314,10 +398,10 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       });
     };
 
-    getRequestTurnState(
+    getRequestTurnState = (
       props = this.props,
       state = this.state
-    ): InjectedStoryProps["requestTurnState"] {
+    ): InjectedStoryProps["requestTurnState"] => {
       if (props.originalProps.type === "LIVE") return "CANNOT_REQUEST_TURN";
 
       const injectedProps = this.getInjectedLiveStoryEditorPropsWithText(
@@ -336,10 +420,11 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
       }
 
       return state.requestTurnState;
-    }
+    };
 
     render() {
       const props = this.getInjectedLiveStoryEditorPropsWithText();
+      const requestTurnState = this.getRequestTurnState();
 
       return (
         <Component
@@ -353,12 +438,8 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
           onTextAreaChange={this.onTextChange}
           onTextAreaFocus={this.onTextAreaFocus}
           onTextAreaBlur={this.onTextAreaBlur}
-          onTakeTurnClick={
-            this.getRequestTurnState() === "CAN_REQUEST_TURN"
-              ? this.onRequestTakeTurn
-              : undefined
-          }
-          requestTurnState={this.getRequestTurnState()}
+          onRequestTakeTurn={this.onRequestTakeTurn}
+          requestTurnState={requestTurnState}
           {...props}
         />
       );

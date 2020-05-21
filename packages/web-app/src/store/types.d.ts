@@ -2,7 +2,7 @@ import { StateType, ActionType } from "typesafe-actions";
 import { Dispatch } from "redux";
 
 declare module "ReduxTypes" {
-  type Action = ActionType<typeof import("./actions").default>;
+  type Action = ActionType<typeof import("./actionsThatDefineTypes").default>;
 
   export type Store = StateType<typeof import("./index").store>;
   export type RootAction = Action;
@@ -12,7 +12,7 @@ declare module "ReduxTypes" {
 
 declare module "typesafe-actions" {
   interface Types {
-    RootAction: ActionType<typeof import("./actions").default>;
+    RootAction: ActionType<typeof import("./actionsThatDefineTypes").default>;
   }
 }
 
@@ -26,6 +26,8 @@ declare module "react-redux" {
   ): TSelected;
 
   function useDispatch<
-    TDispatch = Dispatch<ActionType<typeof import("./actions").default>>
+    TDispatch = Dispatch<
+      ActionType<typeof import("./actionsThatDefineTypes").default>
+    >
   >(): TDispatch;
 }

@@ -21,7 +21,7 @@ function onStoryChanged(
 
     lastDispatchedStoryVersion = message.payload.version;
 
-    store.dispatch(actions.storiesById.setStory(message.payload));
+    store.dispatch(actions.misc.setStoryWithSessionIds(message.payload));
   };
 }
 

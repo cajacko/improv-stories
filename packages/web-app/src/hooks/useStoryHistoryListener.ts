@@ -12,6 +12,7 @@ import {
   isNumber,
 } from "../utils/typeGuards";
 import { DatabaseSession } from "../sharedTypes";
+import sortSessions from "../utils/sortSessions";
 import { Session } from "../store/sessionsById/types";
 import { StoryFetchStatus } from "../store/storyFetchStateByStoryId/types";
 import selectors from "../store/selectors";
@@ -34,11 +35,7 @@ const isSession = isObjectOf<Session>({
 const isSessionsResponse = isKeyedObjectOf<DatabaseSession>(isSession);
 
 function transformSessionsResponse(response: SessionsResponse): Session[] {
-  return Object.values(response).sort(
-    (a, b) =>
-      new Date(a.dateWillFinish).getTime() -
-      new Date(b.dateWillFinish).getTime()
-  );
+  return sortSessions(Object.values(response));
 }
 
 function useStoryHistoryListener(storyId: string) {

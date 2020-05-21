@@ -1,6 +1,6 @@
 import { createReducer } from "typesafe-actions";
-import actions from "../actions";
-import convertServerSession from "../../utils/convertServerSession";
+import actions from "../actionsThatDefineTypes";
+import transformServerSessionToClientSession from "../../utils/transformServerSessionToClientSession";
 import { SessionsByIdState, Session } from "./types";
 
 const defaultState: SessionsByIdState = {};
@@ -37,8 +37,8 @@ const reducer = createReducer<SessionsByIdState>(defaultState)
   )
   .handleAction(actions.storiesById.setStory, (state, { payload }) =>
     addNewSessions(state, [
-      convertServerSession(payload.activeSession),
-      convertServerSession(payload.lastSession),
+      transformServerSessionToClientSession(payload.story.activeSession),
+      transformServerSessionToClientSession(payload.story.lastSession),
     ])
   );
 
