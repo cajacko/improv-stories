@@ -21,6 +21,8 @@ import {
   getLiveStoryTutorialText,
   getStandardStoryTutorialText,
 } from "../../utils/getTutorialText";
+import StoryContext from "../../context/StoryEditor";
+import useStoryEditor from "../../hooks/useStoryEditor";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -69,13 +71,6 @@ function Story({
   editingUser,
   secondsLeftProps,
   canCurrentUserEdit,
-  isTextAreaFocussed,
-  focusOnTextArea,
-  textAreaRef,
-  textAreaValue,
-  onTextAreaBlur,
-  onTextAreaFocus,
-  onTextAreaChange,
   type,
   requestTurnState,
   onRequestTakeTurn,
@@ -83,6 +78,11 @@ function Story({
 }: StoryProps) {
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
+  const {
+    focusOnTextArea,
+    isTextAreaFocussed,
+    ...storyEditor
+  } = useStoryEditor();
   useStorySetup(storyId);
   const fetchStatus = useSelector((state) =>
     selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
@@ -106,10 +106,6 @@ function Story({
   const onTakeTurnClick = React.useCallback(() => {
     onRequestTakeTurn(lastSession);
   }, [onRequestTakeTurn, lastSession]);
-
-  const onFocusOverlayClick = React.useCallback(() => focusOnTextArea(), [
-    focusOnTextArea,
-  ]);
 
   const isPlayingSession = !!playingSession;
 
@@ -155,135 +151,132 @@ function Story({
       : getStandardStoryTutorialText(window.location.href);
 
   return (
-    <div className={classes.container}>
-      {shouldShowLoading && <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />}
-      <StoryLayout
-        canCurrentUserEdit={canCurrentUserEdit}
-        renderMainContent={React.useCallback(
-          ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
-            <>
-              <div
-                className={classes.contentContainer}
-                ref={contentContainerRef}
-              >
-                <div className={classes.actionBar}>
-                  {!isWideScreen &&
-                    secondsLeftProps !== null &&
-                    isTextAreaFocussed && (
-                      <div className={classes.storyProgressBar}>
-                        <StoryProgressBar
-                          value={secondsLeftProps.secondsLeft}
-                          maxValue={secondsLeftProps.totalSeconds}
-                          color="secondary"
-                        />
-                      </div>
-                    )}
+    <StoryContext.Provider
+      value={{
+        registerFocusListener: storyEditor.registerFocusListener,
+        onFocusChange: storyEditor.onFocusChange,
+      }}
+    >
+      <div className={classes.container}>
+        {shouldShowLoading && <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />}
+        <StoryLayout
+          canCurrentUserEdit={canCurrentUserEdit}
+          renderMainContent={React.useCallback(
+            ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
+              <>
+                <div
+                  className={classes.contentContainer}
+                  ref={contentContainerRef}
+                >
+                  <div className={classes.actionBar}>
+                    {!isWideScreen &&
+                      secondsLeftProps !== null &&
+                      isTextAreaFocussed && (
+                        <div className={classes.storyProgressBar}>
+                          <StoryProgressBar
+                            value={secondsLeftProps.secondsLeft}
+                            maxValue={secondsLeftProps.totalSeconds}
+                            color="secondary"
+                          />
+                        </div>
+                      )}
 
-                  <StoryActionBar
-                    storyId={storyId}
-                    isStorySettingsDrawerOpen={isOpen}
-                    toggleIsSettingsDrawerOpen={toggleIsOpen}
-                    hideJoinButton={type === "STANDARD"}
-                  />
-                </div>
+                    <StoryActionBar
+                      storyId={storyId}
+                      isStorySettingsDrawerOpen={isOpen}
+                      toggleIsSettingsDrawerOpen={toggleIsOpen}
+                      hideJoinButton={type === "STANDARD"}
+                    />
+                  </div>
 
-                {!isTextAreaFocussed && canCurrentUserEdit && (
-                  <StoryFocusOverlay onClick={onFocusOverlayClick} />
-                )}
-                <div className={classes.textContainer}>
-                  <StoryContent
-                    storyId={storyId}
-                    editingSessionFinalEntry={
-                      editingSession && editingSession.finalEntry
-                    }
-                    editingSessionId={editingSession && editingSession.id}
-                    textAreaRef={textAreaRef}
-                    textAreaValue={textAreaValue}
-                    onTextAreaBlur={onTextAreaBlur}
-                    onTextAreaFocus={onTextAreaFocus}
-                    onTextAreaChange={onTextAreaChange}
-                    canCurrentUserEdit={canCurrentUserEdit}
-                    isTextInvisible={shouldShowLoading}
-                    tutorialText={tutorialText}
-                    storyType={type}
-                    playingSessionId={playingSessionId}
-                    playingSessionText={playingSessionText}
-                  >
-                    <>
-                      {requestTurnState !== "CANNOT_REQUEST_TURN" &&
-                        !shouldShowLoading && (
-                          <div className={classes.takeTurn}>
-                            <ProgressButton
-                              isLoading={requestTurnState === "REQUESTING"}
-                            >
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={onTakeTurnClick}
-                                disabled={
-                                  requestTurnState !== "CAN_REQUEST_TURN"
-                                }
+                  {!isTextAreaFocussed && canCurrentUserEdit && (
+                    <StoryFocusOverlay onClick={focusOnTextArea} />
+                  )}
+                  <div className={classes.textContainer}>
+                    <StoryContent
+                      storyId={storyId}
+                      editingSessionFinalEntry={
+                        editingSession && editingSession.finalEntry
+                      }
+                      editingSessionId={editingSession && editingSession.id}
+                      canCurrentUserEdit={canCurrentUserEdit}
+                      isTextInvisible={shouldShowLoading}
+                      tutorialText={tutorialText}
+                      storyType={type}
+                      playingSessionId={playingSessionId}
+                      playingSessionText={playingSessionText}
+                    >
+                      <>
+                        {requestTurnState !== "CANNOT_REQUEST_TURN" &&
+                          !shouldShowLoading && (
+                            <div className={classes.takeTurn}>
+                              <ProgressButton
+                                isLoading={requestTurnState === "REQUESTING"}
                               >
-                                {requestTurnState === "CAN_REQUEST_TURN"
-                                  ? "Take Turn"
-                                  : "Updating"}
-                              </Button>
-                            </ProgressButton>
-                          </div>
-                        )}
-                    </>
-                  </StoryContent>
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  onClick={onTakeTurnClick}
+                                  disabled={
+                                    requestTurnState !== "CAN_REQUEST_TURN"
+                                  }
+                                >
+                                  {requestTurnState === "CAN_REQUEST_TURN"
+                                    ? "Take Turn"
+                                    : "Updating"}
+                                </Button>
+                              </ProgressButton>
+                            </div>
+                          )}
+                      </>
+                    </StoryContent>
+                  </div>
                 </div>
-              </div>
-              <StoryStatus
+                <StoryStatus
+                  storyId={storyId}
+                  editingSessionId={editingSession && editingSession.id}
+                  secondsLeftProps={secondsLeftProps}
+                  canCurrentUserEdit={canCurrentUserEdit}
+                  editingUser={editingUser}
+                  storyType={type}
+                  isPlayingSession={isPlayingSession}
+                  playingSessionUserName={playingSessionUserName}
+                />
+              </>
+            ),
+            [
+              classes,
+              storyId,
+              isTextAreaFocussed,
+              canCurrentUserEdit,
+              editingSession,
+              secondsLeftProps,
+              editingUser,
+              focusOnTextArea,
+              shouldShowLoading,
+              tutorialText,
+              onTakeTurnClick,
+              requestTurnState,
+              type,
+              isPlayingSession,
+              playingSessionUserName,
+              playingSessionId,
+              playingSessionText,
+            ]
+          )}
+          renderDrawerContent={React.useCallback(
+            ({ handleClose }) => (
+              <StorySettings
                 storyId={storyId}
-                editingSessionId={editingSession && editingSession.id}
-                secondsLeftProps={secondsLeftProps}
-                canCurrentUserEdit={canCurrentUserEdit}
-                editingUser={editingUser}
+                handleClose={handleClose}
                 storyType={type}
-                isPlayingSession={isPlayingSession}
-                playingSessionUserName={playingSessionUserName}
               />
-            </>
-          ),
-          [
-            classes,
-            storyId,
-            isTextAreaFocussed,
-            canCurrentUserEdit,
-            editingSession,
-            textAreaRef,
-            textAreaValue,
-            onTextAreaBlur,
-            onTextAreaFocus,
-            onTextAreaChange,
-            secondsLeftProps,
-            editingUser,
-            onFocusOverlayClick,
-            shouldShowLoading,
-            tutorialText,
-            onTakeTurnClick,
-            requestTurnState,
-            type,
-            isPlayingSession,
-            playingSessionUserName,
-            playingSessionId,
-            playingSessionText,
-          ]
-        )}
-        renderDrawerContent={React.useCallback(
-          ({ handleClose }) => (
-            <StorySettings
-              storyId={storyId}
-              handleClose={handleClose}
-              storyType={type}
-            />
-          ),
-          [storyId, type]
-        )}
-      />
-    </div>
+            ),
+            [storyId, type]
+          )}
+        />
+      </div>
+    </StoryContext.Provider>
   );
 }
 

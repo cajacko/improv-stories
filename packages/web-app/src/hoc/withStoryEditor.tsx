@@ -336,8 +336,6 @@ function withStoryEditor<P extends StoryOwnProps = StoryOwnProps>(
         !this.props.isLastSessionRevealed &&
         playingSession
       ) {
-        console.log("PLAY STORY");
-
         setInterval(playingIntervalMilliseconds);
 
         this.props.dispatch(

@@ -7,7 +7,7 @@ When a story is in progress 1 person will be editing at a time. They will have a
 It's also more fun to go on a group call whilst writing :)
 `;
 
-  return raw.split("\n");
+  return raw;
 }
 
 export function getStandardStoryTutorialText(storyLink: string) {
@@ -15,5 +15,5 @@ export function getStandardStoryTutorialText(storyLink: string) {
 Improv stories is a way of writing strange, fun, and curious stories with others.
 `;
 
-  return raw.split("\n");
+  return raw;
 }

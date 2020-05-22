@@ -12,8 +12,6 @@ function transformSessionsToParagraphs(
 ): string[] {
   let didAddEditingSession = false;
 
-  console.log("transformSessionsToParagraphs", opts.playingSessionText);
-
   let combinedSessions = sessions
     ? sessions.reduce((acc, { finalEntry, id, userId }, i, array) => {
         if (opts.playingSessionText && opts.playingSessionId === id) {

@@ -2,19 +2,16 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
+import StorySession from "./StorySession";
+import StoryText from "./StoryText";
 
 export interface Props {
   storyId: string;
   editingSessionId: string | null;
   editingSessionFinalEntry: string | null;
   canCurrentUserEdit: boolean;
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus: () => void;
-  onTextAreaBlur: () => void;
-  textAreaValue: string;
-  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   isTextInvisible?: boolean;
-  tutorialText: string[];
+  tutorialText: string;
   children?: JSX.Element;
   storyType: "LIVE" | "STANDARD";
   playingSessionId: string | null;
@@ -79,11 +76,6 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
 );
 
 function StoryContent({
-  textAreaRef,
-  textAreaValue,
-  onTextAreaBlur,
-  onTextAreaFocus,
-  onTextAreaChange,
   isTextInvisible,
   children,
   storyId,
@@ -100,7 +92,12 @@ function StoryContent({
     })
   );
 
-  console.log("StoryContent", playingSessionText);
+  const storySessionIds =
+    useSelector((state) =>
+      selectors.sessionIdsByStoryId.selectStorySessionIds(state, { storyId })
+    ) || [];
+
+  const hasSessions = !!storySessionIds.length;
 
   const storyParagraphs = useSelector((state) =>
     (storyType === "LIVE"
@@ -119,21 +116,14 @@ function StoryContent({
     storyParagraphs.length > 0 &&
     !storyParagraphs.every((paragraph) => paragraph === "");
 
-  let paragraphs: string[] = [];
   let textStyle: StyleProps["textStyle"] = "NORMAL";
-  let cursorPosition: "START" | "END" | undefined;
   let showCursor: boolean = false;
 
   if (fetchStatus !== null) {
     showCursor = true;
 
     if (!doesStoryHaveContent || fetchStatus !== "FETCHED_NOW_LISTENING") {
-      paragraphs = tutorialText;
       textStyle = "FADED";
-      cursorPosition = "START";
-    } else {
-      paragraphs = storyParagraphs;
-      cursorPosition = "END";
     }
   }
 
@@ -143,39 +133,19 @@ function StoryContent({
     textStyle,
   });
 
-  const lastParagraph = paragraphs[paragraphs.length - 1] as string | undefined;
-
-  const autoCapitalize =
-    !lastParagraph ||
-    lastParagraph.trim() === "" ||
-    lastParagraph.trim().endsWith(".");
-
   return (
     <div className={classes.container}>
-      {paragraphs.map((text, i) => (
-        <p key={i} className={classes.paragraph}>
-          {cursorPosition === "START" && 0 === i && (
-            <span className={classes.cursor} />
-          )}
-          <span className={classes.paragraphText}>{text}</span>
-          {cursorPosition === "END" && paragraphs.length - 1 === i && (
-            <span className={classes.cursor} />
-          )}
-        </p>
-      ))}
-      {/* Textarea must always be statically rendered and never unmount */}
-      <span className={classes.textAreaContainer}>
-        <textarea
-          className={classes.textArea}
-          ref={textAreaRef}
-          value={textAreaValue}
-          onBlur={onTextAreaBlur}
-          onFocus={onTextAreaFocus}
-          onChange={onTextAreaChange}
-          autoCorrect="off"
-          autoCapitalize={autoCapitalize ? "sentences" : "none"}
-        />
-      </span>
+      {hasSessions &&
+        storySessionIds.map((sessionId) => (
+          <StorySession
+            key={sessionId}
+            sessionId={sessionId}
+            storyId={storyId}
+          />
+        ))}
+
+      {!hasSessions && <StoryText text={tutorialText} textStyle="FADED" />}
+
       {children}
     </div>
   );

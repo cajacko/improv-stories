@@ -1,4 +1,3 @@
-import React from "react";
 import { User } from "../../sharedTypes";
 import { Session } from "../../store/sessionsById/types";
 
@@ -36,13 +35,6 @@ export type StoryEditorProps =
   | Generic;
 
 export type InjectedStoryProps = StoryEditorProps & {
-  isTextAreaFocussed: boolean;
-  focusOnTextArea: () => void;
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus: () => void;
-  onTextAreaBlur: () => void;
-  textAreaValue: string;
-  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onRequestTakeTurn: (lastSession: Session | null) => void;
   requestTurnState: "CAN_REQUEST_TURN" | "REQUESTING" | "CANNOT_REQUEST_TURN";
 };
