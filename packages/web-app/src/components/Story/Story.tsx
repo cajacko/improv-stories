@@ -21,8 +21,8 @@ import {
 import StoryContext from "../../context/StoryEditor";
 import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
 import useRequestStoryTurn from "../../hooks/useRequestStoryTurn";
-import usePlayingSession from "../../hooks/usePlayingSession";
 import playStoryTimeout from "../../config/playStoryTimeout";
+import PlayingStorySession from "../../context/PlayingStorySession";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -72,10 +72,10 @@ interface Props {
 
 function Story({ storyId, type }: Props) {
   const classes = useStyles();
+  const { playStorySession } = React.useContext(PlayingStorySession);
   const { isTextAreaFocussed, focusOnTextArea } = React.useContext(
     StoryContext
   );
-  const playingSession = usePlayingSession();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
   const canCurrentUserEditStory = useCanCurrentUserEditStory(storyId, type);
   const { onRequestTakeTurn, requestTurnState } = useRequestStoryTurn(
@@ -95,8 +95,6 @@ function Story({ storyId, type }: Props) {
   const lastSession = useSelector((state) =>
     selectors.misc.selectLastStorySession(state, { storyId })
   );
-
-  const { playStorySession } = playingSession;
 
   const onTakeTurnClick = React.useCallback(() => {
     let buffer: number | null = null;

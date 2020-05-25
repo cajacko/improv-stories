@@ -13,8 +13,8 @@ interface Props {
 
 function StoryProvider({ storyId, type }: Props) {
   const playingSession = usePlayingSession();
-
   const storyEditor = useStoryEditor();
+
   useStorySetup(storyId);
 
   return (
