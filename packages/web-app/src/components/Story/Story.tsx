@@ -1,7 +1,6 @@
 import React from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
-import { StoryProps, StoryOwnProps } from "./types";
 import selectors from "../../store/selectors";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
 import StoryFocusOverlay from "./StoryFocusOverlay";
@@ -14,7 +13,6 @@ import useStorySetup from "../../hooks/useStorySetup";
 import LoadingOverlay from "../LoadingOverlay";
 import useStoryInitScroll from "../../hooks/useStoryInitScroll";
 import StorySettings from "./StorySettings";
-import withStoryEditor from "../../hoc/withStoryEditor";
 import ProgressButton from "../ProgressButton";
 import Button from "@material-ui/core/Button";
 import {
@@ -23,6 +21,8 @@ import {
 } from "../../utils/getTutorialText";
 import StoryContext from "../../context/StoryEditor";
 import useStoryEditor from "../../hooks/useStoryEditor";
+import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
+import useRequestStoryTurn from "../../hooks/useRequestStoryTurn";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -65,19 +65,19 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function Story({
-  storyId,
-  editingSession,
-  editingUser,
-  secondsLeftProps,
-  canCurrentUserEdit,
-  type,
-  requestTurnState,
-  onRequestTakeTurn,
-  playingSession,
-}: StoryProps) {
+interface Props {
+  storyId: string;
+  type: "LIVE" | "STANDARD";
+}
+
+function Story({ storyId, type }: Props) {
   const classes = useStyles();
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
+  const canCurrentUserEditStory = useCanCurrentUserEditStory(storyId, type);
+  const { onRequestTakeTurn, requestTurnState } = useRequestStoryTurn(
+    storyId,
+    type
+  );
   const {
     focusOnTextArea,
     isTextAreaFocussed,
@@ -90,13 +90,7 @@ function Story({
     })
   );
   const doesStoryHaveContent = useSelector((state) =>
-    selectors.misc.selectDoesStoryHaveContent(state, {
-      storyId,
-      editingSessionId: editingSession && editingSession.id,
-      editingSessionFinalEntry: editingSession && editingSession.finalEntry,
-      playingSessionId: playingSession && playingSession.session.id,
-      playingSessionText: playingSession && playingSession.currentEntryText,
-    })
+    selectors.misc.selectDoesStoryHaveContent(state, { storyId })
   );
 
   const lastSession = useSelector((state) =>
@@ -106,25 +100,6 @@ function Story({
   const onTakeTurnClick = React.useCallback(() => {
     onRequestTakeTurn(lastSession);
   }, [onRequestTakeTurn, lastSession]);
-
-  const isPlayingSession = !!playingSession;
-
-  const playingSessionUserName = useSelector((state) => {
-    if (!playingSession) return null;
-
-    const user = selectors.usersById.selectUser(state, {
-      userId: playingSession.session.userId,
-    });
-
-    if (!user) return null;
-
-    return user.name;
-  });
-
-  const playingSessionId = playingSession ? playingSession.session.id : null;
-  const playingSessionText = playingSession
-    ? playingSession.currentEntryText
-    : null;
 
   const hasScrolled = useStoryInitScroll(
     fetchStatus,
@@ -160,7 +135,8 @@ function Story({
       <div className={classes.container}>
         {shouldShowLoading && <LoadingOverlay zIndex="STORY_LOADING_OVERLAY" />}
         <StoryLayout
-          canCurrentUserEdit={canCurrentUserEdit}
+          storyId={storyId}
+          storyType={type}
           renderMainContent={React.useCallback(
             ({ isOpen, toggleIsOpen, isWideScreen }: RenderProps) => (
               <>
@@ -169,17 +145,11 @@ function Story({
                   ref={contentContainerRef}
                 >
                   <div className={classes.actionBar}>
-                    {!isWideScreen &&
-                      secondsLeftProps !== null &&
-                      isTextAreaFocussed && (
-                        <div className={classes.storyProgressBar}>
-                          <StoryProgressBar
-                            value={secondsLeftProps.secondsLeft}
-                            maxValue={secondsLeftProps.totalSeconds}
-                            color="secondary"
-                          />
-                        </div>
-                      )}
+                    {!isWideScreen && isTextAreaFocussed && (
+                      <div className={classes.storyProgressBar}>
+                        <StoryProgressBar storyId={storyId} color="secondary" />
+                      </div>
+                    )}
 
                     <StoryActionBar
                       storyId={storyId}
@@ -189,26 +159,18 @@ function Story({
                     />
                   </div>
 
-                  {!isTextAreaFocussed && canCurrentUserEdit && (
+                  {!isTextAreaFocussed && canCurrentUserEditStory && (
                     <StoryFocusOverlay onClick={focusOnTextArea} />
                   )}
-                  <div className={classes.textContainer}>
-                    <StoryContent
-                      storyId={storyId}
-                      editingSessionFinalEntry={
-                        editingSession && editingSession.finalEntry
-                      }
-                      editingSessionId={editingSession && editingSession.id}
-                      canCurrentUserEdit={canCurrentUserEdit}
-                      isTextInvisible={shouldShowLoading}
-                      tutorialText={tutorialText}
-                      storyType={type}
-                      playingSessionId={playingSessionId}
-                      playingSessionText={playingSessionText}
-                    >
-                      <>
-                        {requestTurnState !== "CANNOT_REQUEST_TURN" &&
-                          !shouldShowLoading && (
+                  {!shouldShowLoading && (
+                    <div className={classes.textContainer}>
+                      <StoryContent
+                        storyId={storyId}
+                        tutorialText={tutorialText}
+                        storyType={type}
+                      >
+                        <>
+                          {requestTurnState !== "CANNOT_REQUEST_TURN" && (
                             <div className={classes.takeTurn}>
                               <ProgressButton
                                 isLoading={requestTurnState === "REQUESTING"}
@@ -228,40 +190,25 @@ function Story({
                               </ProgressButton>
                             </div>
                           )}
-                      </>
-                    </StoryContent>
-                  </div>
+                        </>
+                      </StoryContent>
+                    </div>
+                  )}
                 </div>
-                <StoryStatus
-                  storyId={storyId}
-                  editingSessionId={editingSession && editingSession.id}
-                  secondsLeftProps={secondsLeftProps}
-                  canCurrentUserEdit={canCurrentUserEdit}
-                  editingUser={editingUser}
-                  storyType={type}
-                  isPlayingSession={isPlayingSession}
-                  playingSessionUserName={playingSessionUserName}
-                />
+                <StoryStatus storyId={storyId} storyType={type} />
               </>
             ),
             [
               classes,
               storyId,
               isTextAreaFocussed,
-              canCurrentUserEdit,
-              editingSession,
-              secondsLeftProps,
-              editingUser,
+              canCurrentUserEditStory,
               focusOnTextArea,
               shouldShowLoading,
               tutorialText,
               onTakeTurnClick,
               requestTurnState,
               type,
-              isPlayingSession,
-              playingSessionUserName,
-              playingSessionId,
-              playingSessionText,
             ]
           )}
           renderDrawerContent={React.useCallback(
@@ -280,4 +227,4 @@ function Story({
   );
 }
 
-export default withStoryEditor<StoryOwnProps>(React.memo(Story));
+export default React.memo(Story);

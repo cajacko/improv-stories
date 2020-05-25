@@ -44,8 +44,6 @@ const useStyles = makeStyles<Theme>((theme: Theme) =>
 );
 
 function StoryEditor({ value, onChange, autoCapitalize }: Props) {
-  console.log("StoryEditor");
-
   const { registerFocusListener, onFocusChange } = React.useContext(
     StoryEditorContext
   );
@@ -101,4 +99,4 @@ function StoryEditor({ value, onChange, autoCapitalize }: Props) {
   );
 }
 
-export default StoryEditor;
+export default React.memo(StoryEditor);

@@ -58,4 +58,4 @@ function StoryText({ text, isTextInvisible, textStyle }: Props) {
   );
 }
 
-export default StoryText;
+export default React.memo(StoryText);

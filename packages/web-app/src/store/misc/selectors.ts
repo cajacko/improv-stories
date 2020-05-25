@@ -2,13 +2,13 @@ import ReduxTypes from "ReduxTypes";
 import createCachedSelector from "re-reselect";
 import { Session } from "../sessionsById/types";
 import { User, UsersByIdState } from "../usersById/types";
-import { CurrentUserState } from "../currentUser/types";
 import { Story } from "../storiesById/types";
 import { selectCurrentUser } from "../currentUser/selectors";
 import { selectUsersById } from "../usersById/selectors";
 import { selectStory } from "../storiesById/selectors";
 import { selectSessionsById } from "../sessionsById/selectors";
 import { selectStorySessionIds } from "../sessionIdsByStoryId/selectors";
+import { selectDidCurrentUserEndSessionEarlyBySessionId } from "../didCurrentUserEndSessionEarlyBySessionId/selectors";
 import transformSessionsToParagraphs from "../../utils/transformSessionsToParagraphs";
 
 interface SelectorWithStoryIdProp {
@@ -94,87 +94,11 @@ export const selectStorySessions = createCachedSelector(
   }
 )((state, props) => props.storyId);
 
-interface SelectAllStoryParagraphsProps extends SelectorWithStoryIdProp {
-  editingSessionId: string | null;
-  editingSessionFinalEntry: string | null;
-  playingSessionId: string | null;
-  playingSessionText: string | null;
-}
-
-const getSelectAllStoryParagraphsKey = (
-  state: ReduxTypes.RootState,
-  props: SelectAllStoryParagraphsProps
-) => `${props.storyId}_${props.editingSessionId}`;
-
-export const selectAllStoryParagraphs = createCachedSelector<
-  ReduxTypes.RootState,
-  SelectAllStoryParagraphsProps,
-  Session[] | null,
-  string | null,
-  string | null,
-  string | null,
-  string | null,
-  string[]
->(
+export const selectAllStoryParagraphs = createCachedSelector(
   selectStorySessions,
-  (state, props) => props.editingSessionId,
-  (state, props) => props.editingSessionFinalEntry,
-  (state, props) => props.playingSessionId,
-  (state, props) => props.playingSessionText,
-  (
-    sessions,
-    editingSessionId,
-    editingSessionFinalEntry,
-    playingSessionId,
-    playingSessionText
-  ) =>
-    sessions
-      ? transformSessionsToParagraphs(sessions, {
-          editingSessionId: editingSessionId || undefined,
-          editingSessionFinalEntry: editingSessionFinalEntry || undefined,
-          playingSessionId: playingSessionId || undefined,
-          playingSessionText: playingSessionText || undefined,
-        })
-      : []
-)(getSelectAllStoryParagraphsKey);
+  (sessions) => (sessions ? transformSessionsToParagraphs(sessions) : [])
+)((state, props) => props.storyId);
 
-export const selectAllStandardStoryParagraphs = createCachedSelector<
-  ReduxTypes.RootState,
-  SelectAllStoryParagraphsProps,
-  Session[] | null,
-  CurrentUserState,
-  string | null,
-  string | null,
-  string | null,
-  string | null,
-  string[]
->(
-  selectStorySessions,
-  selectCurrentUser,
-  (state, props) => props.editingSessionId,
-  (state, props) => props.editingSessionFinalEntry,
-  (state, props) => props.playingSessionId,
-  (state, props) => props.playingSessionText,
-  (
-    sessions,
-    currentUser,
-    editingSessionId,
-    editingSessionFinalEntry,
-    playingSessionId,
-    playingSessionText
-  ) =>
-    sessions
-      ? transformSessionsToParagraphs(sessions, {
-          editingSessionId: editingSessionId || undefined,
-          editingSessionFinalEntry: editingSessionFinalEntry || undefined,
-          shouldRemoveLastSessionIfNotUserId: currentUser.id,
-          playingSessionId: playingSessionId || undefined,
-          playingSessionText: playingSessionText || undefined,
-        })
-      : []
-)(getSelectAllStoryParagraphsKey);
-
-// TODO: This doesn't switch depending on type of story
 export const selectDoesStoryHaveContent = createCachedSelector(
   selectAllStoryParagraphs,
   (paragraphs): boolean => {
@@ -182,7 +106,7 @@ export const selectDoesStoryHaveContent = createCachedSelector(
 
     return !paragraphs.every((paragraph) => paragraph === "");
   }
-)(getSelectAllStoryParagraphsKey);
+)((state, props) => props.storyId);
 
 // TODO: How to select the users with selectors?
 
@@ -249,5 +173,57 @@ export const selectIsCurrentUserActiveInStory = createCachedSelector<
     if (!activeUsers) return false;
 
     return activeUsers.some(({ id }) => id === currentUserId);
+  }
+)((state, props) => props.storyId);
+
+export const selectIsCurrentUserActiveSessionUser = createCachedSelector(
+  selectActiveStorySession,
+  selectCurrentUser,
+  (activeSession, currentUser) =>
+    !!activeSession && activeSession.userId === currentUser.id
+)((state, props) => props.storyId);
+
+interface SelectCanCurrentUserEditProps {
+  storyId: string;
+  sessionId: string | null;
+  storyType: "LIVE" | "STANDARD";
+  isPlayingASession: boolean;
+}
+
+export const selectCanCurrentUserEdit = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectCanCurrentUserEditProps,
+  Session | null,
+  boolean,
+  boolean,
+  boolean,
+  SelectCanCurrentUserEditProps["storyType"],
+  boolean,
+  boolean
+>(
+  selectActiveStorySession,
+  selectDidCurrentUserEndSessionEarlyBySessionId,
+  selectIsCurrentUserActiveInStory,
+  selectIsCurrentUserActiveSessionUser,
+  (state, { storyType }) => storyType,
+  (state, { isPlayingASession }) => isPlayingASession,
+  (
+    activeSession,
+    didCurrentUserEndCurrentSessionEarly,
+    isCurrentUserActiveInStory,
+    isCurrentUserActiveSessionUser,
+    storyType,
+    isPlayingASession
+  ) => {
+    let canCurrentUserEdit =
+      !!activeSession &&
+      !didCurrentUserEndCurrentSessionEarly &&
+      isCurrentUserActiveSessionUser;
+
+    if (storyType === "LIVE") {
+      return canCurrentUserEdit && isCurrentUserActiveInStory;
+    }
+
+    return canCurrentUserEdit && !!isPlayingASession;
   }
 )((state, props) => props.storyId);

@@ -1,9 +1,20 @@
 import React from "react";
-import { v4 as uuid } from "uuid";
 import { useHistory } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import StoryTypeCard from "./StoryTypeCard";
 import { makeStyles } from "@material-ui/core/styles";
+import {
+  uniqueNamesGenerator,
+  Config,
+  adjectives,
+  colors,
+  animals,
+} from "unique-names-generator";
+
+const customConfig: Config = {
+  dictionaries: [adjectives, colors, animals],
+  separator: "-",
+};
 
 const useStyles = makeStyles({
   root: {
@@ -20,14 +31,14 @@ function ChooseStoryType({ onChooseStory }: Props) {
   const { push } = useHistory();
 
   const onLiveStoryClick = React.useCallback(() => {
-    const id = uuid();
+    const id = uniqueNamesGenerator(customConfig);
 
     if (onChooseStory) onChooseStory("LIVE", id);
     push(`/story/live/${id}`);
   }, [push, onChooseStory]);
 
   const onStandardStoryClick = React.useCallback(() => {
-    const id = uuid();
+    const id = uniqueNamesGenerator(customConfig);
 
     if (onChooseStory) onChooseStory("STANDARD", id);
     push(`/story/standard/${id}`);
