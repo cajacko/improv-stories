@@ -212,7 +212,7 @@ function StoryStatus({ storyId, storyType }: Props) {
   return (
     <div className={classes.footer}>
       <div className={classes.content}>
-        {!!countdown && (
+        {!!countdown && !playingStorySessionId && (
           <Typography className={classes.time}>
             {countdown.secondsLeft}
           </Typography>
@@ -226,11 +226,9 @@ function StoryStatus({ storyId, storyType }: Props) {
           </div>
         )}
       </div>
-      {!!countdown && (
-        <div className={classes.progress}>
-          <StoryProgressBar storyId={storyId} color={progressBarColor} />
-        </div>
-      )}
+      <div className={classes.progress}>
+        <StoryProgressBar storyId={storyId} color={progressBarColor} />
+      </div>
     </div>
   );
 }

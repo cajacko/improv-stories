@@ -15,6 +15,7 @@ interface Props {
   storyType: "LIVE" | "STANDARD";
   sessionId: string;
   isLastSession: boolean;
+  isTextInvisible: boolean;
   setSessionTextType:
     | "LIVE_STORY_SET_SESSION_TEXT"
     | "STANDARD_STORY_SET_SESSION_TEXT";
@@ -26,6 +27,7 @@ function StorySession({
   setSessionTextType,
   storyType,
   isLastSession,
+  isTextInvisible,
 }: Props) {
   const dispatch = useDispatch();
   const canCurrentUserEditStory = useCanCurrentUserEditStory(
@@ -204,7 +206,7 @@ function StorySession({
 
   return (
     <>
-      <StoryText text={text} />
+      <StoryText text={text} isTextInvisible={isTextInvisible} />
       {isCurrentUserEditingThisSession && (
         <StoryEditor
           value={text || ""}

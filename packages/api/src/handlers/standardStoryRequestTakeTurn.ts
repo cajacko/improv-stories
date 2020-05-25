@@ -10,6 +10,8 @@ function standardStoryRequestTakeTurn(
   buffer: number | null
 ): Promise<null | string[]> {
   return getSeconds(storyId).then((seconds) => {
+    const finalMilliSeconds = seconds * 1000 + (buffer || 0);
+
     const isStoryBeingEdited = false;
 
     if (isStoryBeingEdited) return Promise.resolve(null);
@@ -20,11 +22,9 @@ function standardStoryRequestTakeTurn(
 
     const dateStarted = new Date().toISOString();
     const dateWillFinish = new Date(dateStarted);
-    dateWillFinish.setSeconds(dateWillFinish.getSeconds() + seconds);
-
-    if (buffer) {
-      dateWillFinish.setMilliseconds(dateWillFinish.getMilliseconds() + buffer);
-    }
+    dateWillFinish.setMilliseconds(
+      dateWillFinish.getMilliseconds() + finalMilliSeconds
+    );
 
     const sessionId = uuid();
 
@@ -34,7 +34,7 @@ function standardStoryRequestTakeTurn(
       if (!changedStoryIds) return;
 
       broadCastStoriesChanged(changedStoryIds, "STANDARD_STORY_STORY_CHANGED");
-    }, seconds * 1000);
+    }, finalMilliSeconds);
 
     return startNewStorySession(
       {

@@ -77,6 +77,7 @@ function Story({ storyId, type }: Props) {
     StoryContext
   );
   const contentContainerRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const canCurrentUserEditStory = useCanCurrentUserEditStory(storyId, type);
   const { onRequestTakeTurn, requestTurnState } = useRequestStoryTurn(
     storyId,
@@ -110,6 +111,7 @@ function Story({ storyId, type }: Props) {
   const hasScrolled = useStoryInitScroll(
     fetchStatus,
     contentContainerRef,
+    contentRef,
     doesStoryHaveContent
   );
 
@@ -158,20 +160,20 @@ function Story({ storyId, type }: Props) {
                     hideJoinButton={type === "STANDARD"}
                   />
                 </div>
-
                 {canCurrentUserEditStory && !isTextAreaFocussed && (
                   <StoryFocusOverlay onClick={focusOnTextArea} />
                 )}
-                {!shouldShowLoading && (
-                  <div className={classes.textContainer}>
-                    <StoryContent
-                      storyId={storyId}
-                      tutorialText={tutorialText}
-                      storyType={type}
-                    >
-                      <>
-                        {requestTurnState !== "CANNOT_REQUEST_TURN" && (
-                          <div className={classes.takeTurn}>
+                <div className={classes.textContainer} ref={contentRef}>
+                  <StoryContent
+                    storyId={storyId}
+                    tutorialText={tutorialText}
+                    storyType={type}
+                    isTextInvisible={shouldShowLoading}
+                  >
+                    <>
+                      <div className={classes.takeTurn}>
+                        {!shouldShowLoading &&
+                          requestTurnState !== "CANNOT_REQUEST_TURN" && (
                             <ProgressButton
                               isLoading={requestTurnState === "REQUESTING"}
                             >
@@ -188,12 +190,11 @@ function Story({ storyId, type }: Props) {
                                   : "Updating"}
                               </Button>
                             </ProgressButton>
-                          </div>
-                        )}
-                      </>
-                    </StoryContent>
-                  </div>
-                )}
+                          )}
+                      </div>
+                    </>
+                  </StoryContent>
+                </div>
               </div>
               <StoryStatus storyId={storyId} storyType={type} />
             </>

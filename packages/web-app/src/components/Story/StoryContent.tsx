@@ -10,6 +10,7 @@ export interface Props {
   tutorialText: string;
   children?: JSX.Element;
   storyType: "LIVE" | "STANDARD";
+  isTextInvisible: boolean;
 }
 
 const width = 500;
@@ -25,7 +26,13 @@ const useStyles = makeStyles<Theme>((theme: Theme) =>
   })
 );
 
-function StoryContent({ children, storyId, tutorialText, storyType }: Props) {
+function StoryContent({
+  children,
+  storyId,
+  tutorialText,
+  storyType,
+  isTextInvisible,
+}: Props) {
   const storySessionIds =
     useSelector((state) =>
       selectors.sessionIdsByStoryId.selectStorySessionIds(state, { storyId })
@@ -41,6 +48,7 @@ function StoryContent({ children, storyId, tutorialText, storyType }: Props) {
         storySessionIds.map((sessionId, i) => (
           <StorySession
             key={sessionId}
+            isTextInvisible={isTextInvisible}
             storyType={storyType}
             sessionId={sessionId}
             storyId={storyId}
@@ -53,7 +61,13 @@ function StoryContent({ children, storyId, tutorialText, storyType }: Props) {
           />
         ))}
 
-      {!hasSessions && <StoryText text={tutorialText} textStyle="FADED" />}
+      {!hasSessions && (
+        <StoryText
+          text={tutorialText}
+          textStyle="FADED"
+          isTextInvisible={isTextInvisible}
+        />
+      )}
 
       {children}
     </div>

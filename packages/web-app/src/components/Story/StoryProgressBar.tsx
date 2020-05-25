@@ -2,6 +2,7 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import useStoryCountdown from "../../hooks/useStoryCountdown";
+import PlayingStorySession from "../../context/PlayingStorySession";
 
 const normalise = (maxValue: number, minValue: number, value: number) =>
   100 - ((value - minValue) * 100) / (maxValue - minValue);
@@ -22,7 +23,9 @@ interface Props {
 function StoryStatus({ color, storyId }: Props) {
   const classes = useStyles();
   const countdown = useStoryCountdown(storyId);
+  const { playingStorySessionId } = React.useContext(PlayingStorySession);
 
+  if (!!playingStorySessionId) return null;
   if (!countdown) return null;
 
   return (

@@ -20,11 +20,11 @@ export default {
 
     const name = `${dateString} @SERVER/${type}:`;
 
-    Sentry.captureEvent({
-      message: name,
-      extra: payload,
-      level: Sentry.Severity.Debug,
-    });
+    // Sentry.captureEvent({
+    //   message: name,
+    //   extra: payload,
+    //   level: Sentry.Severity.Debug,
+    // });
 
     if (payload === undefined) {
       console.log(name);
