@@ -11,7 +11,7 @@ import selectors from "../../store/selectors";
 import actions from "../../store/actions";
 import useStoryCountdown from "../../hooks/useStoryCountdown";
 import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
-import usePlayingSession from "../../hooks/usePlayingSession";
+import PlayingStorySession from "../../context/PlayingStorySession";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -77,7 +77,23 @@ function StoryStatus({ storyId, storyType }: Props) {
     selectors.misc.selectActiveStorySession(state, { storyId })
   );
   const activeSessionId = activeSession && activeSession.id;
-  const { playingSessionUserName, isPlayingSession } = usePlayingSession();
+  const { playingStorySessionId } = React.useContext(PlayingStorySession);
+
+  const playingSession = useSelector((state) =>
+    playingStorySessionId
+      ? selectors.sessionsById.selectSession(state, {
+          sessionId: playingStorySessionId,
+        })
+      : null
+  );
+
+  const playingSessionUser = useSelector((state) =>
+    playingSession
+      ? selectors.usersById.selectUser(state, { userId: playingSession.userId })
+      : null
+  );
+  const playingSessionUserName = playingSessionUser && playingSessionUser.name;
+
   const currentlyEditingUser = useSelector((state) =>
     selectors.misc.selectCurrentlyEditingStoryUser(state, { storyId })
   );
@@ -144,7 +160,7 @@ function StoryStatus({ storyId, storyType }: Props) {
   let showSkipButton = false;
   const updatingText = "Updating...";
 
-  if (isPlayingSession) {
+  if (!!playingStorySessionId) {
     statusText = `Playing entry by ${playingSessionUserName || "Anonymous"}`;
   } else if (isEditingSessionActive) {
     if (!!countdown) {

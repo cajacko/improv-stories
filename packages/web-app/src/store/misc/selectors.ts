@@ -224,6 +224,6 @@ export const selectCanCurrentUserEdit = createCachedSelector<
       return canCurrentUserEdit && isCurrentUserActiveInStory;
     }
 
-    return canCurrentUserEdit && !!isPlayingASession;
+    return canCurrentUserEdit && !isPlayingASession;
   }
 )((state, props) => props.storyId);

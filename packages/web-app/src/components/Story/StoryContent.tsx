@@ -38,11 +38,13 @@ function StoryContent({ children, storyId, tutorialText, storyType }: Props) {
   return (
     <div className={classes.container}>
       {hasSessions &&
-        storySessionIds.map((sessionId) => (
+        storySessionIds.map((sessionId, i) => (
           <StorySession
             key={sessionId}
+            storyType={storyType}
             sessionId={sessionId}
             storyId={storyId}
+            isLastSession={storySessionIds.length - 1 === i}
             setSessionTextType={
               storyType === "LIVE"
                 ? "LIVE_STORY_SET_SESSION_TEXT"

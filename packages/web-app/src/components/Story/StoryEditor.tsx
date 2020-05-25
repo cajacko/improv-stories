@@ -36,7 +36,7 @@ const useStyles = makeStyles<Theme>((theme: Theme) =>
     },
     textArea: {
       position: "absolute",
-      left: -9999999,
+      left: "-200vw",
       width: 200,
       height: 0,
     },
@@ -65,7 +65,21 @@ function StoryEditor({ value, onChange, autoCapitalize }: Props) {
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   React.useEffect(() => {
-    onFocusChange(isFocussed);
+    let timeout: undefined | number;
+
+    if (isFocussed) {
+      onFocusChange(isFocussed);
+    } else {
+      timeout = setTimeout(() => {
+        if (isFocussed) return;
+
+        onFocusChange(isFocussed);
+      }, 500);
+    }
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [isFocussed, onFocusChange]);
 
   React.useEffect(focusOnTextArea, [focusOnTextArea]);

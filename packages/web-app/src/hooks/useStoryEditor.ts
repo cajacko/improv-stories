@@ -2,10 +2,7 @@ import React from "react";
 import { v4 as uuid } from "uuid";
 import { Context } from "../context/StoryEditor";
 
-interface UseStoryEditor extends Context {
-  isTextAreaFocussed: boolean;
-  focusOnTextArea: () => void;
-}
+interface UseStoryEditor extends Context {}
 
 type Callback = () => void;
 type State = { [K: string]: Callback };
@@ -15,7 +12,6 @@ type Action =
   | { type: "REMOVE_LISTENER"; payload: string };
 
 function reducer(state: State, action: Action): State {
-  console.log("reducer", state, action);
   switch (action.type) {
     case "SET_LISTENER":
       return { ...state, [action.payload.id]: action.payload.callback };
@@ -28,7 +24,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function useStoryEditor(): UseStoryEditor {
+function useStoryEditor(): Context {
   const [focusListeners, dispatch] = React.useReducer(reducer, {});
   const [isTextAreaFocussed, setIsTextAreaFocussed] = React.useState(false);
 

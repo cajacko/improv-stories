@@ -111,7 +111,11 @@ function _switchOverAllTypedMessages(
         .then(transformToRunStoryLoop);
     }
     case "STANDARD_STORY_REQUEST_TAKE_TURN": {
-      return standardStoryRequestTakeTurn(userId, action.payload.storyId)
+      return standardStoryRequestTakeTurn(
+        userId,
+        action.payload.storyId,
+        action.payload.buffer
+      )
         .then(
           (storyIds) =>
             storyIds &&

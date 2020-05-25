@@ -4,7 +4,9 @@ import actions from "./actions";
 import { listen } from "../utils/socket";
 import { ServerMessage } from "../sharedTypes";
 
-let lastDispatchedStoryVersion: number | null = null;
+let lastDispatchedStoryVersionByStoryId: {
+  [K: string]: number | null | undefined;
+} = {};
 
 function onStoryChanged(
   type: "LIVE_STORY_STORY_CHANGED" | "STANDARD_STORY_STORY_CHANGED"
@@ -12,14 +14,19 @@ function onStoryChanged(
   return (message: ServerMessage) => {
     if (message.type !== type) return;
 
+    const lastDispatchedStoryVersion =
+      lastDispatchedStoryVersionByStoryId[message.payload.id];
+
     if (
       lastDispatchedStoryVersion !== null &&
+      lastDispatchedStoryVersion !== undefined &&
       message.payload.version <= lastDispatchedStoryVersion
     ) {
       return;
     }
 
-    lastDispatchedStoryVersion = message.payload.version;
+    lastDispatchedStoryVersionByStoryId[message.payload.id] =
+      message.payload.version;
 
     store.dispatch(actions.misc.setStoryWithSessionIds(message.payload));
   };

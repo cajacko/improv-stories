@@ -80,7 +80,7 @@ export type ClientMessage =
     >
   | Message<
       "STANDARD_STORY_REQUEST_TAKE_TURN",
-      { storyId: string; lastSession: ClientSession | null }
+      { storyId: string; buffer: number | null }
     >;
 
 export type ServerMessage =

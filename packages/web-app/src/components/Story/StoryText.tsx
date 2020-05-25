@@ -28,9 +28,11 @@ function StoryText({ text, isTextInvisible, textStyle }: Props) {
     textStyle,
   });
 
-  const [lines, setLines] = React.useState(text.split("\n"));
+  const lines = React.useMemo(() => {
+    if (text === "") return [];
 
-  React.useEffect(() => setLines(text.split("\n")), [text]);
+    return text.split("\n");
+  }, [text]);
 
   let wasEmptyLine = false;
 

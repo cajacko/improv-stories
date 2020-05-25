@@ -1,22 +1,37 @@
-function usePlayingSession() {
-  // const isPlayingSession = !!playingSession;
+import React from "react";
+import { Context } from "../context/PlayingStorySession";
 
-  // const playingSessionUserName = useSelector((state) => {
-  //   if (!playingSession) return null;
+function usePlayingSession(): Context {
+  const [playingStorySessionId, setPlayingStorySessionId] = React.useState<
+    string | null
+  >(null);
 
-  //   const user = selectors.usersById.selectUser(state, {
-  //     userId: playingSession.session.userId,
-  //   });
+  const playStorySession = React.useCallback(
+    (sessionId: string) => {
+      if (playingStorySessionId) return;
+      setPlayingStorySessionId(sessionId);
+    },
+    [playingStorySessionId]
+  );
 
-  //   if (!user) return null;
+  const stopPlayingStorySession = React.useCallback(
+    (sessionId: string) => {
+      if (!playingStorySessionId) return;
+      if (playingStorySessionId !== sessionId) return;
 
-  //   return user.name;
-  // });
+      setPlayingStorySessionId(null);
+    },
+    [playingStorySessionId]
+  );
 
-  return {
-    isPlayingSession: false,
-    playingSessionUserName: null,
-  };
+  return React.useMemo(
+    (): Context => ({
+      playingStorySessionId,
+      playStorySession,
+      stopPlayingStorySession,
+    }),
+    [playingStorySessionId, playStorySession, stopPlayingStorySession]
+  );
 }
 
 export default usePlayingSession;

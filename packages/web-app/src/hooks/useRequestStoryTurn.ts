@@ -2,7 +2,6 @@ import React from "react";
 import { v4 as uuid } from "uuid";
 import { useSelector } from "react-redux";
 import { send } from "../utils/socket";
-import { Session } from "../store/sessionsById/types";
 import selectors from "../store/selectors";
 import useCanCurrentUserEditStory from "./useCanCurrentUserEditStory";
 
@@ -12,7 +11,7 @@ type RequestTurnState =
   | "CANNOT_REQUEST_TURN";
 
 interface UseRequestStoryTurn {
-  onRequestTakeTurn: (lastSession: Session | null) => void;
+  onRequestTakeTurn: (buffer: number | null) => void;
   requestTurnState: RequestTurnState;
 }
 
@@ -20,10 +19,10 @@ function useRequestStoryTurn(
   storyId: string,
   storyType: "LIVE" | "STANDARD"
 ): UseRequestStoryTurn {
-  const activeSession = useSelector((state) =>
-    selectors.misc.selectActiveStorySession(state, { storyId })
+  const lastSession = useSelector((state) =>
+    selectors.misc.selectLastStorySession(state, { storyId })
   );
-  const activeSessionId = activeSession && activeSession.id;
+  const lastSessionId = lastSession && lastSession.id;
 
   const isCurrentUserLastActiveSessionUserForStory = useSelector((state) =>
     selectors.misc.selectIsCurrentUserLastActiveSessionUserForStory(state, {
@@ -51,7 +50,7 @@ function useRequestStoryTurn(
       return "CANNOT_REQUEST_TURN";
     } else if (isCurrentUserLastActiveSessionUserForStory) {
       return "CANNOT_REQUEST_TURN";
-    } else if (requestingSessionId && requestingSessionId === activeSessionId) {
+    } else if (requestingSessionId && requestingSessionId === lastSessionId) {
       return "REQUESTING";
     }
 
@@ -61,16 +60,15 @@ function useRequestStoryTurn(
     isCurrentUserActiveSessionUser,
     isCurrentUserLastActiveSessionUserForStory,
     storyType,
-    activeSessionId,
+    lastSessionId,
     requestingSessionId,
   ]);
 
   const onRequestTakeTurn = React.useCallback(
-    (lastSession: Session | null) => {
-      if (!activeSessionId) return;
+    (buffer: number | null) => {
       if (requestTurnState !== "CAN_REQUEST_TURN") return;
 
-      setRequestingSessionId(activeSessionId);
+      setRequestingSessionId(lastSessionId);
 
       send({
         type: "STANDARD_STORY_REQUEST_TAKE_TURN",
@@ -78,11 +76,11 @@ function useRequestStoryTurn(
         createdAt: new Date().toISOString(),
         payload: {
           storyId,
-          lastSession,
+          buffer,
         },
       });
     },
-    [requestTurnState, storyId, activeSessionId]
+    [requestTurnState, storyId, lastSessionId]
   );
 
   return { requestTurnState, onRequestTakeTurn };

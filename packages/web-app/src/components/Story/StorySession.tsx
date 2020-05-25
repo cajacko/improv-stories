@@ -1,37 +1,65 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 import { send, listen } from "../../utils/socket";
 import selectors from "../../store/selectors";
 import StoryText from "./StoryText";
 import StoryEditor from "./StoryEditor";
+import actions from "../../store/actions";
+import PlayingStorySession from "../../context/PlayingStorySession";
+import playStoryTimeout from "../../config/playStoryTimeout";
+import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
 
 interface Props {
   storyId: string;
+  storyType: "LIVE" | "STANDARD";
   sessionId: string;
+  isLastSession: boolean;
   setSessionTextType:
     | "LIVE_STORY_SET_SESSION_TEXT"
     | "STANDARD_STORY_SET_SESSION_TEXT";
 }
 
-function StorySession({ storyId, sessionId, setSessionTextType }: Props) {
+function StorySession({
+  storyId,
+  sessionId,
+  setSessionTextType,
+  storyType,
+  isLastSession,
+}: Props) {
+  const dispatch = useDispatch();
+  const canCurrentUserEditStory = useCanCurrentUserEditStory(
+    storyId,
+    storyType
+  );
+  const { playingStorySessionId, stopPlayingStorySession } = React.useContext(
+    PlayingStorySession
+  );
+  const isSessionRevealed = useSelector((state) =>
+    selectors.revealedSessionsBySessionId.selectIsSessionRevealed(state, {
+      sessionId,
+    })
+  );
   const session = useSelector((state) =>
     selectors.sessionsById.selectSession(state, { sessionId: sessionId })
   );
+  const entries = session && session.entries;
 
   const activeStorySession = useSelector((state) =>
     selectors.misc.selectActiveStorySession(state, { storyId: storyId })
   );
 
+  const isPlayingSession =
+    playingStorySessionId && session && playingStorySessionId === session.id;
+
   const isActiveSession =
     !!activeStorySession && activeStorySession.id === sessionId;
 
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+  const isSessionUser = !!session && session.userId === currentUserId;
 
-  const isCurrentUserEditingSession =
-    isActiveSession &&
-    !!activeStorySession &&
-    activeStorySession.userId === currentUserId;
+  const isCurrentUserEditingThisSession =
+    canCurrentUserEditStory && isActiveSession && isSessionUser;
 
   const savedText = session && session.finalEntry;
 
@@ -66,7 +94,10 @@ function StorySession({ storyId, sessionId, setSessionTextType }: Props) {
   React.useEffect(() => {
     const key = uuid();
 
+    if (storyType !== "LIVE") return;
+
     return listen("LIVE_STORY_SESSION_CHANGED", key, (message) => {
+      if (storyType !== "LIVE") return;
       if (message.type !== "LIVE_STORY_SESSION_CHANGED") return;
       if (sessionId !== message.payload.id) return;
       if (currentUserId === message.payload.user.id) return;
@@ -76,16 +107,92 @@ function StorySession({ storyId, sessionId, setSessionTextType }: Props) {
         version: message.payload.version,
       });
     });
-  }, [sessionId, currentUserId]);
+  }, [sessionId, currentUserId, storyType]);
 
-  if (!isCurrentUserEditingSession) editingText = null;
+  if (!isCurrentUserEditingThisSession) editingText = null;
 
   const latestSavedText =
     liveSession && session && liveSession.version > session.version
       ? liveSession.text
       : savedText;
 
-  const text = editingText || latestSavedText;
+  const [playingIndex, setPlayingIndex] = React.useState<null | number>(null);
+
+  const getPlayingText = React.useCallback(
+    (index: number | null): string | null => {
+      if (!isPlayingSession) return null;
+      if (index === null) return null;
+      if (!entries || entries.length < 1) return null;
+
+      return entries[index] || null;
+    },
+    [entries, isPlayingSession]
+  );
+
+  React.useEffect(() => {
+    if (!isPlayingSession) return;
+    if (playingIndex === null) return;
+
+    const timeout = setTimeout(() => {
+      if (!isPlayingSession) return;
+      if (playingIndex === null) return;
+
+      const nextIndex = playingIndex + 1;
+
+      const nextPlayingText = getPlayingText(nextIndex);
+
+      if (nextPlayingText) {
+        setPlayingIndex(nextIndex);
+      } else {
+        setPlayingIndex(null);
+
+        stopPlayingStorySession(sessionId);
+
+        dispatch(
+          actions.revealedSessionsBySessionId.setRevealedSessionBySessionId({
+            sessionId,
+          })
+        );
+      }
+    }, playStoryTimeout);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [
+    playingIndex,
+    getPlayingText,
+    sessionId,
+    dispatch,
+    stopPlayingStorySession,
+    isPlayingSession,
+  ]);
+
+  React.useEffect(() => () => stopPlayingStorySession(sessionId), [
+    stopPlayingStorySession,
+    sessionId,
+  ]);
+
+  React.useEffect(() => {
+    if (!isPlayingSession) return;
+    if (playingIndex !== null) return;
+
+    setPlayingIndex(0);
+  }, [playingStorySessionId, sessionId, playingIndex, isPlayingSession]);
+
+  const playingText = getPlayingText(playingIndex);
+
+  let text = editingText || playingText || latestSavedText;
+
+  if (
+    storyType === "STANDARD" &&
+    !isSessionUser &&
+    isLastSession &&
+    !playingText &&
+    !isSessionRevealed
+  ) {
+    text = null;
+  }
 
   if (text === null) return null;
 
@@ -98,9 +205,9 @@ function StorySession({ storyId, sessionId, setSessionTextType }: Props) {
   return (
     <>
       <StoryText text={text} />
-      {editingText !== null && (
+      {isCurrentUserEditingThisSession && (
         <StoryEditor
-          value={editingText}
+          value={text || ""}
           onChange={onChange}
           autoCapitalize={false}
         />

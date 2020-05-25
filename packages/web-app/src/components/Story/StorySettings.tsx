@@ -46,7 +46,7 @@ interface Props {
 }
 
 const min = 5;
-const max = 60;
+const max = 300;
 
 type InputValues = StoryPropsContent<number | null>;
 type State = Partial<InputValues>;

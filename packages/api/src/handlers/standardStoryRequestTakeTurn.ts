@@ -6,7 +6,8 @@ import { broadCastStoriesChanged } from "../broadcast";
 
 function standardStoryRequestTakeTurn(
   userId: string,
-  storyId: string
+  storyId: string,
+  buffer: number | null
 ): Promise<null | string[]> {
   return getSeconds(storyId).then((seconds) => {
     const isStoryBeingEdited = false;
@@ -20,6 +21,10 @@ function standardStoryRequestTakeTurn(
     const dateStarted = new Date().toISOString();
     const dateWillFinish = new Date(dateStarted);
     dateWillFinish.setSeconds(dateWillFinish.getSeconds() + seconds);
+
+    if (buffer) {
+      dateWillFinish.setMilliseconds(dateWillFinish.getMilliseconds() + buffer);
+    }
 
     const sessionId = uuid();
 
