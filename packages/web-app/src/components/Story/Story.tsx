@@ -147,7 +147,7 @@ function Story({ storyId, type }: Props) {
                 ref={contentContainerRef}
               >
                 <div className={classes.actionBar}>
-                  {!isWideScreen && isTextAreaFocussed && (
+                  {!isWideScreen && (
                     <div className={classes.storyProgressBar}>
                       <StoryProgressBar storyId={storyId} color="secondary" />
                     </div>
@@ -163,7 +163,11 @@ function Story({ storyId, type }: Props) {
                 {canCurrentUserEditStory && !isTextAreaFocussed && (
                   <StoryFocusOverlay onClick={focusOnTextArea} />
                 )}
-                <div className={classes.textContainer} ref={contentRef}>
+                <div
+                  className={classes.textContainer}
+                  ref={contentRef}
+                  onClick={focusOnTextArea}
+                >
                   <StoryContent
                     storyId={storyId}
                     tutorialText={tutorialText}

@@ -50,7 +50,7 @@ function ChooseStoryType({ onChooseStory }: Props) {
         <Grid item xs={6}>
           <StoryTypeCard
             title="Standard Story"
-            description="Play with friends over multiple days. Take it in turns to write a story together and get notifications when you can take your next turn."
+            description="Play with friends over multiple days. Take it in turns to write a story together, you'll get a certain amount of seconds per entry but can spread the story over more time."
             onClick={onStandardStoryClick}
           />
         </Grid>

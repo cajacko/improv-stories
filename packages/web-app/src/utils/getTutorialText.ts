@@ -13,6 +13,10 @@ It's also more fun to go on a group call whilst writing :)
 export function getStandardStoryTutorialText(storyLink: string) {
   const raw = `Hello and welcome to improv stories! This is the start of a new story!
 Improv stories is a way of writing strange, fun, and curious stories with others.
+Press the "Take Turn" button below to start off the story. You'll get a set amount of seconds to write the first entry to the story before being cut off.
+Other people with the link can then add the next entry and so on.
+Share the link to this page with anyone else you want to write the story with:
+${storyLink}
 `;
 
   return raw;
