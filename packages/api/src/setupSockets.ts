@@ -27,7 +27,7 @@ function setupSockets(io: socket.Server) {
       socket: sock,
     });
 
-    broadCastStoriesChanged(changedStoryIds);
+    broadCastStoriesChanged(changedStoryIds, "LIVE_STORY_STORY_CHANGED");
 
     sock.on("message", onClientMessage(userId));
   }
@@ -37,7 +37,7 @@ function setupSockets(io: socket.Server) {
 
     const changedStoryIds = removeUser(userId);
 
-    broadCastStoriesChanged(changedStoryIds);
+    broadCastStoriesChanged(changedStoryIds, "LIVE_STORY_STORY_CHANGED");
   }
 
   function getUserIdFromSocket(sock: socket.Socket) {
@@ -61,7 +61,7 @@ function setupSockets(io: socket.Server) {
     onSocketConnect(sock, userId);
 
     const interval = setInterval(() => {
-      broadCastUserStories(userId);
+      broadCastUserStories(userId, "LIVE_STORY_STORY_CHANGED");
     }, 1000);
 
     sock.on("disconnect", () => {

@@ -8,6 +8,8 @@ import { selectUsersById } from "../usersById/selectors";
 import { selectStory } from "../storiesById/selectors";
 import { selectSessionsById } from "../sessionsById/selectors";
 import { selectStorySessionIds } from "../sessionIdsByStoryId/selectors";
+import { selectDidCurrentUserEndSessionEarlyBySessionId } from "../didCurrentUserEndSessionEarlyBySessionId/selectors";
+import transformSessionsToParagraphs from "../../utils/transformSessionsToParagraphs";
 
 interface SelectorWithStoryIdProp {
   storyId: string;
@@ -24,7 +26,45 @@ export const selectActiveStorySession = createCachedSelector(
   }
 )((state, props) => props.storyId);
 
-export const selectActiveStorySessionUser = createCachedSelector(
+export const selectLastStorySession = createCachedSelector(
+  selectStory,
+  selectSessionsById,
+  selectStorySessionIds,
+  (story, sessionsById, storySessionsById) => {
+    if (!story) return null;
+
+    let lastSessionId: string | undefined;
+    let secondLastSessionId: string | undefined;
+    let actualLastSessionId: string | undefined;
+
+    if (storySessionsById) {
+      lastSessionId = storySessionsById[storySessionsById.length - 1];
+      secondLastSessionId = storySessionsById[storySessionsById.length - 2];
+    }
+
+    if (story.activeSessionId && lastSessionId === story.activeSessionId) {
+      actualLastSessionId = secondLastSessionId;
+    } else {
+      actualLastSessionId = lastSessionId;
+    }
+
+    if (!actualLastSessionId) return null;
+
+    return sessionsById[actualLastSessionId] || null;
+  }
+)((state, props) => props.storyId);
+
+export const selectIsCurrentUserLastActiveSessionUserForStory = createCachedSelector(
+  selectCurrentUser,
+  selectLastStorySession,
+  (currentUser, lastSession) => {
+    if (!lastSession) return false;
+
+    return lastSession.userId === currentUser.id;
+  }
+)((state, props) => props.storyId);
+
+export const selectCurrentlyEditingStoryUser = createCachedSelector(
   selectActiveStorySession,
   selectUsersById,
   (session, usersById) => {
@@ -54,59 +94,19 @@ export const selectStorySessions = createCachedSelector(
   }
 )((state, props) => props.storyId);
 
-interface SelectAllStoryParagraphsProps extends SelectorWithStoryIdProp {
-  editingSessionId: string | null;
-  editingSessionFinalEntry: string | null;
-}
-
-const getSelectAllStoryParagraphsKey = (
-  state: ReduxTypes.RootState,
-  props: SelectAllStoryParagraphsProps
-) => `${props.storyId}_${props.editingSessionId}`;
-
-export const selectAllStoryParagraphs = createCachedSelector<
-  ReduxTypes.RootState,
-  SelectAllStoryParagraphsProps,
-  Session[] | null,
-  string | null,
-  string | null,
-  string[]
->(
+export const selectAllStoryParagraphs = createCachedSelector(
   selectStorySessions,
-  (state, props) => props.editingSessionId,
-  (state, props) => props.editingSessionFinalEntry,
-  (sessions, editingSessionId, editingSessionFinalEntry) => {
-    let didAddEditingSession = false;
-
-    let combinedSessions = sessions
-      ? sessions.reduce((acc, { finalEntry, id }) => {
-          if (editingSessionFinalEntry && editingSessionId === id) {
-            didAddEditingSession = true;
-            return `${acc}${editingSessionFinalEntry}`;
-          }
-
-          return `${acc}${finalEntry}`;
-        }, "")
-      : "";
-
-    if (!didAddEditingSession && editingSessionFinalEntry && editingSessionId) {
-      combinedSessions = `${combinedSessions}${editingSessionFinalEntry}`;
-    }
-
-    return combinedSessions.split("\n");
-  }
-)(getSelectAllStoryParagraphsKey);
+  (sessions) => (sessions ? transformSessionsToParagraphs(sessions) : [])
+)((state, props) => props.storyId);
 
 export const selectDoesStoryHaveContent = createCachedSelector(
   selectAllStoryParagraphs,
-  (paragraphs) => {
-    if (paragraphs.length > 1) return true;
-    if (paragraphs.length !== 1) return false;
-    if (!paragraphs[0]) return false;
+  (paragraphs): boolean => {
+    if (paragraphs.length < 1) return false;
 
-    return paragraphs[0] !== "";
+    return !paragraphs.every((paragraph) => paragraph === "");
   }
-)(getSelectAllStoryParagraphsKey);
+)((state, props) => props.storyId);
 
 // TODO: How to select the users with selectors?
 
@@ -173,5 +173,57 @@ export const selectIsCurrentUserActiveInStory = createCachedSelector<
     if (!activeUsers) return false;
 
     return activeUsers.some(({ id }) => id === currentUserId);
+  }
+)((state, props) => props.storyId);
+
+export const selectIsCurrentUserActiveSessionUser = createCachedSelector(
+  selectActiveStorySession,
+  selectCurrentUser,
+  (activeSession, currentUser) =>
+    !!activeSession && activeSession.userId === currentUser.id
+)((state, props) => props.storyId);
+
+interface SelectCanCurrentUserEditProps {
+  storyId: string;
+  sessionId: string | null;
+  storyType: "LIVE" | "STANDARD";
+  isPlayingASession: boolean;
+}
+
+export const selectCanCurrentUserEdit = createCachedSelector<
+  ReduxTypes.RootState,
+  SelectCanCurrentUserEditProps,
+  Session | null,
+  boolean,
+  boolean,
+  boolean,
+  SelectCanCurrentUserEditProps["storyType"],
+  boolean,
+  boolean
+>(
+  selectActiveStorySession,
+  selectDidCurrentUserEndSessionEarlyBySessionId,
+  selectIsCurrentUserActiveInStory,
+  selectIsCurrentUserActiveSessionUser,
+  (state, { storyType }) => storyType,
+  (state, { isPlayingASession }) => isPlayingASession,
+  (
+    activeSession,
+    didCurrentUserEndCurrentSessionEarly,
+    isCurrentUserActiveInStory,
+    isCurrentUserActiveSessionUser,
+    storyType,
+    isPlayingASession
+  ) => {
+    let canCurrentUserEdit =
+      !!activeSession &&
+      !didCurrentUserEndCurrentSessionEarly &&
+      isCurrentUserActiveSessionUser;
+
+    if (storyType === "LIVE") {
+      return canCurrentUserEdit && isCurrentUserActiveInStory;
+    }
+
+    return canCurrentUserEdit && !isPlayingASession;
   }
 )((state, props) => props.storyId);

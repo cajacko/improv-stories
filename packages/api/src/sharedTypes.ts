@@ -8,7 +8,6 @@ export interface User extends UserDetails {
   id: string;
   version: number;
 }
-
 export interface BaseSession {
   id: string;
   dateStarted: string;
@@ -23,6 +22,10 @@ export interface BaseSession {
 export interface ServerSession extends BaseSession {
   user: User;
   dateFinished: null | string;
+}
+
+export interface ClientSession extends BaseSession {
+  userId: string;
 }
 
 export interface DatabaseSession extends BaseSession {
@@ -58,14 +61,29 @@ export interface Message<T, P = undefined> {
 }
 
 export type ClientMessage =
-  | Message<"ADD_USER_TO_STORY", { storyId: string; isActive: boolean }>
-  | Message<"REMOVE_USER_FROM_STORY", { storyId: string }>
+  | Message<
+      "LIVE_STORY_ADD_USER_TO_STORY",
+      { storyId: string; isActive: boolean }
+    >
+  | Message<"LIVE_STORY_REMOVE_USER_FROM_STORY", { storyId: string }>
   | Message<"SET_USER_DETAILS", { userDetails: UserDetails }>
-  | Message<"ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
-  | Message<"REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
-  | Message<"SET_SESSION_TEXT", { storyId: string; text: string }>
-  | Message<"SET_SESSION_DONE", { storyId: string; sessionId: string }>;
+  | Message<"LIVE_STORY_ADD_ACTIVE_USER_TO_STORY", { storyId: string }>
+  | Message<"LIVE_STORY_REMOVE_ACTIVE_USER_FROM_STORY", { storyId: string }>
+  | Message<"LIVE_STORY_SET_SESSION_TEXT", { storyId: string; text: string }>
+  | Message<
+      "STANDARD_STORY_SET_SESSION_TEXT",
+      { storyId: string; text: string }
+    >
+  | Message<
+      "LIVE_STORY_SET_SESSION_DONE",
+      { storyId: string; sessionId: string }
+    >
+  | Message<
+      "STANDARD_STORY_REQUEST_TAKE_TURN",
+      { storyId: string; buffer: number | null }
+    >;
 
 export type ServerMessage =
-  | Message<"STORY_CHANGED", Story>
-  | Message<"SESSION_CHANGED", ServerSession>;
+  | Message<"LIVE_STORY_STORY_CHANGED", Story>
+  | Message<"LIVE_STORY_SESSION_CHANGED", ServerSession>
+  | Message<"STANDARD_STORY_STORY_CHANGED", Story>;

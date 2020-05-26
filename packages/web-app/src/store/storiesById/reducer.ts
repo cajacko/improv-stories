@@ -1,5 +1,5 @@
 import { createReducer } from "typesafe-actions";
-import actions from "../actions";
+import actions from "../actionsThatDefineTypes";
 import { StoriesByIdState, Story } from "./types";
 
 const defaultState: StoriesByIdState = {};
@@ -7,24 +7,28 @@ const defaultState: StoriesByIdState = {};
 const reducer = createReducer<StoriesByIdState>(defaultState).handleAction(
   actions.storiesById.setStory,
   (state, { payload }) => {
-    const story = state[payload.id];
+    const story = state[payload.story.id];
 
-    if (story && story.version >= payload.version) return state;
+    if (story && story.version >= payload.story.version) return state;
 
     const newStory: Story = {
-      connectedUserIds: payload.connectedUsers.map(({ id }) => id),
-      activeUserIds: payload.activeUsers.map(({ id }) => id),
-      lastSessionId: payload.lastSession ? payload.lastSession.id : null,
-      activeSessionId: payload.activeSession ? payload.activeSession.id : null,
-      id: payload.id,
-      dateCreated: payload.dateCreated,
-      dateModified: payload.dateModified,
-      version: payload.version,
+      connectedUserIds: payload.story.connectedUsers.map(({ id }) => id),
+      activeUserIds: payload.story.activeUsers.map(({ id }) => id),
+      lastSessionId: payload.story.lastSession
+        ? payload.story.lastSession.id
+        : null,
+      activeSessionId: payload.story.activeSession
+        ? payload.story.activeSession.id
+        : null,
+      id: payload.story.id,
+      dateCreated: payload.story.dateCreated,
+      dateModified: payload.story.dateModified,
+      version: payload.story.version,
     };
 
     const newState: StoriesByIdState = {
       ...state,
-      [payload.id]: newStory,
+      [payload.story.id]: newStory,
     };
 
     return newState;

@@ -2,14 +2,16 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import { v4 as uuid } from "uuid";
-import { send } from "../../utils/socket";
-import { User } from "../../store/usersById/types";
-import { useSelector, useDispatch } from "react-redux";
-import selectors from "../../store/selectors";
 import StoryProgressBar from "./StoryProgressBar";
 import getZIndex from "../../utils/getZIndex";
+import { v4 as uuid } from "uuid";
+import { send } from "../../utils/socket";
+import { useSelector, useDispatch } from "react-redux";
+import selectors from "../../store/selectors";
 import actions from "../../store/actions";
+import useStoryCountdown from "../../hooks/useStoryCountdown";
+import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
+import PlayingStorySession from "../../context/PlayingStorySession";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -67,28 +69,56 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface Props {
   storyId: string;
-  editingSessionId: string | null;
-  secondsLeftProps: null | { secondsLeft: number; totalSeconds: number };
-  canCurrentUserEdit: boolean;
-  editingUser: User | null;
+  storyType: "LIVE" | "STANDARD";
 }
 
-function StoryStatus({
-  storyId,
-  editingSessionId,
-  editingUser,
-  secondsLeftProps,
-  canCurrentUserEdit,
-}: Props) {
+function StoryStatus({ storyId, storyType }: Props) {
+  const activeSession = useSelector((state) =>
+    selectors.misc.selectActiveStorySession(state, { storyId })
+  );
+  const activeSessionId = activeSession && activeSession.id;
+  const { playingStorySessionId } = React.useContext(PlayingStorySession);
+
+  const playingSession = useSelector((state) =>
+    playingStorySessionId
+      ? selectors.sessionsById.selectSession(state, {
+          sessionId: playingStorySessionId,
+        })
+      : null
+  );
+
+  const playingSessionUser = useSelector((state) =>
+    playingSession
+      ? selectors.usersById.selectUser(state, { userId: playingSession.userId })
+      : null
+  );
+  const playingSessionUserName = playingSessionUser && playingSessionUser.name;
+
+  const currentlyEditingUser = useSelector((state) =>
+    selectors.misc.selectCurrentlyEditingStoryUser(state, { storyId })
+  );
+
+  const canCurrentUserEditStory = useCanCurrentUserEditStory(
+    storyId,
+    storyType
+  );
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;
+  const countdown = useStoryCountdown(storyId);
+
+  const isCurrentUserLastActiveSessionUserForStory = useSelector((state) =>
+    selectors.misc.selectIsCurrentUserLastActiveSessionUserForStory(state, {
+      storyId,
+    })
+  );
+
   const { canUsersEndRoundEarly } = useSelector((state) =>
     selectors.storyPropsByStoryId.selectStoryPropsContent(state, { storyId })
   );
   const didCurrentUserEndSessionEarly = useSelector((state) =>
-    editingSessionId
+    activeSessionId
       ? selectors.didCurrentUserEndSessionEarlyBySessionId.selectDidCurrentUserEndSessionEarlyBySessionId(
           state,
-          { sessionId: editingSessionId }
+          { sessionId: activeSessionId }
         )
       : false
   );
@@ -103,49 +133,54 @@ function StoryStatus({
   const dispatch = useDispatch();
 
   const onDone = React.useCallback(() => {
-    if (!editingSessionId) return;
+    if (!activeSessionId) return;
 
     dispatch(
       actions.didCurrentUserEndSessionEarlyBySessionId.setDidCurrentUserEndSessionEarly(
-        { sessionId: editingSessionId }
+        { sessionId: activeSessionId }
       )
     );
 
     send({
       id: uuid(),
-      type: "SET_SESSION_DONE",
+      type: "LIVE_STORY_SET_SESSION_DONE",
       createdAt: new Date().toISOString(),
       payload: {
         storyId,
-        sessionId: editingSessionId,
+        sessionId: activeSessionId,
       },
     });
-  }, [storyId, editingSessionId, dispatch]);
+  }, [storyId, activeSessionId, dispatch]);
 
-  const isEditingSessionActive = !!editingSessionId;
+  const isEditingSessionActive = !!activeSessionId;
   const countOfActiveUsersNeeded = 2 - activeUserCount;
 
   let statusText: string;
-  let progressBarColor: "secondary" | "primary" = "secondary";
   let backgroundColor: "secondary" | "primary" = "primary";
   let showSkipButton = false;
   const updatingText = "Updating...";
 
-  if (isEditingSessionActive) {
-    if (secondsLeftProps && secondsLeftProps.secondsLeft >= 0) {
-      if (canCurrentUserEdit) {
+  if (!!playingStorySessionId) {
+    statusText = `Playing entry by ${playingSessionUserName || "Anonymous"}`;
+  } else if (isEditingSessionActive) {
+    if (!!countdown) {
+      if (canCurrentUserEditStory) {
         statusText = "You are editing! Start typing.";
-        progressBarColor = "primary";
         backgroundColor = "secondary";
         showSkipButton = true;
       } else {
-        if (editingUser) {
+        if (currentlyEditingUser) {
           if (didCurrentUserEndSessionEarly) {
             statusText = updatingText;
-          } else if (currentUserId === editingUser.id) {
+          } else if (
+            storyType === "LIVE" &&
+            currentUserId === currentlyEditingUser.id
+          ) {
             statusText = `Join the story to finish editing`;
           } else {
-            statusText = `${editingUser.name || "Anonymous"} is editing`;
+            statusText = `${
+              currentlyEditingUser.name || "Anonymous"
+            } is editing`;
           }
         } else {
           statusText = `Anonymous is editing`;
@@ -154,31 +189,36 @@ function StoryStatus({
     } else {
       statusText = updatingText;
     }
-  } else if (countOfActiveUsersNeeded > 0) {
+  } else if (storyType === "LIVE" && countOfActiveUsersNeeded > 0) {
     statusText = `Waiting for ${countOfActiveUsersNeeded} more editor${
       countOfActiveUsersNeeded > 1 ? "s" : ""
     } to join the story...`;
+  } else if (
+    storyType === "STANDARD" &&
+    isCurrentUserLastActiveSessionUserForStory
+  ) {
+    statusText = "You went last! Wait for someone else to go.";
+  } else if (storyType === "STANDARD") {
+    statusText = "Scroll down and take your turn!";
   } else {
     statusText = updatingText;
   }
 
   const classes = useStyles({ backgroundColor });
 
-  let seconds =
-    secondsLeftProps === null
-      ? null
-      : secondsLeftProps.secondsLeft < 0
-      ? 0
-      : secondsLeftProps.secondsLeft;
+  let progressBarColor: "secondary" | "primary" =
+    backgroundColor === "primary" ? "secondary" : "primary";
 
   return (
     <div className={classes.footer}>
       <div className={classes.content}>
-        {seconds !== null && (
-          <Typography className={classes.time}>{seconds}</Typography>
+        {!!countdown && !playingStorySessionId && (
+          <Typography className={classes.time}>
+            {countdown.secondsLeft}
+          </Typography>
         )}
         <Typography className={classes.name}>{statusText}</Typography>
-        {showSkipButton && canUsersEndRoundEarly && (
+        {onDone && showSkipButton && canUsersEndRoundEarly && (
           <div className={classes.doneContainer}>
             <Button className={classes.doneButton} onClick={onDone}>
               Done
@@ -186,15 +226,9 @@ function StoryStatus({
           </div>
         )}
       </div>
-      {seconds !== null && secondsLeftProps && (
-        <div className={classes.progress}>
-          <StoryProgressBar
-            value={seconds}
-            color={progressBarColor}
-            maxValue={secondsLeftProps.totalSeconds}
-          />
-        </div>
-      )}
+      <div className={classes.progress}>
+        <StoryProgressBar storyId={storyId} color={progressBarColor} />
+      </div>
     </div>
   );
 }

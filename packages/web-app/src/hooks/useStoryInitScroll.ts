@@ -4,6 +4,7 @@ import { StoryFetchStatus } from "../store/storyFetchStateByStoryId/types";
 function useStoryInitScroll(
   fetchStatus: StoryFetchStatus | null,
   scrollRef: React.RefObject<HTMLDivElement>,
+  contentRef: React.RefObject<HTMLDivElement>,
   doesStoryHaveContent: boolean
 ) {
   const [hasScrolled, setHasScrolled] = React.useState(false);
@@ -28,12 +29,15 @@ function useStoryInitScroll(
       if (hasScrolled) return;
       if (fetchStatus !== "FETCHED_NOW_LISTENING") return;
       if (!scrollRef.current) return;
+      if (!contentRef.current) return;
       if (!doesStoryHaveContent) return;
 
+      const offsetFromBottom = scrollRef.current.clientHeight;
+
       const scrollTop =
-        scrollRef.current.scrollHeight -
-        window.innerHeight -
-        window.innerHeight / 2;
+        contentRef.current.clientHeight -
+        scrollRef.current.clientHeight -
+        offsetFromBottom;
 
       scrollRef.current.scrollTop = scrollTop;
 
@@ -49,6 +53,7 @@ function useStoryInitScroll(
     setHasScrolled,
     doesStoryHaveContent,
     scrollRef,
+    contentRef,
   ]);
 
   return hasScrolled;

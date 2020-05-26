@@ -44,7 +44,7 @@ function StoryUsers({ storyId }: { storyId: string }) {
     ) || [];
 
   const currentlyEditingUser = useSelector((state) =>
-    selectors.misc.selectActiveStorySessionUser(state, { storyId })
+    selectors.misc.selectCurrentlyEditingStoryUser(state, { storyId })
   );
 
   const currentUserId = useSelector(selectors.currentUser.selectCurrentUser).id;

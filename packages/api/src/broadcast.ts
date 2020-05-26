@@ -13,7 +13,10 @@ const lastBroadCastedStoryVersionBySocketId: {
   [K: string]: undefined | { [K: string]: number | undefined };
 } = {};
 
-export function broadCastStoryChanged(storyId: string) {
+export function broadCastStoryChanged(
+  storyId: string,
+  type: "LIVE_STORY_STORY_CHANGED" | "STANDARD_STORY_STORY_CHANGED"
+) {
   const story = getStory(storyId);
 
   story.connectedUsers.forEach((user) => {
@@ -36,7 +39,7 @@ export function broadCastStoryChanged(storyId: string) {
 
     const message: ServerMessage = {
       id: getGetId()(),
-      type: "STORY_CHANGED",
+      type,
       payload: story,
       createdAt: getGetDate()(),
     };
@@ -47,18 +50,24 @@ export function broadCastStoryChanged(storyId: string) {
   return storyId;
 }
 
-export function broadCastStoriesChanged(storyIds: string[]) {
-  storyIds.forEach(broadCastStoryChanged);
+export function broadCastStoriesChanged(
+  storyIds: string[],
+  type: "LIVE_STORY_STORY_CHANGED" | "STANDARD_STORY_STORY_CHANGED"
+) {
+  storyIds.forEach((storyId) => broadCastStoryChanged(storyId, type));
 
   return storyIds;
 }
 
-export function broadCastUserStories(userId: string) {
+export function broadCastUserStories(
+  userId: string,
+  type: "LIVE_STORY_STORY_CHANGED" | "STANDARD_STORY_STORY_CHANGED"
+) {
   const user = getUser(userId);
 
   if (!user) return;
 
-  return broadCastStoriesChanged(Object.keys(user.connectedStories));
+  return broadCastStoriesChanged(Object.keys(user.connectedStories), type);
 }
 
 export function broadCastSessionChanged(
@@ -77,7 +86,7 @@ export function broadCastSessionChanged(
 
     const message: ServerMessage = {
       id: getGetId()(),
-      type: "SESSION_CHANGED",
+      type: "LIVE_STORY_SESSION_CHANGED",
       payload: session,
       createdAt: getGetDate()(),
     };

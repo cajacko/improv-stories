@@ -4,6 +4,7 @@ import { createGlobalStyle } from "styled-components";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import { BrowserRouter } from "react-router-dom";
 import Router from "./Router";
 import { store, persistor } from "../store";
 import "../store/socketActionDispatcher";
@@ -35,7 +36,9 @@ function App() {
           loading={<LoadingOverlay zIndex="WHOLE_APP_LOADING_OVERLAY" />}
           persistor={persistor}
         >
-          <Router />
+          <BrowserRouter>
+            <Router />
+          </BrowserRouter>
         </PersistGate>
       </Provider>
     </ThemeProvider>

@@ -1,6 +1,6 @@
 import React from "react";
 import * as firebase from "firebase/app";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import actions from "../store/actions";
 import { useEntriesRef } from "./useStoryRef";
 import {
@@ -12,9 +12,9 @@ import {
   isNumber,
 } from "../utils/typeGuards";
 import { DatabaseSession } from "../sharedTypes";
+import sortSessions from "../utils/sortSessions";
 import { Session } from "../store/sessionsById/types";
 import { StoryFetchStatus } from "../store/storyFetchStateByStoryId/types";
-import selectors from "../store/selectors";
 
 interface SessionsResponse {
   [K: string]: DatabaseSession;
@@ -34,19 +34,10 @@ const isSession = isObjectOf<Session>({
 const isSessionsResponse = isKeyedObjectOf<DatabaseSession>(isSession);
 
 function transformSessionsResponse(response: SessionsResponse): Session[] {
-  return Object.values(response).sort(
-    (a, b) =>
-      new Date(a.dateWillFinish).getTime() -
-      new Date(b.dateWillFinish).getTime()
-  );
+  return sortSessions(Object.values(response));
 }
 
 function useStoryHistoryListener(storyId: string) {
-  const story = useSelector((state) =>
-    selectors.storiesById.selectStory(state, { storyId })
-  );
-  const activeSessionId = story && story.activeSessionId;
-  const lastSessionId = story && story.lastSessionId;
   const ref = useEntriesRef(storyId);
   const dispatch = useDispatch();
   const [status, setStatus] = React.useState<StoryFetchStatus | null>(null);
@@ -75,8 +66,6 @@ function useStoryHistoryListener(storyId: string) {
         actions.sessionIdsByStoryId.setStorySessions({
           storyId,
           sessions: transformSessionsResponse(sessionsResponse),
-          lastSessionId,
-          activeSessionId,
         })
       );
     }
@@ -88,7 +77,7 @@ function useStoryHistoryListener(storyId: string) {
     return () => {
       ref.off(eventType, setSessionsFromSnapshot);
     };
-  }, [storyId, ref, dispatch, lastSessionId, activeSessionId]);
+  }, [storyId, ref, dispatch]);
 
   return status;
 }

@@ -186,7 +186,7 @@ describe("user1 connects", () => {
 
     beforeEach(() => {
       user1.sendClientMessage({
-        type: "ADD_USER_TO_STORY",
+        type: "LIVE_STORY_ADD_USER_TO_STORY",
         payload: {
           storyId: story1Id,
         },
@@ -218,7 +218,7 @@ describe("user1 connects", () => {
       describe("user2 added to story1", () => {
         beforeEach(() => {
           user2.sendClientMessage({
-            type: "ADD_USER_TO_STORY",
+            type: "LIVE_STORY_ADD_USER_TO_STORY",
             payload: {
               storyId: story1Id,
             },
@@ -270,7 +270,7 @@ describe("user1 connects", () => {
 
               beforeEach(() => {
                 user1.sendClientMessage({
-                  type: "ADD_USER_TO_STORY",
+                  type: "LIVE_STORY_ADD_USER_TO_STORY",
                   payload: {
                     storyId: story1Id,
                   },
@@ -299,7 +299,7 @@ describe("user1 connects", () => {
         describe("user1 becomes active on story1", () => {
           beforeEach(() => {
             user1.sendClientMessage({
-              type: "ADD_ACTIVE_USER_TO_STORY",
+              type: "LIVE_STORY_ADD_ACTIVE_USER_TO_STORY",
               payload: {
                 storyId: story1Id,
               },
@@ -325,7 +325,7 @@ describe("user1 connects", () => {
           describe("user2 becomes active on story1", () => {
             beforeEach(() => {
               user2.sendClientMessage({
-                type: "ADD_ACTIVE_USER_TO_STORY",
+                type: "LIVE_STORY_ADD_ACTIVE_USER_TO_STORY",
                 payload: {
                   storyId: story1Id,
                 },
@@ -353,7 +353,7 @@ describe("user1 connects", () => {
             it("user1 is the active user", () => {
               const message = getLastUserSendCall(user2);
 
-              if (message.type !== "STORY_CHANGED") {
+              if (message.type !== "LIVE_STORY_STORY_CHANGED") {
                 throw new Error("Expected message type to be STORY_CHANGED");
               }
 
@@ -369,7 +369,7 @@ describe("user1 connects", () => {
             describe("user1 sets text", () => {
               beforeEach(() => {
                 user1.sendClientMessage({
-                  type: "SET_SESSION_TEXT",
+                  type: "LIVE_STORY_SET_SESSION_TEXT",
                   payload: {
                     text: "a",
                     storyId: story1Id,
@@ -400,7 +400,7 @@ describe("user1 connects", () => {
               describe("user1 ends the session early", () => {
                 beforeEach(() => {
                   return user1.sendClientMessage({
-                    type: "SET_SESSION_DONE",
+                    type: "LIVE_STORY_SET_SESSION_DONE",
                     payload: {
                       sessionId: "8",
                       storyId: story1Id,
@@ -446,7 +446,7 @@ describe("user1 connects", () => {
                 const message1 = getLastUserSendCall(user1);
                 const message2 = getLastUserSendCall(user2);
 
-                if (message1.type !== "STORY_CHANGED") {
+                if (message1.type !== "LIVE_STORY_STORY_CHANGED") {
                   throw new Error("Expected message type to be STORY_CHANGED");
                 }
 
@@ -456,7 +456,7 @@ describe("user1 connects", () => {
                   );
                 }
 
-                if (message2.type !== "STORY_CHANGED") {
+                if (message2.type !== "LIVE_STORY_STORY_CHANGED") {
                   throw new Error("Expected message type to be STORY_CHANGED");
                 }
 
@@ -489,7 +489,7 @@ describe("user1 connects", () => {
                 const message1 = getLastUserSendCall(user1);
                 const message2 = getLastUserSendCall(user2);
 
-                if (message1.type !== "STORY_CHANGED") {
+                if (message1.type !== "LIVE_STORY_STORY_CHANGED") {
                   throw new Error("Expected message type to be STORY_CHANGED");
                 }
 
@@ -499,7 +499,7 @@ describe("user1 connects", () => {
                   );
                 }
 
-                if (message2.type !== "STORY_CHANGED") {
+                if (message2.type !== "LIVE_STORY_STORY_CHANGED") {
                   throw new Error("Expected message type to be STORY_CHANGED");
                 }
 

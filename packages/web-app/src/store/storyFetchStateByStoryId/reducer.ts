@@ -1,5 +1,5 @@
 import { createReducer } from "typesafe-actions";
-import actions from "../actions";
+import actions from "../actionsThatDefineTypes";
 import { StoryFetchStatusByStoryIdState, StoryFetchStatus } from "./types";
 
 const defaultState: StoryFetchStatusByStoryIdState = {};

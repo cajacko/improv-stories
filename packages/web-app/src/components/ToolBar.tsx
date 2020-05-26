@@ -1,34 +1,46 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
+import { Link as RRLink } from "react-router-dom";
 import actions from "../store/actions";
 import { send } from "../utils/socket";
 import { fade, makeStyles } from "@material-ui/core/styles";
-import { useHistory } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
+import Link from "@material-ui/core/Link";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
-import AddIcon from "@material-ui/icons/FiberNew";
 import SaveIcon from "@material-ui/icons/Save";
 import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 import getZIndex from "../utils/getZIndex";
 import selectors from "../store/selectors";
+import NewStoryButton from "./NewStoryButton";
 
 const useStyles = makeStyles((theme) => ({
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
   appBar: {
     position: "relative",
     zIndex: getZIndex("TOOLBAR"),
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
   title: {
-    flexGrow: 1,
+    display: "inline-block",
+    cursor: "pointer",
+    color: theme.palette.common.white,
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     display: "none",
     [theme.breakpoints.up("sm")]: {
-      display: "block",
+      display: "flex",
     },
+  },
+  subTitle: {
+    marginLeft: theme.spacing(2),
+    marginTop: 4,
   },
   search: {
     position: "relative",
@@ -75,12 +87,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ToolBar() {
+interface Props {
+  subTitle?: string;
+}
+
+function ToolBar({ subTitle }: Props) {
   const currentUser = useSelector(selectors.currentUser.selectCurrentUser);
   const currentUserId = currentUser.id;
   const dispatch = useDispatch();
   const [value, setValue] = React.useState(currentUser.name);
-  const { push } = useHistory();
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const canSave =
@@ -121,25 +136,29 @@ function ToolBar() {
     });
   };
 
-  const onNewStoryClick = React.useCallback(() => push(`/story/${uuid()}`), [
-    push,
-  ]);
-
   return (
     <AppBar className={classes.appBar}>
       <Toolbar>
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="open drawer"
-          onClick={onNewStoryClick}
-        >
-          <AddIcon />
-        </IconButton>
-        <Typography className={classes.title} variant="h6" noWrap>
-          Improv Stories
-        </Typography>
+        <div className={classes.menuButton}>
+          <NewStoryButton />
+        </div>
+        <div className={classes.titleContainer}>
+          <Link
+            className={classes.title}
+            variant="h6"
+            noWrap
+            to="/"
+            component={RRLink}
+          >
+            Improv Stories
+          </Link>
+          {!!subTitle && (
+            <Typography className={classes.subTitle} component="span">
+              {subTitle}
+            </Typography>
+          )}
+        </div>
+
         <form className={classes.search} onSubmit={saveName}>
           <InputBase
             inputRef={inputRef}

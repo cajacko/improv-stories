@@ -1,5 +1,5 @@
 import { createReducer } from "typesafe-actions";
-import actions from "../actions";
+import actions from "../actionsThatDefineTypes";
 import { UsersByIdState } from "./types";
 
 const defaultState: UsersByIdState = {};
@@ -8,10 +8,12 @@ const reducer = createReducer<UsersByIdState>(defaultState).handleAction(
   actions.storiesById.setStory,
   (state, { payload }) => {
     const allUsers = [
-      ...payload.connectedUsers,
-      ...payload.activeUsers,
-      ...(payload.lastSession ? [payload.lastSession.user] : []),
-      ...(payload.activeSession ? [payload.activeSession.user] : []),
+      ...payload.story.connectedUsers,
+      ...payload.story.activeUsers,
+      ...(payload.story.lastSession ? [payload.story.lastSession.user] : []),
+      ...(payload.story.activeSession
+        ? [payload.story.activeSession.user]
+        : []),
     ];
 
     let changed = false;

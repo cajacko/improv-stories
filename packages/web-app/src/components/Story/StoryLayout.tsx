@@ -4,6 +4,7 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import getZIndex from "../../utils/getZIndex";
+import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
 
 export const drawerWidth = 240;
 
@@ -63,20 +64,25 @@ type RenderFunction = (props: RenderProps) => JSX.Element;
 interface Props {
   renderMainContent: RenderFunction | JSX.Element;
   renderDrawerContent: RenderFunction | JSX.Element;
-  canCurrentUserEdit: boolean;
+  storyId: string;
+  storyType: "LIVE" | "STANDARD";
 }
 
 function StoryLayout({
   renderMainContent,
   renderDrawerContent,
-  canCurrentUserEdit,
+  storyId,
+  storyType,
 }: Props) {
   const isWideScreen = useMediaQuery(getDrawerOnTopBreakPoint, {
     // Ensures the query runs on load
     noSsr: true,
   });
-
   const classes = useStyles();
+  const canCurrentUserEditStory = useCanCurrentUserEditStory(
+    storyId,
+    storyType
+  );
 
   const [isOpen, setIsOpen] = React.useState(isWideScreen);
 
@@ -88,10 +94,10 @@ function StoryLayout({
   ]);
 
   React.useEffect(() => {
-    if (!isWideScreen && isOpen && canCurrentUserEdit) {
+    if (!isWideScreen && isOpen && canCurrentUserEditStory) {
       handleClose();
     }
-  }, [isWideScreen, isOpen, canCurrentUserEdit, handleClose]);
+  }, [isWideScreen, isOpen, canCurrentUserEditStory, handleClose]);
 
   const renderProps: RenderProps = {
     isOpen,

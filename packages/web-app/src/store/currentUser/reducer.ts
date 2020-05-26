@@ -1,6 +1,6 @@
 import { createReducer } from "typesafe-actions";
 import { v4 as uuid } from "uuid";
-import actions from "../actions";
+import actions from "../actionsThatDefineTypes";
 import { CurrentUserState } from "./types";
 
 const defaultState: CurrentUserState = {

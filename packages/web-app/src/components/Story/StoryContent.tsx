@@ -2,156 +2,75 @@ import React from "react";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
-import getTutorialText from "../../utils/getTutorialText";
+import StorySession from "./StorySession";
+import StoryText from "./StoryText";
 
-interface StyleProps {
-  showCursor: boolean;
+export interface Props {
+  storyId: string;
+  tutorialText: string;
+  children?: JSX.Element;
+  storyType: "LIVE" | "STANDARD";
   isTextInvisible: boolean;
 }
 
-const animationKeyframeKey = "storycontent__flash";
+const width = 500;
 
-const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme: Theme) =>
   createStyles({
-    [`@keyframes ${animationKeyframeKey}`]: {
-      "0%": {
-        opacity: 1,
-      },
-      "25%": {
-        opacity: 0,
-      },
-      "75%": {
-        opacity: 0,
-      },
-      "100%": {
-        opacity: 1,
-      },
-    },
-    cursor: {
-      borderRight: ({ showCursor }) =>
-        showCursor ? `1px solid ${theme.palette.secondary.main}` : 0,
-      marginLeft: 0,
-      animation: `$${animationKeyframeKey} linear 1s infinite`,
-    },
-    textAreaContainer: {
-      position: "relative",
-    },
-    textArea: {
-      position: "absolute",
-      left: -9999999,
-      width: 200,
-      height: 0,
-    },
-    tutorialText: {
-      color: "grey",
-    },
-    paragraph: {
-      whiteSpace: "break-spaces",
-      opacity: ({ isTextInvisible }) => (isTextInvisible ? 0 : 1),
+    container: {
+      maxWidth: width,
+      width,
+      margin: 20,
+      padding: "0 20px 100vh",
     },
   })
 );
 
-interface Props {
-  storyId: string;
-  editingSessionId: string | null;
-  editingSessionFinalEntry: string | null;
-  canCurrentUserEdit: boolean;
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
-  onTextAreaFocus: () => void;
-  onTextAreaBlur: () => void;
-  textAreaValue: string;
-  onTextAreaChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  isTextInvisible?: boolean;
-}
-
 function StoryContent({
+  children,
   storyId,
-  editingSessionId,
-  editingSessionFinalEntry,
-  canCurrentUserEdit,
-  textAreaRef,
-  textAreaValue,
-  onTextAreaBlur,
-  onTextAreaFocus,
-  onTextAreaChange,
+  tutorialText,
+  storyType,
   isTextInvisible,
 }: Props) {
-  const fetchStatus = useSelector((state) =>
-    selectors.storyFetchStateByStoryId.selectStoryFetchStatus(state, {
-      storyId,
-    })
-  );
+  const storySessionIds =
+    useSelector((state) =>
+      selectors.sessionIdsByStoryId.selectStorySessionIds(state, { storyId })
+    ) || [];
 
-  const paragraphs = useSelector((state) =>
-    selectors.misc.selectAllStoryParagraphs(state, {
-      storyId,
-      editingSessionId,
-      editingSessionFinalEntry,
-    })
-  );
+  const hasSessions = !!storySessionIds.length;
 
-  const doesStoryHaveContent = useSelector((state) =>
-    selectors.misc.selectDoesStoryHaveContent(state, {
-      storyId,
-      editingSessionId,
-      editingSessionFinalEntry,
-    })
-  );
-
-  const classes = useStyles({
-    showCursor: canCurrentUserEdit,
-    isTextInvisible: !!isTextInvisible,
-  });
-
-  let showType: "TUTORIAL" | "CONTENT" | "NONE";
-
-  if (fetchStatus === null) {
-    showType = "NONE";
-  } else if (!doesStoryHaveContent || fetchStatus !== "FETCHED_NOW_LISTENING") {
-    showType = "TUTORIAL";
-  } else {
-    showType = "CONTENT";
-  }
-
-  const lastParagraph = paragraphs[paragraphs.length - 1] as string | undefined;
-
-  // TODO: Need a way of identifying a new paragraph, also need this for the cursor.
-  const autoCapitalize =
-    !lastParagraph ||
-    lastParagraph.trim() === "" ||
-    lastParagraph.trim().endsWith(".");
+  const classes = useStyles();
 
   return (
-    <>
-      {showType === "TUTORIAL" &&
-        getTutorialText(window.location.href).map((text, i) => (
-          <p key={i} className={classes.paragraph}>
-            {0 === i && <span className={classes.cursor} />}
-            <span className={classes.tutorialText}>{text}</span>
-          </p>
+    <div className={classes.container}>
+      {hasSessions &&
+        storySessionIds.map((sessionId, i) => (
+          <StorySession
+            key={sessionId}
+            isTextInvisible={isTextInvisible}
+            storyType={storyType}
+            sessionId={sessionId}
+            storyId={storyId}
+            isLastSession={storySessionIds.length - 1 === i}
+            setSessionTextType={
+              storyType === "LIVE"
+                ? "LIVE_STORY_SET_SESSION_TEXT"
+                : "STANDARD_STORY_SET_SESSION_TEXT"
+            }
+          />
         ))}
-      {showType === "CONTENT" &&
-        paragraphs.map((text, i) => (
-          <p key={i} className={classes.paragraph}>
-            {text}
-            {paragraphs.length - 1 === i && <span className={classes.cursor} />}
-          </p>
-        ))}
-      {/* Textarea must always be statically rendered and never unmount */}
-      <span className={classes.textAreaContainer}>
-        <textarea
-          className={classes.textArea}
-          ref={textAreaRef}
-          value={textAreaValue}
-          onBlur={onTextAreaBlur}
-          onFocus={onTextAreaFocus}
-          onChange={onTextAreaChange}
-          autoCorrect="off"
-          autoCapitalize={autoCapitalize ? undefined : "none"}
+
+      {!hasSessions && (
+        <StoryText
+          text={tutorialText}
+          textStyle="FADED"
+          isTextInvisible={isTextInvisible}
         />
-      </span>
-    </>
+      )}
+
+      {children}
+    </div>
   );
 }
 

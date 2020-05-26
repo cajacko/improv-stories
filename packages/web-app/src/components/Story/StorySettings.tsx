@@ -42,10 +42,11 @@ const useStyles = makeStyles((theme: Theme) =>
 interface Props {
   storyId: string;
   handleClose: () => void;
+  storyType: "LIVE" | "STANDARD";
 }
 
 const min = 5;
-const max = 60;
+const max = 300;
 
 type InputValues = StoryPropsContent<number | null>;
 type State = Partial<InputValues>;
@@ -68,7 +69,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function Story({ storyId, handleClose }: Props) {
+function Story({ storyId, handleClose, storyType }: Props) {
   const savedStoryProps =
     useSelector((state) =>
       selectors.storyPropsByStoryId.selectStoryPropsContent(state, { storyId })
@@ -244,7 +245,7 @@ function Story({ storyId, handleClose }: Props) {
         </ListItem>
       </List>
       <Divider />
-      <StoryUsers storyId={storyId} />
+      {storyType === "LIVE" && <StoryUsers storyId={storyId} />}
     </>
   );
 }

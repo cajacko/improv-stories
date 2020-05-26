@@ -1,6 +1,6 @@
 import { createReducer } from "typesafe-actions";
 import { StoryPropsByStoryId } from "./types";
-import actions from "../actions";
+import actions from "../actionsThatDefineTypes";
 
 const defaultState: StoryPropsByStoryId = {};
 
