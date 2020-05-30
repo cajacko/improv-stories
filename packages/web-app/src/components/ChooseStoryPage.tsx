@@ -9,6 +9,7 @@ const useStyles = makeStyles(() =>
       alignItems: "center",
       justifyContent: "center",
       display: "flex",
+      padding: 20,
     },
   })
 );
