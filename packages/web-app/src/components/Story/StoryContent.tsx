@@ -4,12 +4,14 @@ import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
 import StorySession from "./StorySession";
 import StoryTutorialText from "./StoryTutorialText";
+import StoryStatus from "../../context/StoryStatus";
+import { GetTutorialText } from "../../utils/withGetTutorialText";
 
 type RenderProp = (props: { showingTutorialText: boolean }) => JSX.Element;
 
 export interface Props {
   storyId: string;
-  tutorialText: string;
+  getTutorialText: GetTutorialText;
   children?: JSX.Element | RenderProp;
   storyType: "LIVE" | "STANDARD";
   isTextInvisible: boolean;
@@ -34,42 +36,45 @@ const useStyles = makeStyles<Theme>((theme: Theme) =>
 function StoryContent({
   children,
   storyId,
-  tutorialText,
+  getTutorialText,
   storyType,
   isTextInvisible,
 }: Props) {
+  const { sessionsTextStatus } = React.useContext(StoryStatus);
   const storySessionIds =
     useSelector((state) =>
       selectors.sessionIdsByStoryId.selectStorySessionIds(state, { storyId })
     ) || [];
 
-  const showTutorialText = !storySessionIds.length;
+  const showTutorialText =
+    !storySessionIds.length || sessionsTextStatus === "DOES_NOT_HAVE_CONTENT";
 
   const classes = useStyles();
 
   return (
     <div className={classes.container}>
       <div className={classes.contentContainer}>
-        {!showTutorialText &&
-          storySessionIds.map((sessionId, i) => (
-            <StorySession
-              key={sessionId}
-              isTextInvisible={isTextInvisible}
-              storyType={storyType}
-              sessionId={sessionId}
-              storyId={storyId}
-              isLastSession={storySessionIds.length - 1 === i}
-              setSessionTextType={
-                storyType === "LIVE"
-                  ? "LIVE_STORY_SET_SESSION_TEXT"
-                  : "STANDARD_STORY_SET_SESSION_TEXT"
-              }
-            />
-          ))}
+        {storySessionIds.map((sessionId, i) => (
+          <StorySession
+            key={sessionId}
+            isTextInvisible={isTextInvisible || showTutorialText}
+            storyType={storyType}
+            sessionId={sessionId}
+            storyId={storyId}
+            isLastSession={storySessionIds.length - 1 === i}
+            setSessionTextType={
+              storyType === "LIVE"
+                ? "LIVE_STORY_SET_SESSION_TEXT"
+                : "STANDARD_STORY_SET_SESSION_TEXT"
+            }
+          />
+        ))}
 
         {showTutorialText && (
           <StoryTutorialText
-            text={tutorialText}
+            text={getTutorialText("NEW_STORY_PLACEHOLDER", {
+              hasEntries: !!storySessionIds.length,
+            })}
             isTextInvisible={isTextInvisible}
             isFaded
           />

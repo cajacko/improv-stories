@@ -9,6 +9,7 @@ import actions from "../../store/actions";
 import PlayingStorySession from "../../context/PlayingStorySession";
 import playStoryTimeout from "../../config/playStoryTimeout";
 import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
+import StoryStatus from "../../context/StoryStatus";
 
 interface Props {
   storyId: string;
@@ -30,6 +31,10 @@ function StorySession({
   isTextInvisible,
 }: Props) {
   const dispatch = useDispatch();
+  const { setSessionTextStatus, removeSessionTextStatus } = React.useContext(
+    StoryStatus
+  );
+
   const canCurrentUserEditStory = useCanCurrentUserEditStory(
     storyId,
     storyType
@@ -195,6 +200,18 @@ function StorySession({
   ) {
     text = null;
   }
+
+  React.useEffect(() => {
+    setSessionTextStatus(
+      sessionId,
+      text ? "HAS_CONTENT" : "DOES_NOT_HAVE_CONTENT"
+    );
+  }, [text, sessionId, removeSessionTextStatus, setSessionTextStatus]);
+
+  React.useEffect(() => () => removeSessionTextStatus(sessionId), [
+    sessionId,
+    removeSessionTextStatus,
+  ]);
 
   if (text === null) return null;
 

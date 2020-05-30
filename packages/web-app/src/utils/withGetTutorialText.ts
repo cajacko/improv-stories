@@ -1,5 +1,11 @@
-type StoryType = "LIVE" | "STANDARD";
-type Type = "GENERIC_FULL_HELP" | "NEW_STORY_PLACEHOLDER";
+export type StoryType = "LIVE" | "STANDARD";
+export type Type = "GENERIC_FULL_HELP" | "NEW_STORY_PLACEHOLDER";
+
+export interface Details {
+  hasEntries?: boolean;
+}
+
+export type GetTutorialText = (type: Type, details?: Details) => string;
 
 const settingsText = `You can adjust the story settings (such as turn time or can end turn early) by clicking the settings icon.`;
 
@@ -14,7 +20,9 @@ const share = (
 ${storyLink}`;
 
 const tutorialTexts: {
-  [K in StoryType]: { [K in Type]: (storyLink: string) => string };
+  [K in StoryType]: {
+    [K in Type]: (storyLink: string, details: Details) => string;
+  };
 } = {
   LIVE: {
     GENERIC_FULL_HELP: (
@@ -48,19 +56,29 @@ ${tips}
 ${settingsText}
 ${share(storyLink)}`,
     NEW_STORY_PLACEHOLDER: (
-      storyLink
-    ) => `Hello and welcome to improv stories! This is the start of a new story!
+      storyLink,
+      { hasEntries }
+    ) => `Hello and welcome to improv stories! ${
+      hasEntries ? "" : "This is the start of a new story!"
+    }
 Improv stories is a way of writing strange, fun, and curious stories with others.
-Press the "Take Turn" button below to start off the story. You'll get a set amount of seconds to write the first entry to the story before being cut off.
+${
+  hasEntries
+    ? 'To have a go press the "Take Turn " button below. You may have to wait until someone has finished their turn first.'
+    : 'Press the "Take Turn" button below to start off the story.'
+} You'll get a set amount of seconds to write the first entry to the story before being cut off.
 Other people with the link can then add the next entry and so on.
 Share the link to this page with anyone else you want to write the story with:
 ${storyLink}`,
   },
 };
 
-function getTutorialText(storyType: StoryType, storyLink: string) {
-  return (type: Type) => {
-    return tutorialTexts[storyType][type](storyLink);
+function getTutorialText(
+  storyType: StoryType,
+  storyLink: string
+): GetTutorialText {
+  return (type: Type, details = {}) => {
+    return tutorialTexts[storyType][type](storyLink, details);
   };
 }
 

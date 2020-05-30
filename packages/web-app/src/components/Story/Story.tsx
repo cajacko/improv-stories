@@ -211,7 +211,7 @@ function Story({ storyId, type }: Props) {
                 >
                   <StoryContent
                     storyId={storyId}
-                    tutorialText={getTutorialText("NEW_STORY_PLACEHOLDER")}
+                    getTutorialText={getTutorialText}
                     storyType={type}
                     isTextInvisible={shouldShowLoading}
                   >
