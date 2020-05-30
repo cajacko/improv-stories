@@ -19,9 +19,12 @@ const useStyles = makeStyles<Theme>((theme: Theme) =>
   createStyles({
     container: {
       maxWidth: width,
-      width,
-      margin: 20,
+      width: "100%",
+      // margin: 20,
       padding: "0 20px 100vh",
+    },
+    contentContainer: {
+      margin: 20,
     },
   })
 );
@@ -44,32 +47,34 @@ function StoryContent({
 
   return (
     <div className={classes.container}>
-      {hasSessions &&
-        storySessionIds.map((sessionId, i) => (
-          <StorySession
-            key={sessionId}
+      <div className={classes.contentContainer}>
+        {hasSessions &&
+          storySessionIds.map((sessionId, i) => (
+            <StorySession
+              key={sessionId}
+              isTextInvisible={isTextInvisible}
+              storyType={storyType}
+              sessionId={sessionId}
+              storyId={storyId}
+              isLastSession={storySessionIds.length - 1 === i}
+              setSessionTextType={
+                storyType === "LIVE"
+                  ? "LIVE_STORY_SET_SESSION_TEXT"
+                  : "STANDARD_STORY_SET_SESSION_TEXT"
+              }
+            />
+          ))}
+
+        {!hasSessions && (
+          <StoryText
+            text={tutorialText}
+            textStyle="FADED"
             isTextInvisible={isTextInvisible}
-            storyType={storyType}
-            sessionId={sessionId}
-            storyId={storyId}
-            isLastSession={storySessionIds.length - 1 === i}
-            setSessionTextType={
-              storyType === "LIVE"
-                ? "LIVE_STORY_SET_SESSION_TEXT"
-                : "STANDARD_STORY_SET_SESSION_TEXT"
-            }
           />
-        ))}
+        )}
 
-      {!hasSessions && (
-        <StoryText
-          text={tutorialText}
-          textStyle="FADED"
-          isTextInvisible={isTextInvisible}
-        />
-      )}
-
-      {children}
+        {children}
+      </div>
     </div>
   );
 }

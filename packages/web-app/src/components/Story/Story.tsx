@@ -36,10 +36,14 @@ const useStyles = makeStyles((theme: Theme) =>
     textContainer: {
       paddingTop: actionBarHeight,
       position: "relative",
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
     },
     takeTurn: {
       justifyContent: "center",
       display: "flex",
+      marginTop: 20,
     },
     contentContainer: {
       display: "flex",
