@@ -55,14 +55,14 @@ function ChooseStoryType({ onChooseStory }: Props) {
         <Grid item {...grid}>
           <StoryTypeCard
             title="Standard Story"
-            description="Play with friends over multiple days. Take it in turns to write a story together, you'll get a certain amount of seconds per entry but can spread the story over more time."
+            description="Take it in turns to write a story over a long period of time. When it's your turn you can take your go whenever you like. Perfect for keeping long running stories going over many days."
             onClick={onStandardStoryClick}
           />
         </Grid>
         <Grid item {...grid}>
           <StoryTypeCard
             title="Live Story"
-            description="Get online with friends and play in realtime. Write a story in the moment, seeing what people type as their typing."
+            description="Get online with friends and play in realtime. Write a story in the moment, seeing what people type as their doing it. With the writer changing player every 40 seconds or so."
             onClick={onLiveStoryClick}
           />
         </Grid>

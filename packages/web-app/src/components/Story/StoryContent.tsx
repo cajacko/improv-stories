@@ -3,12 +3,14 @@ import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
 import StorySession from "./StorySession";
-import StoryText from "./StoryText";
+import StoryTutorialText from "./StoryTutorialText";
+
+type RenderProp = (props: { showingTutorialText: boolean }) => JSX.Element;
 
 export interface Props {
   storyId: string;
   tutorialText: string;
-  children?: JSX.Element;
+  children?: JSX.Element | RenderProp;
   storyType: "LIVE" | "STANDARD";
   isTextInvisible: boolean;
 }
@@ -41,14 +43,14 @@ function StoryContent({
       selectors.sessionIdsByStoryId.selectStorySessionIds(state, { storyId })
     ) || [];
 
-  const hasSessions = !!storySessionIds.length;
+  const showTutorialText = !storySessionIds.length;
 
   const classes = useStyles();
 
   return (
     <div className={classes.container}>
       <div className={classes.contentContainer}>
-        {hasSessions &&
+        {!showTutorialText &&
           storySessionIds.map((sessionId, i) => (
             <StorySession
               key={sessionId}
@@ -65,15 +67,17 @@ function StoryContent({
             />
           ))}
 
-        {!hasSessions && (
-          <StoryText
+        {showTutorialText && (
+          <StoryTutorialText
             text={tutorialText}
-            textStyle="FADED"
             isTextInvisible={isTextInvisible}
+            isFaded
           />
         )}
 
-        {children}
+        {typeof children === "function"
+          ? children({ showingTutorialText: showTutorialText })
+          : children}
       </div>
     </div>
   );

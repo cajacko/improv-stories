@@ -1,5 +1,10 @@
 import React from "react";
-import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
+import {
+  makeStyles,
+  createStyles,
+  Theme,
+  withStyles,
+} from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import selectors from "../../store/selectors";
 import StoryActionBar, { height as actionBarHeight } from "./StoryActionBar";
@@ -14,15 +19,31 @@ import useStoryInitScroll from "../../hooks/useStoryInitScroll";
 import StorySettings from "./StorySettings";
 import ProgressButton from "../ProgressButton";
 import Button from "@material-ui/core/Button";
-import {
-  getLiveStoryTutorialText,
-  getStandardStoryTutorialText,
-} from "../../utils/getTutorialText";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/HelpOutline";
+import withGetTutorialText from "../../utils/withGetTutorialText";
 import StoryContext from "../../context/StoryEditor";
 import useCanCurrentUserEditStory from "../../hooks/useCanCurrentUserEditStory";
 import useRequestStoryTurn from "../../hooks/useRequestStoryTurn";
 import playStoryTimeout from "../../config/playStoryTimeout";
 import PlayingStorySession from "../../context/PlayingStorySession";
+import StoryTutorialText from "./StoryTutorialText";
+import Dialog from "@material-ui/core/Dialog";
+import MuiDialogContent from "@material-ui/core/DialogContent";
+import MuiDialogActions from "@material-ui/core/DialogActions";
+
+const DialogContent = withStyles((theme: Theme) => ({
+  root: {
+    padding: theme.spacing(2),
+  },
+}))(MuiDialogContent);
+
+const DialogActions = withStyles((theme: Theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(1),
+  },
+}))(MuiDialogActions);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -32,6 +53,11 @@ const useStyles = makeStyles((theme: Theme) =>
       left: 0,
       right: 0,
       zIndex: getZIndex("STORY_ACTION_BAR"),
+    },
+    helpButton: {
+      justifyContent: "center",
+      display: "flex",
+      marginTop: 10,
     },
     textContainer: {
       paddingTop: actionBarHeight,
@@ -76,7 +102,10 @@ interface Props {
 
 function Story({ storyId, type }: Props) {
   const classes = useStyles();
-  const { playStorySession } = React.useContext(PlayingStorySession);
+  const { playStorySession, playingStorySessionId } = React.useContext(
+    PlayingStorySession
+  );
+  const isPlaying = !!playingStorySessionId;
   const { isTextAreaFocussed, focusOnTextArea } = React.useContext(
     StoryContext
   );
@@ -132,10 +161,18 @@ function Story({ storyId, type }: Props) {
     shouldShowLoading = true;
   }
 
-  const tutorialText =
-    type === "LIVE"
-      ? getLiveStoryTutorialText(window.location.href)
-      : getStandardStoryTutorialText(window.location.href);
+  const getTutorialText = withGetTutorialText(type, window.location.href);
+
+  const [isTutorialModalOpen, setIsTutorialModalOpen] = React.useState(false);
+
+  const handleTutorialModalClose = React.useCallback(
+    () => setIsTutorialModalOpen(false),
+    []
+  );
+  const handleTutorialModalShow = React.useCallback(
+    () => setIsTutorialModalOpen(true),
+    []
+  );
 
   return (
     <div className={classes.container}>
@@ -174,33 +211,47 @@ function Story({ storyId, type }: Props) {
                 >
                   <StoryContent
                     storyId={storyId}
-                    tutorialText={tutorialText}
+                    tutorialText={getTutorialText("NEW_STORY_PLACEHOLDER")}
                     storyType={type}
                     isTextInvisible={shouldShowLoading}
                   >
-                    <>
-                      <div className={classes.takeTurn}>
-                        {!shouldShowLoading &&
-                          requestTurnState !== "CANNOT_REQUEST_TURN" && (
-                            <ProgressButton
-                              isLoading={requestTurnState === "REQUESTING"}
-                            >
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={onTakeTurnClick}
-                                disabled={
-                                  requestTurnState !== "CAN_REQUEST_TURN"
-                                }
+                    {({ showingTutorialText }) => (
+                      <>
+                        <div className={classes.takeTurn}>
+                          {!shouldShowLoading &&
+                            requestTurnState !== "CANNOT_REQUEST_TURN" && (
+                              <ProgressButton
+                                isLoading={requestTurnState === "REQUESTING"}
                               >
-                                {requestTurnState === "CAN_REQUEST_TURN"
-                                  ? "Take Turn"
-                                  : "Updating"}
-                              </Button>
-                            </ProgressButton>
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  onClick={onTakeTurnClick}
+                                  disabled={
+                                    requestTurnState !== "CAN_REQUEST_TURN"
+                                  }
+                                >
+                                  {requestTurnState === "CAN_REQUEST_TURN"
+                                    ? "Take Turn"
+                                    : "Updating"}
+                                </Button>
+                              </ProgressButton>
+                            )}
+                        </div>
+                        {!shouldShowLoading &&
+                          !canCurrentUserEditStory &&
+                          !isPlaying && (
+                            <div className={classes.helpButton}>
+                              <IconButton
+                                aria-label="delete"
+                                onClick={handleTutorialModalShow}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </div>
                           )}
-                      </div>
-                    </>
+                      </>
+                    )}
                   </StoryContent>
                 </div>
               </div>
@@ -214,10 +265,12 @@ function Story({ storyId, type }: Props) {
             canCurrentUserEditStory,
             focusOnTextArea,
             shouldShowLoading,
-            tutorialText,
+            getTutorialText,
             onTakeTurnClick,
             requestTurnState,
             type,
+            isPlaying,
+            handleTutorialModalShow,
           ]
         )}
         renderDrawerContent={React.useCallback(
@@ -231,6 +284,17 @@ function Story({ storyId, type }: Props) {
           [storyId, type]
         )}
       />
+
+      <Dialog open={isTutorialModalOpen} onClose={handleTutorialModalClose}>
+        <DialogContent dividers>
+          <StoryTutorialText text={getTutorialText("GENERIC_FULL_HELP")} />
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleTutorialModalClose} color="default">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

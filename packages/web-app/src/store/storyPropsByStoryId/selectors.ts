@@ -23,10 +23,11 @@ export const selectStoryPropsContent = createCachedSelector(
             storyProps.secondsPerRound === undefined
               ? defaultSecondsPerRound
               : storyProps.secondsPerRound,
-          canUsersEndRoundEarly: !!storyProps.canUsersEndRoundEarly,
+          canUsersEndRoundEarly:
+            storyProps.canUsersEndRoundEarly === false ? false : true,
         }
       : {
           secondsPerRound: defaultSecondsPerRound,
-          canUsersEndRoundEarly: false,
+          canUsersEndRoundEarly: true,
         }
 )((state, props) => props.storyId);

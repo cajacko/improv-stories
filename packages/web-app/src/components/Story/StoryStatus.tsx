@@ -197,7 +197,7 @@ function StoryStatus({ storyId, storyType }: Props) {
     storyType === "STANDARD" &&
     isCurrentUserLastActiveSessionUserForStory
   ) {
-    statusText = "You went last! Wait for someone else to go.";
+    statusText = "You went last! Tell someone else to take a turn.";
   } else if (storyType === "STANDARD") {
     statusText = "Scroll down and take your turn!";
   } else {
