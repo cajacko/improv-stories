@@ -14,7 +14,7 @@
     "@types/react-dom": "^16.9.0",
     "firebase": "^7.11.0",
     "graphql": "^14.6.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "re-reselect": "^3.4.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
